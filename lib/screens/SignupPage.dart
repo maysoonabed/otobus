@@ -241,7 +241,7 @@ class _SignupPageState extends State<SignupPage> {
                   //action on tap
                 },
                 child: Text(
-                  "Forgot Password? Troubleshoot",
+                  "لديك حساب؟ سجل الدخول",
                   style: TextStyle(color: Colors.white, fontSize: 18),
                 )),
           )
