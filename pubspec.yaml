@@ -50,3 +50,9 @@ flutter:
     - family: Pacifico
       fonts:
         - asset: lib/Font/Pacifico-Regular.ttf
+    - family: ArefRuqaaR
+      fonts:
+        - asset: lib/Font/ArefRuqaa-Regular.ttf
+    - family: ArefRuqaaB
+      fonts:  
+        - asset: lib/Font/ArefRuqaa-Bold.ttf        
