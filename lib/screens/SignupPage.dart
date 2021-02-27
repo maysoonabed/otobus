@@ -11,7 +11,10 @@ class SignupPage extends StatefulWidget {
   _SignupPageState createState() => _SignupPageState();
 }
 
+enum SingingCharacter { driver, passenger }
+
 class _SignupPageState extends State<SignupPage> {
+  SingingCharacter _character = SingingCharacter.passenger;
   String name, email, password, phone;
   String errormsg;
   bool error, showprogress;
@@ -103,149 +106,153 @@ class _SignupPageState extends State<SignupPage> {
         ), //show linear gradient background of page
 
         padding: EdgeInsets.all(20),
-        child: Column(children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(top: 80),
-            child: Text(
-              "إنشاء حساب جديد",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 40,
-                  fontFamily: 'Lemonade',
-                  fontWeight: FontWeight.bold),
-            ), //title text
-          ),
-          /* Container(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(top: 80),
+                child: Text(
+                  "إنشاء حساب جديد",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontFamily: 'Lemonade',
+                      fontWeight: FontWeight.bold),
+                ), //title text
+              ),
+              /* Container(
             margin: EdgeInsets.only(top: 10),
             child: Text(
               "",
               style: TextStyle(color: Colors.white, fontSize: 15),
             ), //subtitle text
           ), */
-          Container(
-            //show error message here
-            margin: EdgeInsets.only(top: 30),
-            padding: EdgeInsets.all(10),
-            child: error ? errmsg(errormsg) : Container(),
-            //if error == true then show error message
-            //else set empty container as child
-          ),
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            margin: EdgeInsets.only(top: 10),
-            child: TextField(
-              controller: _name, //set username controller
-              style: TextStyle(color: Colors.green[100], fontSize: 20),
-              decoration: myInputDecoration(
-                label: "اسم المستخدم",
-                icon: Icons.person,
+              Container(
+                //show error message here
+                margin: EdgeInsets.only(top: 30),
+                padding: EdgeInsets.all(10),
+                child: error ? errmsg(errormsg) : Container(),
+                //if error == true then show error message
+                //else set empty container as child
               ),
-              onChanged: (value) {
-                //set username  text on change
-                name = value;
-              },
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            margin: EdgeInsets.only(top: 10),
-            child: TextField(
-              controller: _phone, //set username controller
-              style: TextStyle(color: Colors.green[100], fontSize: 20),
-              decoration: myInputDecoration(
-                label: "رقم الهاتف",
-                icon: Icons.phone_android,
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                margin: EdgeInsets.only(top: 10),
+                child: TextField(
+                  controller: _name, //set username controller
+                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  decoration: myInputDecoration(
+                    label: "اسم المستخدم",
+                    icon: Icons.person,
+                  ),
+                  onChanged: (value) {
+                    //set username  text on change
+                    name = value;
+                  },
+                ),
               ),
-              onChanged: (value) {
-                //set username  text on change
-                phone = value;
-              },
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            margin: EdgeInsets.only(top: 10),
-            child: TextField(
-              controller: _email, //set username controller
-              style: TextStyle(color: Colors.green[100], fontSize: 20),
-              decoration: myInputDecoration(
-                label: "البريد الإلكتروني",
-                icon: Icons.email,
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                margin: EdgeInsets.only(top: 10),
+                child: TextField(
+                  controller: _phone, //set username controller
+                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  decoration: myInputDecoration(
+                    label: "رقم الهاتف",
+                    icon: Icons.phone_android,
+                  ),
+                  onChanged: (value) {
+                    //set username  text on change
+                    phone = value;
+                  },
+                ),
               ),
-              onChanged: (value) {
-                //set username  text on change
-                email = value;
-              },
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-            child: TextField(
-              controller: _password, //set password controller
-              style: TextStyle(color: Colors.green[100], fontSize: 20),
-              obscureText: true,
-              decoration: myInputDecoration(
-                label: "كلمة السر",
-                icon: Icons.lock,
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                margin: EdgeInsets.only(top: 10),
+                child: TextField(
+                  controller: _email, //set username controller
+                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  decoration: myInputDecoration(
+                    label: "البريد الإلكتروني",
+                    icon: Icons.email,
+                  ),
+                  onChanged: (value) {
+                    //set username  text on change
+                    email = value;
+                  },
+                ),
               ),
-              onChanged: (value) {
-                // change password text
-                password = value;
-              },
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 20),
-            child: SizedBox(
-              height: 60,
-              width: double.infinity,
-              child: RaisedButton(
-                onPressed: () {
-                  setState(() {
-                    //show progress indicator on click
-                    showprogress = true;
-                  });
-                  startLogin();
-                },
-                child: showprogress
-                    ? SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.green[100],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.lightGreenAccent),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextField(
+                  controller: _password, //set password controller
+                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  obscureText: true,
+                  decoration: myInputDecoration(
+                    label: "كلمة السر",
+                    icon: Icons.lock,
+                  ),
+                  onChanged: (value) {
+                    // change password text
+                    password = value;
+                  },
+                ),
+              ),
+              RadioGroup(),
+              Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.only(top: 20),
+                child: SizedBox(
+                  height: 60,
+                  width: double.infinity,
+                  child: RaisedButton(
+                    onPressed: () {
+                      setState(() {
+                        //show progress indicator on click
+                        showprogress = true;
+                      });
+                      startLogin();
+                    },
+                    child: showprogress
+                        ? SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.green[100],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.lightGreenAccent),
+                            ),
+                          )
+                        : Text(
+                            "إنشاء حساب",
+                            style:
+                                TextStyle(fontSize: 20, fontFamily: 'Lemonade'),
+                          ),
+                    // if showprogress == true then show progress indicator
+                    // else show "LOGIN NOW" text
+                    colorBrightness: Brightness.dark,
+                    color: Colors.green,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)
+                        //button corner radius
                         ),
-                      )
-                    : Text(
-                        "إنشاء حساب",
-                        style: TextStyle(fontSize: 20, fontFamily: 'Lemonade'),
-                      ),
-                // if showprogress == true then show progress indicator
-                // else show "LOGIN NOW" text
-                colorBrightness: Brightness.dark,
-                color: Colors.green,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)
-                    //button corner radius
-                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 20),
-            child: InkResponse(
-                onTap: () {
-                  //action on tap
-                },
-                child: Text(
-                  "لديك حساب؟ سجل الدخول",
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                )),
-          )
-        ]),
+              Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.only(top: 20),
+                child: InkResponse(
+                    onTap: () {
+                      //action on tap
+                    },
+                    child: Text(
+                      "لديك حساب؟ سجل الدخول",
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    )),
+              )
+            ]),
       )),
     );
   }
@@ -298,6 +305,69 @@ class _SignupPageState extends State<SignupPage> {
         Text(text, style: TextStyle(color: Colors.white, fontSize: 18)),
         //show error message text
       ]),
+    );
+  }
+}
+
+class RadioGroup extends StatefulWidget {
+  @override
+  RadioGroupWidget createState() => RadioGroupWidget();
+}
+
+class RadioGroupWidget extends State {
+  // Default Radio Button Selected Item When App Starts.
+  String radioButtonItem = 'يقهرثق';
+
+  // Group Value for Radio Button.
+  int id = 1;
+
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        /*  Padding(
+            padding: EdgeInsets.all(14.0),
+            child: Text('Selected Radio Item = ' + '$radioButtonItem',
+                style: TextStyle(fontSize: 21))), */
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Radio(
+              toggleable: true,
+              activeColor: Colors.green,
+              value: 1,
+              groupValue: id,
+              onChanged: (val) {
+                setState(() {
+                  radioButtonItem = 'driver';
+                  id = 1;
+                });
+              },
+            ),
+            Text(
+              'سائق',
+              style: new TextStyle(fontSize: 17.0),
+            ),
+            Radio(
+              toggleable: true,
+              activeColor: Colors.green,
+              value: 2,
+              groupValue: id,
+              onChanged: (val) {
+                setState(() {
+                  radioButtonItem = 'passenger';
+                  id = 2;
+                });
+              },
+            ),
+            Text(
+              'راكب',
+              style: new TextStyle(
+                fontSize: 17.0,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
