@@ -132,7 +132,6 @@ class _LoginPageState extends State<LoginPage> {
               focusNode: _focusNodep1,
               maxLength: 13,
               style: TextStyle(
-                
                   color: Colors.white, fontSize: 20, fontFamily: 'Lemonada'),
               keyboardType: TextInputType.number,
               decoration: myInputDecoration(
@@ -215,9 +214,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: Text(
                   "ليس لديك حساب؟ إنشاء حساب جديد",
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.white, //ba2color,
                       fontSize: 15,
-                      fontFamily: 'Lemonada'),
+                      fontFamily: 'Lemonada'), //
                 )),
           )
         ]),
