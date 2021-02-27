@@ -13,7 +13,7 @@ class _SignupPageState extends State<SignupPage> {
       home: Scaffold(
         appBar: AppBar(
           title: Text(
-            "Signup",
+            "إنشاء حساب جديد",
             style: TextStyle(
               fontSize: 25,
               fontFamily: 'Pacifico',
@@ -21,6 +21,7 @@ class _SignupPageState extends State<SignupPage> {
             ),
           ),
           backgroundColor: apcolor,
+          centerTitle: true,
         ),
         body: Container(
           alignment: Alignment.bottomCenter,
