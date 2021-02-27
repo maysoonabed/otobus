@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
+import 'LoginPage.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -245,6 +246,9 @@ class _SignupPageState extends State<SignupPage> {
                 margin: EdgeInsets.only(top: 20),
                 child: InkResponse(
                     onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => LoginPage()));
+
                       //action on tap
                     },
                     child: Text(
@@ -316,7 +320,7 @@ class RadioGroup extends StatefulWidget {
 
 class RadioGroupWidget extends State {
   // Default Radio Button Selected Item When App Starts.
-  String radioButtonItem = 'يقهرثق';
+  String radioButtonItem = 'passenger';
 
   // Group Value for Radio Button.
   int id = 1;
