@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 Color apcolor = const Color(0xFF1ABC9C);
 Color apBcolor = const Color(0xFF00796B);
@@ -159,7 +160,7 @@ class _MyAppState extends State<MyApp> {
                           child: Text(
                             "OtoBüs",
                             style: TextStyle(
-                              fontSize: 80,
+                              fontSize: 60,
                               fontFamily: 'Pacifico',
                               color: Color(
                                   0xFF07322a), // Color(0xFF05211b) //Color(0xFF02100d),
@@ -222,9 +223,9 @@ class _MyAppState extends State<MyApp> {
                                       child: Text("  تسجيل الدخول", //"Sign up"
                                           style: TextStyle(
                                               color: Colors.white, //bacolor,
-                                              fontSize: 25, //18
+                                              fontSize: 15, //18
                                               fontFamily:
-                                                  'ArefRuqaaR', //Pacifico',
+                                                  'Lemonada', // 'ArefRuqaaR', //Pacifico',
                                               fontWeight: FontWeight.w500)),
                                       padding:
                                           EdgeInsets.only(top: 16, bottom: 16),
@@ -278,12 +279,13 @@ class _MyAppState extends State<MyApp> {
                                             ),
                                           ],
                                         ),
-                                        child: Text("إنشاء حساب   ", //"Log in"
+                                        child: Text(
+                                            "إنشاء حساب", //"Log in""إنشاء حساب   "
                                             style: TextStyle(
                                                 color: Colors.white, //bacolor,
-                                                fontSize: 25, //18
+                                                fontSize: 15,
                                                 fontFamily:
-                                                    'ArefRuqaaR', //Pacifico',
+                                                    'Lemonada', //'ArefRuqaaR',25 //Pacifico',18
                                                 fontWeight: FontWeight.w500)),
                                         padding: EdgeInsets.only(
                                             top: 16, bottom: 16),
