@@ -72,9 +72,9 @@ void main() {
     statusBarColor: Colors.transparent,
   ));
   runApp(MaterialApp(
-  debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-  home: MyApp(),
-    ));
+    debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+    home: MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
