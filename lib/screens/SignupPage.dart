@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -95,47 +93,37 @@ class _SignupPageState extends State<SignupPage> {
         //make width of outer wrapper to 100%
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [
-              Colors.green,
-              Colors.lightGreenAccent,
-              Colors.grey,
-              Colors.lightGreen,
-            ],
-          ),
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: myGradients1),
         ), //show linear gradient background of page
 
         padding: EdgeInsets.all(20),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              /*************************************************************/
               Container(
-                margin: EdgeInsets.only(top: 80),
+                //margin: EdgeInsets.only(top: 80),
                 child: Text(
                   "إنشاء حساب جديد",
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 40,
-                      fontFamily: 'Lemonade',
+                      fontSize: 30,
+                      fontFamily: 'Lemonada',
                       fontWeight: FontWeight.bold),
                 ), //title text
               ),
-              /* Container(
-            margin: EdgeInsets.only(top: 10),
-            child: Text(
-              "",
-              style: TextStyle(color: Colors.white, fontSize: 15),
-            ), //subtitle text
-          ), */
+              /*************************************************************/
               Container(
                 //show error message here
-                margin: EdgeInsets.only(top: 30),
+                //margin: EdgeInsets.only(top: 10),
                 padding: EdgeInsets.all(10),
                 child: error ? errmsg(errormsg) : Container(),
                 //if error == true then show error message
                 //else set empty container as child
               ),
+              /*************************************************************/
               Container(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
@@ -153,12 +141,15 @@ class _SignupPageState extends State<SignupPage> {
                   },
                 ),
               ),
+              /*************************************************************/
               Container(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
                 child: TextField(
                   textAlign: TextAlign.center,
                   controller: _phone, //set username controller
+                  keyboardType: TextInputType.number,
+                  maxLength: 13,
                   style: TextStyle(color: Colors.green[100], fontSize: 20),
                   decoration: myInputDecoration(
                     label: "رقم الهاتف",
@@ -170,6 +161,7 @@ class _SignupPageState extends State<SignupPage> {
                   },
                 ),
               ),
+              /*************************************************************/
               Container(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
@@ -187,6 +179,7 @@ class _SignupPageState extends State<SignupPage> {
                   },
                 ),
               ),
+              /*************************************************************/
               Container(
                 padding: EdgeInsets.all(10),
                 child: TextField(
@@ -204,6 +197,7 @@ class _SignupPageState extends State<SignupPage> {
                   },
                 ),
               ),
+              /*************************************************************/
               RadioGroup(),
               Container(
                 padding: EdgeInsets.all(10),
@@ -224,7 +218,7 @@ class _SignupPageState extends State<SignupPage> {
                             height: 30,
                             width: 30,
                             child: CircularProgressIndicator(
-                              backgroundColor: Colors.green[100],
+                              backgroundColor: apcolor,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                   Colors.lightGreenAccent),
                             ),
@@ -232,12 +226,12 @@ class _SignupPageState extends State<SignupPage> {
                         : Text(
                             "إنشاء حساب",
                             style:
-                                TextStyle(fontSize: 20, fontFamily: 'Lemonade'),
+                                TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
                           ),
                     // if showprogress == true then show progress indicator
                     // else show "LOGIN NOW" text
                     colorBrightness: Brightness.dark,
-                    color: Colors.green,
+                    color: apcolor,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)
                         //button corner radius
@@ -245,19 +239,24 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
               ),
+              /*************************************************************/
               Container(
                 padding: EdgeInsets.all(10),
                 margin: EdgeInsets.only(top: 20),
                 child: InkResponse(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => LoginPage()));
-
-                      //action on tap
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  LoginPage())); //action on tap
                     },
                     child: Text(
                       "لديك حساب؟ سجل الدخول",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontFamily: 'Lemonada'),
                     )),
               )
             ]),
@@ -268,29 +267,34 @@ class _SignupPageState extends State<SignupPage> {
   InputDecoration myInputDecoration({String label, IconData icon}) {
     return InputDecoration(
       hintText: label, //show label as placeholder
-      hintStyle:
-          TextStyle(color: Colors.green[100], fontSize: 20), //hint text style
+      alignLabelWithHint: true,
+      //prefixText: '+97',
+      hintStyle: TextStyle(
+          color: Colors.white.withOpacity(0.4),
+          fontSize: 15,
+          fontFamily: 'Lemonada'), //hint text style
       suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
           child: Icon(
             icon,
-            color: Colors.green[100],
+            color: Colors.white,
           )
           //padding and icon for prefix
           ),
 
-      contentPadding: EdgeInsets.fromLTRB(30, 20, 0, 20),
+      contentPadding: EdgeInsets.fromLTRB(30, 15, 0, 15),
       enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(
-              color: Colors.green[300], width: 1)), //default border of input
+          borderSide:
+              BorderSide(color: apcolor, width: 1)), //default border of input
 
       focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide:
-              BorderSide(color: Colors.green[200], width: 1)), //focus border
-      fillColor: Color.fromRGBO(55, 140, 0, 0.5),
-      filled: true, //set true if you want to show input background
+          borderRadius: BorderRadius.circular(40),
+          borderSide: BorderSide(color: Colors.white, width: 1)),
+
+      //focus border
+      fillColor: apcolor,
+      filled: false, //set true if you want to show input background
     );
   }
 
@@ -340,7 +344,7 @@ class RadioGroupWidget extends State {
           children: <Widget>[
             Radio(
               toggleable: true,
-              activeColor: Colors.green,
+              activeColor: apcolor,
               value: 1,
               groupValue: id,
               onChanged: (val) {
@@ -352,11 +356,12 @@ class RadioGroupWidget extends State {
             ),
             Text(
               'سائق',
-              style: new TextStyle(fontSize: 17.0),
+              style: new TextStyle(
+                  fontSize: 17.0, fontFamily: 'Lemonada', color: Colors.white),
             ),
             Radio(
               toggleable: true,
-              activeColor: Colors.green,
+              activeColor: apcolor,
               value: 2,
               groupValue: id,
               onChanged: (val) {
@@ -369,8 +374,7 @@ class RadioGroupWidget extends State {
             Text(
               'راكب',
               style: new TextStyle(
-                fontSize: 17.0,
-              ),
+                  fontSize: 17.0, fontFamily: 'Lemonada', color: Colors.white),
             ),
           ],
         ),
