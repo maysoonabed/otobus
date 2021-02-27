@@ -65,16 +65,16 @@ const List<Color> myGradients4 = [
   Color(0xFF0acca6),
   Color(0xFF01d5ab),
 ];
-
+bool spin = true;
 void main() {
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
   runApp(MaterialApp(
-    debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-    home: MyApp(),
-  ));
+  debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+  home: MyApp(),
+    ));
 }
 
 class MyApp extends StatefulWidget {
