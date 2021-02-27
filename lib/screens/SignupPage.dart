@@ -140,6 +140,7 @@ class _SignupPageState extends State<SignupPage> {
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
                 child: TextField(
+                  textAlign: TextAlign.center,
                   controller: _name, //set username controller
                   style: TextStyle(color: Colors.green[100], fontSize: 20),
                   decoration: myInputDecoration(
@@ -156,6 +157,7 @@ class _SignupPageState extends State<SignupPage> {
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
                 child: TextField(
+                  textAlign: TextAlign.center,
                   controller: _phone, //set username controller
                   style: TextStyle(color: Colors.green[100], fontSize: 20),
                   decoration: myInputDecoration(
@@ -172,6 +174,7 @@ class _SignupPageState extends State<SignupPage> {
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
                 child: TextField(
+                  textAlign: TextAlign.center,
                   controller: _email, //set username controller
                   style: TextStyle(color: Colors.green[100], fontSize: 20),
                   decoration: myInputDecoration(
@@ -187,6 +190,7 @@ class _SignupPageState extends State<SignupPage> {
               Container(
                 padding: EdgeInsets.all(10),
                 child: TextField(
+                  textAlign: TextAlign.center,
                   controller: _password, //set password controller
                   style: TextStyle(color: Colors.green[100], fontSize: 20),
                   obscureText: true,
@@ -275,7 +279,7 @@ class _SignupPageState extends State<SignupPage> {
           //padding and icon for prefix
           ),
 
-      contentPadding: EdgeInsets.fromLTRB(111, 20, 30, 20),
+      contentPadding: EdgeInsets.fromLTRB(30, 20, 0, 20),
       enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
           borderSide: BorderSide(
@@ -285,7 +289,6 @@ class _SignupPageState extends State<SignupPage> {
           borderRadius: BorderRadius.circular(30),
           borderSide:
               BorderSide(color: Colors.green[200], width: 1)), //focus border
-
       fillColor: Color.fromRGBO(55, 140, 0, 0.5),
       filled: true, //set true if you want to show input background
     );
