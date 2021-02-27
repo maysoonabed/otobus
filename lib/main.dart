@@ -8,7 +8,7 @@ Color apcolor = const Color(0xFF1ABC9C);
 Color apBcolor = const Color(0xFF00796B);
 Color bacolor = const Color(0xFFBDBDBD);
 
-Color mypink = const Color(0xFFde1f44);
+Color mypink = const Color(0xFFde1f11);
 Color ba2color = const Color(0xFFbba6aa);
 
 const List<Color> myGradients1 = [
