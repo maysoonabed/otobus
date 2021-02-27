@@ -127,10 +127,12 @@ class _LoginPageState extends State<LoginPage> {
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
             margin: EdgeInsets.only(top: 10),
             child: TextFormField(
+              textAlign: TextAlign.center,
               controller: _phone, //set username controller
               focusNode: _focusNodep1,
               maxLength: 13,
               style: TextStyle(
+                
                   color: Colors.white, fontSize: 20, fontFamily: 'Lemonada'),
               keyboardType: TextInputType.number,
               decoration: myInputDecoration(
@@ -146,6 +148,7 @@ class _LoginPageState extends State<LoginPage> {
           Container(
             padding: EdgeInsets.all(10),
             child: TextField(
+              textAlign: TextAlign.center,
               controller: _password, //set password controller
               focusNode: _focusNodep2,
               style: TextStyle(
@@ -231,7 +234,7 @@ class _LoginPageState extends State<LoginPage> {
         color: Colors.white.withOpacity(0.4),
         fontSize: 20,
       ), //hint text style
-      prefixIcon: Padding(
+      suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
           child: Icon(
             icon,
@@ -240,7 +243,7 @@ class _LoginPageState extends State<LoginPage> {
           //padding and icon for prefix
           ),
 
-      //contentPadding: EdgeInsets.fromLTRB(111, 15, 0, 15),
+      contentPadding: EdgeInsets.fromLTRB(30, 15, 0, 15),
       enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
           borderSide:
