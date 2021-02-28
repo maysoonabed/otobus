@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +17,8 @@ class _UploadImagesState extends State<UploadImages> {
   var _busId = TextEditingController();
   var _numpass = TextEditingController();
   var _type = TextEditingController();
-
+  File _idcard, _license;
+  final picker = ImagePicker();
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.transparent
@@ -53,7 +55,7 @@ class _UploadImagesState extends State<UploadImages> {
           Container(
             margin: EdgeInsets.only(top: 80),
             child: Text(
-              "أوراق مطلوبة",
+              "استكمال التسجيل",
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 30,
@@ -72,7 +74,7 @@ class _UploadImagesState extends State<UploadImages> {
               style: TextStyle(color: Colors.green[100], fontSize: 20),
               decoration: myInputDecoration(
                 label: "نوع الباص",
-                icon: Icons.email,
+                icon: Icons.directions_bus,
               ),
               onChanged: (value) {
                 //set username  text on change
@@ -90,7 +92,7 @@ class _UploadImagesState extends State<UploadImages> {
               style: TextStyle(color: Colors.green[100], fontSize: 20),
               decoration: myInputDecoration(
                 label: "لوحة التسجيل",
-                icon: Icons.email,
+                icon: Icons.money,
               ),
               onChanged: (value) {
                 //set username  text on change
@@ -105,16 +107,50 @@ class _UploadImagesState extends State<UploadImages> {
             margin: EdgeInsets.only(top: 10),
             child: TextField(
               textAlign: TextAlign.center,
+              maxLength: 2,
+              keyboardType: TextInputType.number,
               controller: _numpass, //set username controller
               style: TextStyle(color: Colors.green[100], fontSize: 20),
               decoration: myInputDecoration(
                 label: "عدد الركاب",
-                icon: Icons.email,
+                icon: Icons.people,
               ),
               onChanged: (value) {
                 //set username  text on change
                 numpass = value;
               },
+            ),
+          ),
+          /*************************************************************/
+          Container(
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.only(top: 20),
+            child: SizedBox(
+              height: 60,
+              width: double.infinity,
+              child: RaisedButton(
+                onPressed: () {
+                  /*   setState(() {
+                        //show progress indicator on click
+                        showprogress = true;
+                      });
+                      startLogin(); */
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => UploadImages()));
+                },
+                child: Text(
+                  "إنشاء حساب",
+                  style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                ),
+                // if showprogress == true then show progress indicator
+                // else show "LOGIN NOW" text
+                colorBrightness: Brightness.dark,
+                color: apcolor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)
+                    //button corner radius
+                    ),
+              ),
             ),
           ),
           /*************************************************************/
