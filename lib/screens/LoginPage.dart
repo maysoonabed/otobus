@@ -16,16 +16,13 @@ class _LoginPageState extends State<LoginPage> {
   bool error, showprogress;
   TextEditingController _password;
   TextEditingController _phone;
-  FocusNode _focusNodep1;
-  FocusNode _focusNodep2;
+  bool _obscureText = true;
 
   startLogin() async {
-    String apiurl = "http://10.0.0.15/otobus/regpass.php";
+    String apiurl = "http://192.168.1.107:8089/otobus/logpass.php"; //10.0.0.15
 
-    var response = await http.post(apiurl, body: {
-      'phone': phone,
-      'password': password //get password text
-    });
+    var response =
+        await http.post(apiurl, body: {'phone': phone, 'password': password});
 
     if (response.statusCode == 200) {
       var jsondata = json.decode(response.body);
@@ -63,16 +60,6 @@ class _LoginPageState extends State<LoginPage> {
     errormsg = "";
     error = false;
     showprogress = false;
-    _focusNodep1 = FocusNode();
-    _focusNodep1.addListener(() {
-      if (_focusNodep1.hasFocus) _phone.clear();
-    });
-    _focusNodep2 = FocusNode();
-    _focusNodep2.addListener(() {
-      if (_focusNodep2.hasFocus) _password.clear();
-    });
-    //_name.text = "defaulttext";
-    //_password.text = "defaultpassword";
     super.initState();
   }
 
@@ -128,8 +115,7 @@ class _LoginPageState extends State<LoginPage> {
             margin: EdgeInsets.only(top: 10),
             child: TextFormField(
               textAlign: TextAlign.center,
-              controller: _phone, //set username controller
-              focusNode: _focusNodep1,
+              controller: _phone,
               maxLength: 13,
               style: TextStyle(
                   color: Colors.white, fontSize: 20, fontFamily: 'Lemonada'),
@@ -148,12 +134,11 @@ class _LoginPageState extends State<LoginPage> {
             padding: EdgeInsets.all(10),
             child: TextField(
               textAlign: TextAlign.center,
-              controller: _password, //set password controller
-              focusNode: _focusNodep2,
+              controller: _password,
               style: TextStyle(
                   color: Colors.white, fontSize: 20, fontFamily: 'Lemonada'),
-              obscureText: true,
-              decoration: myInputDecoration(
+              obscureText: _obscureText,
+              decoration: myPasswordDecoration(
                 label: "كلمة السر",
                 icon: Icons.lock,
               ),
@@ -162,6 +147,8 @@ class _LoginPageState extends State<LoginPage> {
               },
             ),
           ),
+          /*************************************************************/
+          RadioGroup(),
           /*************************************************************/
           Container(
             padding: EdgeInsets.all(10),
@@ -241,7 +228,54 @@ class _LoginPageState extends State<LoginPage> {
           )
           //padding and icon for prefix
           ),
+      contentPadding: EdgeInsets.fromLTRB(30, 15, 0, 15),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide:
+              BorderSide(color: apcolor, width: 1)), //default border of input
 
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(40),
+          borderSide: BorderSide(color: Colors.white, width: 1)),
+
+      //focus border
+      fillColor: apcolor,
+      filled: false, //set true if you want to show input background
+    );
+  }
+
+  InputDecoration myPasswordDecoration({String label, IconData icon}) {
+    return InputDecoration(
+      hintText: label, //show label as placeholder
+      alignLabelWithHint: true,
+      //prefixText: '+97',
+      hintStyle: TextStyle(
+        color: Colors.white.withOpacity(0.4),
+        fontSize: 20,
+      ), //hint text style
+      suffixIcon: Padding(
+          padding: EdgeInsets.only(left: 20, right: 10),
+          child: Icon(
+            icon,
+            color: Colors.white,
+          )
+          //padding and icon for prefix
+          ),
+
+      ///************************
+      prefixIcon: GestureDetector(
+        onTap: () {
+          setState(() {
+            _obscureText = !_obscureText;
+          });
+        },
+        child: Icon(
+          _obscureText ? Icons.visibility : Icons.visibility_off,
+          color: Colors.white,
+        ),
+      ),
+
+      ///************************
       contentPadding: EdgeInsets.fromLTRB(30, 15, 0, 15),
       enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
@@ -265,17 +299,80 @@ class _LoginPageState extends State<LoginPage> {
       margin: EdgeInsets.only(bottom: 10.00),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          color: Colors.red,
+          color: Colors.white,
           border: Border.all(color: Colors.red[300], width: 2)),
       child: Row(children: <Widget>[
         Container(
           margin: EdgeInsets.only(right: 6.00),
-          child: Icon(Icons.info, color: Colors.white),
+          child: Icon(Icons.info, color: Colors.red),
         ), // icon for error message
 
-        Text(text, style: TextStyle(color: Colors.white, fontSize: 18)),
+        Text(text, style: TextStyle(color: Colors.red, fontSize: 18)),
         //show error message text
       ]),
+    );
+  }
+}
+
+class RadioGroup extends StatefulWidget {
+  @override
+  RadioGroupWidget createState() => RadioGroupWidget();
+}
+
+class RadioGroupWidget extends State {
+  // Default Radio Button Selected Item When App Starts.
+  String radioButtonItem = 'passenger';
+
+  // Group Value for Radio Button.
+  int id = 1;
+
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        /*  Padding(
+            padding: EdgeInsets.all(14.0),
+            child: Text('Selected Radio Item = ' + '$radioButtonItem',
+                style: TextStyle(fontSize: 21))), */
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Radio(
+              toggleable: true,
+              activeColor: apcolor,
+              value: 1,
+              groupValue: id,
+              onChanged: (val) {
+                setState(() {
+                  radioButtonItem = 'driver';
+                  id = 1;
+                });
+              },
+            ),
+            Text(
+              'سائق',
+              style: new TextStyle(
+                  fontSize: 17.0, fontFamily: 'Lemonada', color: Colors.white),
+            ),
+            Radio(
+              toggleable: true,
+              activeColor: apcolor,
+              value: 2,
+              groupValue: id,
+              onChanged: (val) {
+                setState(() {
+                  radioButtonItem = 'passenger';
+                  id = 2;
+                });
+              },
+            ),
+            Text(
+              'راكب',
+              style: new TextStyle(
+                  fontSize: 17.0, fontFamily: 'Lemonada', color: Colors.white),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

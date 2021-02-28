@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:OtoBus/screens/UploadImages.dart';
+import 'package:OtoBus/screens/uploadImages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +22,7 @@ class _SignupPageState extends State<SignupPage> {
   var _email = TextEditingController();
   var _password = TextEditingController();
   var _phone = TextEditingController();
+  bool _obscureText = true;
   startLogin() async {
     String apiurl = "http://10.0.0.15/otobus/regpass.php";
 
@@ -156,6 +157,7 @@ class _SignupPageState extends State<SignupPage> {
                 icon: Icons.phone_android,
               ),
               onChanged: (value) {
+                //set username  text on change
                 phone = value;
               },
             ),
@@ -185,8 +187,8 @@ class _SignupPageState extends State<SignupPage> {
               textAlign: TextAlign.center,
               controller: _password, //set password controller
               style: TextStyle(color: Colors.green[100], fontSize: 20),
-              obscureText: true,
-              decoration: myInputDecoration(
+              obscureText: _obscureText,
+              decoration: myPasswordDecoration(
                 label: "كلمة السر",
                 icon: Icons.lock,
               ),
@@ -206,12 +208,11 @@ class _SignupPageState extends State<SignupPage> {
               width: double.infinity,
               child: RaisedButton(
                 onPressed: () {
-                  /* setState(() {
-                    //show progress indicator on click
-                    showprogress = true;
-                  });
-                  startLogin(); */
-
+                  /*   setState(() {
+                        //show progress indicator on click
+                        showprogress = true;
+                      });
+                      startLogin(); */
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => UploadImages()));
                 },
@@ -282,6 +283,54 @@ class _SignupPageState extends State<SignupPage> {
           //padding and icon for prefix
           ),
 
+      contentPadding: EdgeInsets.fromLTRB(30, 15, 0, 15),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide:
+              BorderSide(color: apcolor, width: 1)), //default border of input
+
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(40),
+          borderSide: BorderSide(color: Colors.white, width: 1)),
+
+      //focus border
+      fillColor: apcolor,
+      filled: false, //set true if you want to show input background
+    );
+  }
+
+  InputDecoration myPasswordDecoration({String label, IconData icon}) {
+    return InputDecoration(
+      hintText: label, //show label as placeholder
+      alignLabelWithHint: true,
+      //prefixText: '+97',
+      hintStyle: TextStyle(
+        color: Colors.white.withOpacity(0.4),
+        fontSize: 20,
+      ), //hint text style
+      suffixIcon: Padding(
+          padding: EdgeInsets.only(left: 20, right: 10),
+          child: Icon(
+            icon,
+            color: Colors.white,
+          )
+          //padding and icon for prefix
+          ),
+
+      ///************************
+      prefixIcon: GestureDetector(
+        onTap: () {
+          setState(() {
+            _obscureText = !_obscureText;
+          });
+        },
+        child: Icon(
+          _obscureText ? Icons.visibility : Icons.visibility_off,
+          color: Colors.white,
+        ),
+      ),
+
+      ///************************
       contentPadding: EdgeInsets.fromLTRB(30, 15, 0, 15),
       enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
