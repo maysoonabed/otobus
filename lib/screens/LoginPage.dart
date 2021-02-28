@@ -5,24 +5,27 @@ import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'SignupPage.dart';
 
+int id = 1;
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String name, email, password, phone;
+  String password, phone;
   String errormsg;
+  int idtype;
   bool error, showprogress;
-  TextEditingController _password;
-  TextEditingController _phone;
+  TextEditingController _password = TextEditingController();
+  TextEditingController _phone = TextEditingController();
   bool _obscureText = true;
 
   startLogin() async {
     String apiurl = "http://192.168.1.107:8089/otobus/logpass.php"; //10.0.0.15
 
-    var response =
-        await http.post(apiurl, body: {'phone': phone, 'password': password});
+    var response = await http.post(apiurl,
+        body: {'phone': phone, 'password': password, 'id': idtype});
 
     if (response.statusCode == 200) {
       var jsondata = json.decode(response.body);
@@ -34,11 +37,13 @@ class _LoginPageState extends State<LoginPage> {
         });
       } else {
         if (jsondata["success"]) {
+          print("success");
           setState(() {
             error = false;
             showprogress = false;
           });
         } else {
+          print("fail");
           showprogress = false; //don't show progress indicator
           error = true;
           errormsg = "Something went wrong.";
@@ -323,16 +328,13 @@ class RadioGroupWidget extends State {
   // Default Radio Button Selected Item When App Starts.
   String radioButtonItem = 'passenger';
 
-  // Group Value for Radio Button.
-  int id = 1;
-
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        /*  Padding(
+        Padding(
             padding: EdgeInsets.all(14.0),
-            child: Text('Selected Radio Item = ' + '$radioButtonItem',
-                style: TextStyle(fontSize: 21))), */
+            child: Text('Selected Radio Item = ' + '$id',
+                style: TextStyle(fontSize: 21))),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
