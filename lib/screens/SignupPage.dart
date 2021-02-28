@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:OtoBus/screens/UploadImages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -99,167 +100,166 @@ class _SignupPageState extends State<SignupPage> {
         ), //show linear gradient background of page
 
         padding: EdgeInsets.all(20),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              /*************************************************************/
-              Container(
-                //margin: EdgeInsets.only(top: 80),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <
+            Widget>[
+          /*************************************************************/
+          Container(
+            //margin: EdgeInsets.only(top: 80),
+            child: Text(
+              "إنشاء حساب جديد",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontFamily: 'Lemonada',
+                  fontWeight: FontWeight.bold),
+            ), //title text
+          ),
+          /*************************************************************/
+          Container(
+            //show error message here
+            //margin: EdgeInsets.only(top: 10),
+            padding: EdgeInsets.all(10),
+            child: error ? errmsg(errormsg) : Container(),
+            //if error == true then show error message
+            //else set empty container as child
+          ),
+          /*************************************************************/
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            margin: EdgeInsets.only(top: 10),
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: _name, //set username controller
+              style: TextStyle(color: Colors.green[100], fontSize: 20),
+              decoration: myInputDecoration(
+                label: "اسم المستخدم",
+                icon: Icons.person,
+              ),
+              onChanged: (value) {
+                //set username  text on change
+                name = value;
+              },
+            ),
+          ),
+          /*************************************************************/
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            margin: EdgeInsets.only(top: 10),
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: _phone, //set username controller
+              keyboardType: TextInputType.number,
+              maxLength: 13,
+              style: TextStyle(color: Colors.green[100], fontSize: 20),
+              decoration: myInputDecoration(
+                label: "رقم الهاتف",
+                icon: Icons.phone_android,
+              ),
+              onChanged: (value) {
+                phone = value;
+              },
+            ),
+          ),
+          /*************************************************************/
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            margin: EdgeInsets.only(top: 10),
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: _email, //set username controller
+              style: TextStyle(color: Colors.green[100], fontSize: 20),
+              decoration: myInputDecoration(
+                label: "البريد الإلكتروني",
+                icon: Icons.email,
+              ),
+              onChanged: (value) {
+                //set username  text on change
+                email = value;
+              },
+            ),
+          ),
+          /*************************************************************/
+          Container(
+            padding: EdgeInsets.all(10),
+            child: TextField(
+              textAlign: TextAlign.center,
+              controller: _password, //set password controller
+              style: TextStyle(color: Colors.green[100], fontSize: 20),
+              obscureText: true,
+              decoration: myInputDecoration(
+                label: "كلمة السر",
+                icon: Icons.lock,
+              ),
+              onChanged: (value) {
+                // change password text
+                password = value;
+              },
+            ),
+          ),
+          /*************************************************************/
+          RadioGroup(),
+          Container(
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.only(top: 20),
+            child: SizedBox(
+              height: 60,
+              width: double.infinity,
+              child: RaisedButton(
+                onPressed: () {
+                  /* setState(() {
+                    //show progress indicator on click
+                    showprogress = true;
+                  });
+                  startLogin(); */
+
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => UploadImages()));
+                },
+                child: showprogress
+                    ? SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: CircularProgressIndicator(
+                          backgroundColor: apcolor,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.lightGreenAccent),
+                        ),
+                      )
+                    : Text(
+                        "إنشاء حساب",
+                        style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                      ),
+                // if showprogress == true then show progress indicator
+                // else show "LOGIN NOW" text
+                colorBrightness: Brightness.dark,
+                color: apcolor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)
+                    //button corner radius
+                    ),
+              ),
+            ),
+          ),
+          /*************************************************************/
+          Container(
+            padding: EdgeInsets.all(10),
+            margin: EdgeInsets.only(top: 20),
+            child: InkResponse(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => LoginPage())); //action on tap
+                },
                 child: Text(
-                  "إنشاء حساب جديد",
+                  "لديك حساب؟ سجل الدخول",
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 30,
-                      fontFamily: 'Lemonada',
-                      fontWeight: FontWeight.bold),
-                ), //title text
-              ),
-              /*************************************************************/
-              Container(
-                //show error message here
-                //margin: EdgeInsets.only(top: 10),
-                padding: EdgeInsets.all(10),
-                child: error ? errmsg(errormsg) : Container(),
-                //if error == true then show error message
-                //else set empty container as child
-              ),
-              /*************************************************************/
-              Container(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                margin: EdgeInsets.only(top: 10),
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: _name, //set username controller
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
-                  decoration: myInputDecoration(
-                    label: "اسم المستخدم",
-                    icon: Icons.person,
-                  ),
-                  onChanged: (value) {
-                    //set username  text on change
-                    name = value;
-                  },
-                ),
-              ),
-              /*************************************************************/
-              Container(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                margin: EdgeInsets.only(top: 10),
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: _phone, //set username controller
-                  keyboardType: TextInputType.number,
-                  maxLength: 13,
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
-                  decoration: myInputDecoration(
-                    label: "رقم الهاتف",
-                    icon: Icons.phone_android,
-                  ),
-                  onChanged: (value) {
-                    //set username  text on change
-                    phone = value;
-                  },
-                ),
-              ),
-              /*************************************************************/
-              Container(
-                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                margin: EdgeInsets.only(top: 10),
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: _email, //set username controller
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
-                  decoration: myInputDecoration(
-                    label: "البريد الإلكتروني",
-                    icon: Icons.email,
-                  ),
-                  onChanged: (value) {
-                    //set username  text on change
-                    email = value;
-                  },
-                ),
-              ),
-              /*************************************************************/
-              Container(
-                padding: EdgeInsets.all(10),
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  controller: _password, //set password controller
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
-                  obscureText: true,
-                  decoration: myInputDecoration(
-                    label: "كلمة السر",
-                    icon: Icons.lock,
-                  ),
-                  onChanged: (value) {
-                    // change password text
-                    password = value;
-                  },
-                ),
-              ),
-              /*************************************************************/
-              RadioGroup(),
-              Container(
-                padding: EdgeInsets.all(10),
-                margin: EdgeInsets.only(top: 20),
-                child: SizedBox(
-                  height: 60,
-                  width: double.infinity,
-                  child: RaisedButton(
-                    onPressed: () {
-                      setState(() {
-                        //show progress indicator on click
-                        showprogress = true;
-                      });
-                      startLogin();
-                    },
-                    child: showprogress
-                        ? SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: CircularProgressIndicator(
-                              backgroundColor: apcolor,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.lightGreenAccent),
-                            ),
-                          )
-                        : Text(
-                            "إنشاء حساب",
-                            style:
-                                TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
-                          ),
-                    // if showprogress == true then show progress indicator
-                    // else show "LOGIN NOW" text
-                    colorBrightness: Brightness.dark,
-                    color: apcolor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)
-                        //button corner radius
-                        ),
-                  ),
-                ),
-              ),
-              /*************************************************************/
-              Container(
-                padding: EdgeInsets.all(10),
-                margin: EdgeInsets.only(top: 20),
-                child: InkResponse(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  LoginPage())); //action on tap
-                    },
-                    child: Text(
-                      "لديك حساب؟ سجل الدخول",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontFamily: 'Lemonada'),
-                    )),
-              )
-            ]),
+                      fontSize: 15,
+                      fontFamily: 'Lemonada'),
+                )),
+          )
+        ]),
       )),
     );
   }
