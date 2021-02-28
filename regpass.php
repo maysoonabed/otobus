@@ -3,7 +3,8 @@
              $Name = $_POST['name'];
              $Email = $_POST['email'];
              $Mobile = $_POST['phone'];
-             $Password = md5($_POST['password']);   	    		
+             $Password = md5($_POST['password']);   
+			    		
             $query = "SELECT * FROM passenger WHERE phonenum='$Mobile'";
         	$result = mysqli_query($connect, $query);
         	
