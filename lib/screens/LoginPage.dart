@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
           /*************************************************************/
           Container(
             padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 20),
+            // margin: EdgeInsets.only(top: 20),
             child: SizedBox(
               height: 60,
               width: double.infinity,
