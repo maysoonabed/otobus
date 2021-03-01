@@ -17,8 +17,17 @@ class _UploadImagesState extends State<UploadImages> {
   var _busId = TextEditingController();
   var _numpass = TextEditingController();
   var _type = TextEditingController();
+
   File _idcard, _license;
   final picker = ImagePicker();
+
+  Future upIm() async {
+    var picked = await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      _idcard = File(picked.path);
+    });
+  }
+
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.transparent
@@ -122,6 +131,11 @@ class _UploadImagesState extends State<UploadImages> {
             ),
           ),
           /*************************************************************/
+          IconButton(
+              icon: Icon(Icons.camera),
+              onPressed: () {
+                upIm();
+              }),
           Container(
             padding: EdgeInsets.all(10),
             margin: EdgeInsets.only(top: 20),
