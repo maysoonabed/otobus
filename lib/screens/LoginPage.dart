@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'SignupPage.dart';
+import 'MapPage.dart';
 
 int id = 1;
 
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
 
   startLogin() async {
-    String apiurl = "http://192.168.1.107:8089/otobus/logpass.php"; //10.0.0.15
+    String apiurl = "http://10.0.0.15/otobus/logpass.php"; //10.0.0.15
 
     var response = await http.post(apiurl,
         body: {'phone': phone, 'password': password, 'id': idtype});
@@ -163,11 +164,13 @@ class _LoginPageState extends State<LoginPage> {
               width: double.infinity,
               child: RaisedButton(
                 onPressed: () {
-                  setState(() {
+                  /*    setState(() {
                     //show progress indicator on click
-                    showprogress = true;
-                  });
+                    //  showprogress = true;
+                  }); */
                   startLogin();
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MapPage()));
                 },
                 child: showprogress
                     ? SizedBox(
