@@ -108,7 +108,7 @@ class _SignupPageState extends State<SignupPage> {
             children: <Widget>[
               /*************************************************************/
               Container(
-                //margin: EdgeInsets.only(top: 80),
+                margin: EdgeInsets.only(top: 30),
                 child: Text(
                   "إنشاء حساب جديد",
                   style: TextStyle(
@@ -205,7 +205,7 @@ class _SignupPageState extends State<SignupPage> {
               RadioGroup(),
               Container(
                 padding: EdgeInsets.all(10),
-                margin: EdgeInsets.only(top: 20),
+                //margin: EdgeInsets.only(top: 20),
                 child: SizedBox(
                   height: 60,
                   width: double.infinity,
@@ -256,7 +256,7 @@ class _SignupPageState extends State<SignupPage> {
               /*************************************************************/
               Container(
                 padding: EdgeInsets.all(10),
-                margin: EdgeInsets.only(top: 20),
+                //margin: EdgeInsets.only(top: 20),
                 child: InkResponse(
                     onTap: () {
                       Navigator.push(

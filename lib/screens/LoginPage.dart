@@ -197,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
           /*************************************************************/
           Container(
             padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 20),
+            //margin: EdgeInsets.only(top: 20),
             child: InkResponse(
                 onTap: () {
                   Navigator.push(context,
@@ -331,10 +331,11 @@ class RadioGroupWidget extends State {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Padding(
+        /*  Padding(
             padding: EdgeInsets.all(14.0),
             child: Text('Selected Radio Item = ' + '$id',
                 style: TextStyle(fontSize: 21))),
+                */
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
