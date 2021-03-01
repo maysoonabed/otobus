@@ -15,12 +15,12 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
     if(isset($cek) && $cek != null){
         echo json_encode("success");
     }else{
-        $data['msg'] = "DATA TIDAK ADA";
         echo json_encode("fail");
     }
    }
    else{}
    }
+<<<<<<< HEAD
 /*
     $con = mysqli_connect('localhost', 'root', '', 'otobus') or die('No connection');
 >>>>>>> b1052d5ecfc829ca0d9759a2cd2e39095211e358:login.php
@@ -54,6 +54,9 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
   
     
 >>>>>>> b1052d5ecfc829ca0d9759a2cd2e39095211e358:login.php
+=======
+>>>>>>> 972db1bdb4b8d3a5a712e5b1cb73fdbc00ee561f
 
 ?>
+
 

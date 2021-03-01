@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'SignupPage.dart';
-import 'MapPage.dart';
+import 'PassengerMap.dart';
 
 int id = 1;
 
@@ -23,44 +23,11 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
 
   startLogin() async {
-<<<<<<< HEAD
     String apiurl = "http://10.0.0.15/otobus/logpass.php"; //10.0.0.15
-=======
-    String apiurl = "http://192.168.1.107:8089/otobus/login.php"; //10.0.0.15
->>>>>>> b1052d5ecfc829ca0d9759a2cd2e39095211e358
-
     var response = await http.post(apiurl,
         body: {'phone': phone, 'password': password, 'id': idtype});
 
-    if (response.statusCode == 200) {
-      var jsondata = json.decode(response.body);
-      if (jsondata["error"]) {
-        setState(() {
-          showprogress = false; //don't show progress indicator
-          error = true;
-          errormsg = jsondata["message"];
-        });
-      } else {
-        if (jsondata["success"]) {
-          print("success");
-          setState(() {
-            error = false;
-            showprogress = false;
-          });
-        } else {
-          print("fail");
-          showprogress = false; //don't show progress indicator
-          error = true;
-          errormsg = "Something went wrong.";
-        }
-      }
-    } else {
-      setState(() {
-        showprogress = false; //don't show progress indicator
-        error = true;
-        errormsg = "Error during connecting to server.";
-      });
-    }
+    print(idtype);
   }
 
   @override
@@ -174,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
                   }); */
                   startLogin();
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MapPage()));
+                      MaterialPageRoute(builder: (context) => PassengerMap()));
                 },
                 child: showprogress
                     ? SizedBox(
