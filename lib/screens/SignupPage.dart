@@ -230,8 +230,10 @@ class _SignupPageState extends State<SignupPage> {
                       */
                       if (id == 2) {
                         startLogin();
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => MapPage()));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PassengerMap()));
                       } else {
                         Navigator.push(
                             context,
