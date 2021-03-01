@@ -23,7 +23,11 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
 
   startLogin() async {
+<<<<<<< HEAD
     String apiurl = "http://10.0.0.15/otobus/logpass.php"; //10.0.0.15
+=======
+    String apiurl = "http://192.168.1.107:8089/otobus/login.php"; //10.0.0.15
+>>>>>>> b1052d5ecfc829ca0d9759a2cd2e39095211e358
 
     var response = await http.post(apiurl,
         body: {'phone': phone, 'password': password, 'id': idtype});
@@ -158,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
           /*************************************************************/
           Container(
             padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 20),
+            // margin: EdgeInsets.only(top: 20),
             child: SizedBox(
               height: 60,
               width: double.infinity,
@@ -200,7 +204,7 @@ class _LoginPageState extends State<LoginPage> {
           /*************************************************************/
           Container(
             padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 20),
+            //margin: EdgeInsets.only(top: 20),
             child: InkResponse(
                 onTap: () {
                   Navigator.push(context,
@@ -225,9 +229,9 @@ class _LoginPageState extends State<LoginPage> {
       alignLabelWithHint: true,
       //prefixText: '+97',
       hintStyle: TextStyle(
-        color: Colors.white.withOpacity(0.4),
-        fontSize: 20,
-      ), //hint text style
+          color: Colors.white.withOpacity(0.4),
+          fontSize: 20,
+          fontFamily: 'Lemonada'), //hint text style
       suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
           child: Icon(
@@ -258,9 +262,9 @@ class _LoginPageState extends State<LoginPage> {
       alignLabelWithHint: true,
       //prefixText: '+97',
       hintStyle: TextStyle(
-        color: Colors.white.withOpacity(0.4),
-        fontSize: 20,
-      ), //hint text style
+          color: Colors.white.withOpacity(0.4),
+          fontSize: 20,
+          fontFamily: 'Lemonada'), //hint text style
       suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
           child: Icon(
@@ -334,10 +338,11 @@ class RadioGroupWidget extends State {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Padding(
+        /*  Padding(
             padding: EdgeInsets.all(14.0),
             child: Text('Selected Radio Item = ' + '$id',
                 style: TextStyle(fontSize: 21))),
+                */
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
