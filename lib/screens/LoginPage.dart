@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
 
   startLogin() async {
-    String apiurl = "http://192.168.1.107:8089/otobus/logpass.php"; //10.0.0.15
+    String apiurl = "http://192.168.1.107:8089/otobus/login.php"; //10.0.0.15
 
     var response = await http.post(apiurl,
         body: {'phone': phone, 'password': password, 'id': idtype});
@@ -222,9 +222,9 @@ class _LoginPageState extends State<LoginPage> {
       alignLabelWithHint: true,
       //prefixText: '+97',
       hintStyle: TextStyle(
-        color: Colors.white.withOpacity(0.4),
-        fontSize: 20,
-      ), //hint text style
+          color: Colors.white.withOpacity(0.4),
+          fontSize: 20,
+          fontFamily: 'Lemonada'), //hint text style
       suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
           child: Icon(
@@ -255,9 +255,9 @@ class _LoginPageState extends State<LoginPage> {
       alignLabelWithHint: true,
       //prefixText: '+97',
       hintStyle: TextStyle(
-        color: Colors.white.withOpacity(0.4),
-        fontSize: 20,
-      ), //hint text style
+          color: Colors.white.withOpacity(0.4),
+          fontSize: 20,
+          fontFamily: 'Lemonada'), //hint text style
       suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
           child: Icon(

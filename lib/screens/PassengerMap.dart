@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 
-class MapPage extends StatefulWidget {
+class PassengerMap extends StatefulWidget {
   @override
-  _MapPageState createState() => _MapPageState();
+  _PassengerMapState createState() => _PassengerMapState();
 }
 
-class _MapPageState extends State<MapPage> {
+class _PassengerMapState extends State<PassengerMap> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false, //لإخفاء شريط depug
