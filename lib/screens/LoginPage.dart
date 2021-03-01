@@ -95,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(children: <Widget>[
           /*************************************************************/
           Container(
-            margin: EdgeInsets.only(top: 80),
+            margin: EdgeInsets.only(top: 60),
             child: Text(
               "تسجيل الدخول",
               style: TextStyle(
@@ -108,7 +108,7 @@ class _LoginPageState extends State<LoginPage> {
           /*************************************************************/
           Container(
             //show error message here
-            margin: EdgeInsets.only(top: 30),
+            margin: EdgeInsets.only(top: 10),
             padding: EdgeInsets.all(10),
             child: error ? errmsg(errormsg) : Container(),
             //if error == true then show error message
