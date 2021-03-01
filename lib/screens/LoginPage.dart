@@ -27,35 +27,7 @@ class _LoginPageState extends State<LoginPage> {
     var response = await http.post(apiurl,
         body: {'phone': phone, 'password': password, 'id': idtype});
 
-    if (response.statusCode == 200) {
-      var jsondata = json.decode(response.body);
-      if (jsondata["error"]) {
-        setState(() {
-          showprogress = false; //don't show progress indicator
-          error = true;
-          errormsg = jsondata["message"];
-        });
-      } else {
-        if (jsondata["success"]) {
-          print("success");
-          setState(() {
-            error = false;
-            showprogress = false;
-          });
-        } else {
-          print("fail");
-          showprogress = false; //don't show progress indicator
-          error = true;
-          errormsg = "Something went wrong.";
-        }
-      }
-    } else {
-      setState(() {
-        showprogress = false; //don't show progress indicator
-        error = true;
-        errormsg = "Error during connecting to server.";
-      });
-    }
+    print(idtype);
   }
 
   @override
