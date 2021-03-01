@@ -166,7 +166,8 @@ class _UploadImagesState extends State<UploadImages> {
       //prefixText: '+97',
       hintStyle: TextStyle(
         color: Colors.white.withOpacity(0.4),
-        fontSize: 20,
+        fontSize: 15,
+        fontFamily: 'Lemonada',
       ), //hint text style
       suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
