@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:OtoBus/screens/MapPage.dart';
+import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:OtoBus/screens/uploadImages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -134,7 +134,10 @@ class _SignupPageState extends State<SignupPage> {
                 child: TextField(
                   textAlign: TextAlign.center,
                   controller: _name, //set username controller
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontFamily: 'Lemonada'),
                   decoration: myInputDecoration(
                     label: "اسم المستخدم",
                     icon: Icons.person,
@@ -154,7 +157,10 @@ class _SignupPageState extends State<SignupPage> {
                   controller: _phone, //set username controller
                   keyboardType: TextInputType.number,
                   maxLength: 13,
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontFamily: 'Lemonada'),
                   decoration: myInputDecoration(
                     label: "رقم الهاتف",
                     icon: Icons.phone_android,
@@ -172,7 +178,10 @@ class _SignupPageState extends State<SignupPage> {
                 child: TextField(
                   textAlign: TextAlign.center,
                   controller: _email, //set username controller
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontFamily: 'Lemonada'),
                   decoration: myInputDecoration(
                     label: "البريد الإلكتروني",
                     icon: Icons.email,
@@ -189,7 +198,10 @@ class _SignupPageState extends State<SignupPage> {
                 child: TextField(
                   textAlign: TextAlign.center,
                   controller: _password, //set password controller
-                  style: TextStyle(color: Colors.green[100], fontSize: 20),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontFamily: 'Lemonada'),
                   obscureText: _obscureText,
                   decoration: myPasswordDecoration(
                     label: "كلمة السر",
@@ -318,9 +330,9 @@ class _SignupPageState extends State<SignupPage> {
       alignLabelWithHint: true,
       //prefixText: '+97',
       hintStyle: TextStyle(
-        color: Colors.white.withOpacity(0.4),
-        fontSize: 20,
-      ), //hint text style
+          color: Colors.white.withOpacity(0.4),
+          fontSize: 15,
+          fontFamily: 'Lemonada'), //hint text style
       suffixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 10),
           child: Icon(
