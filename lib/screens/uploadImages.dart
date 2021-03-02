@@ -28,6 +28,20 @@ class _UploadImagesState extends State<UploadImages> {
     });
   }
 
+  Future upload(File im) async {
+    var uri = Uri.parse("http://10.0.0.15/otobus/regdriver.php");
+    var request = http.MultipartRequest("POST", uri);
+    request.fields['type'] = type;
+    var pic = await http.MultipartFile.fromPath("image", im.path);
+    request.files.add(pic);
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      print("Image Uploaded");
+    } else {
+      print("Image not Uploaded");
+    }
+  }
+
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.transparent
@@ -137,6 +151,21 @@ class _UploadImagesState extends State<UploadImages> {
                 upIm();
               }),
           Container(
+            child: _idcard == null
+                ? Text(
+                    'لم يتم رفع الصورة',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.4),
+                      fontSize: 10,
+                      fontFamily: 'Lemonada',
+                    ),
+                  )
+                : Image.file(_idcard),
+          ),
+
+          /*************************************************************/
+
+          Container(
             padding: EdgeInsets.all(10),
             margin: EdgeInsets.only(top: 20),
             child: SizedBox(
@@ -144,13 +173,7 @@ class _UploadImagesState extends State<UploadImages> {
               width: double.infinity,
               child: RaisedButton(
                 onPressed: () {
-                  /*   setState(() {
-                        //show progress indicator on click
-                        showprogress = true;
-                      });
-                      startLogin(); */
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => UploadImages()));
+                  upload(_idcard);
                 },
                 child: Text(
                   "إنشاء حساب",
