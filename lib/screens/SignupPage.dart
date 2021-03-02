@@ -37,29 +37,31 @@ class _SignupPageState extends State<SignupPage> {
 
     if (response.statusCode == 200) {
       var jsondata = json.decode(response.body);
-      if (jsondata["error"]) {
+      if (jsondata["error"] == 1) {
         setState(() {
           showprogress = false; //don't show progress indicator
           error = true;
           errormsg = jsondata["message"];
         });
       } else {
-        if (jsondata["success"]) {
+        if (jsondata["success"] == 1) {
           setState(() {
             error = false;
             showprogress = false;
           });
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => PassengerMap()));
         } else {
           showprogress = false; //don't show progress indicator
           error = true;
-          errormsg = "Something went wrong.";
+          errormsg = "حدث خطأ";
         }
       }
     } else {
       setState(() {
         showprogress = false; //don't show progress indicator
         error = true;
-        errormsg = "Error during connecting to server.";
+        errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
       });
     }
   }
@@ -121,7 +123,7 @@ class _SignupPageState extends State<SignupPage> {
               /*************************************************************/
               Container(
                 //show error message here
-                //margin: EdgeInsets.only(top: 10),
+                margin: EdgeInsets.only(top: 10),
                 padding: EdgeInsets.all(10),
                 child: error ? errmsg(errormsg) : Container(),
                 //if error == true then show error message
@@ -176,6 +178,7 @@ class _SignupPageState extends State<SignupPage> {
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
                 child: TextField(
+                  keyboardType: TextInputType.emailAddress,
                   textAlign: TextAlign.center,
                   controller: _email, //set username controller
                   style: TextStyle(
@@ -228,17 +231,33 @@ class _SignupPageState extends State<SignupPage> {
                         showprogress = true;
                       });
                       */
-                      if (id == 2) {
-                        startLogin();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => PassengerMap()));
+                      bool emailValid = RegExp(
+                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                          .hasMatch(email);
+                      if (email.isEmpty ||
+                          phone.isEmpty ||
+                          name.isEmpty ||
+                          password.isEmpty) {
+                        setState(() {
+                          showprogress = false;
+                          error = true;
+                          errormsg = 'الرجاء ملء كافة البيانات';
+                        });
+                      } else if (!emailValid) {
+                        setState(() {
+                          showprogress = false;
+                          error = true;
+                          errormsg = 'عنوان البريد الإلكتروني غير صالح';
+                        });
                       } else {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => UploadImages()));
+                        if (id == 2) {
+                          startLogin();
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => UploadImages()));
+                        }
                       }
                     },
                     child: showprogress
@@ -381,17 +400,22 @@ class _SignupPageState extends State<SignupPage> {
       margin: EdgeInsets.only(bottom: 10.00),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
-          color: Colors.red,
+          color: Colors.white,
           border: Border.all(color: Colors.red[300], width: 2)),
-      child: Row(children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(right: 6.00),
-          child: Icon(Icons.info, color: Colors.white),
-        ), // icon for error message
+      child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment.center, //Center Row contents horizontally,
+          crossAxisAlignment:
+              CrossAxisAlignment.center, //Center Row contents vertically,
+          children: <Widget>[
+            Container(
+              //margin: EdgeInsets.only(left: 15.00),
+              child: Icon(Icons.info, color: Colors.red),
+            ), // icon for error message
 
-        Text(text, style: TextStyle(color: Colors.white, fontSize: 18)),
-        //show error message text
-      ]),
+            Text(text, style: TextStyle(color: Colors.red, fontSize: 18)),
+            //show error message text
+          ]),
     );
   }
 }

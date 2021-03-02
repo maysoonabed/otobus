@@ -10,21 +10,25 @@
         	
     		if(mysqli_num_rows($result)>0){
     			$json['value'] = 2;
-    			$json['message'] = ' Phone number Already Used: ' .$Mobile;
+				$json['error'] =1;
+    			$json['message'] = ' رقم الهاتف مستخدم' .$Mobile;
     			
     		}else{
     			$query = "INSERT INTO passenger (name, email, phonenum, password) VALUES ('$Name','$Email','$Mobile','$Password')";
     			$inserted = mysqli_query($connect, $query);
     			
     			if($inserted == 1 ){    			
-    			    
+					$json['success'] = 1;
     				$json['value'] = 1;
+					$json['error'] =0;
     				$json['message'] = 'User Successfully Registered';
     			}else{
     				$json['value'] = 0;
-    				$json['message'] = 'User Registration Failed';
+					$json['error'] =1;
+    				$json['message'] = 'فشل في إنشاء الحساب';
     			}
 
       		}
-      		
+			  echo json_encode($json);
+			  mysqli_close($connect);  		
 ?>
