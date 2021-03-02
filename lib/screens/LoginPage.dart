@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         showprogress = false; //don't show progress indicator
         error = true;
-        errormsg = "Error during connecting to server.";
+        errormsg = "هناك مشكلة في الاتصال بالسيرفر";
       });
     }
   }
@@ -318,7 +318,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget errmsg(String text) {
-    //error message widget.
     return Container(
       padding: EdgeInsets.all(15.00),
       margin: EdgeInsets.only(bottom: 10.00),
@@ -326,15 +325,20 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(30),
           color: Colors.white,
           border: Border.all(color: Colors.red[300], width: 2)),
-      child: Row(children: <Widget>[
-        Container(
-          margin: EdgeInsets.only(right: 6.00),
-          child: Icon(Icons.info, color: Colors.red),
-        ), // icon for error message
+      child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment.center, //Center Row contents horizontally,
+          crossAxisAlignment:
+              CrossAxisAlignment.center, //Center Row contents vertically,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(right: 6.00),
+              child: Icon(Icons.info, color: Colors.red),
+            ), // icon for error message
 
-        Text(text, style: TextStyle(color: Colors.red, fontSize: 18)),
-        //show error message text
-      ]),
+            Text(text, style: TextStyle(color: Colors.red, fontSize: 18)),
+            //show error message text
+          ]),
     );
   }
 }
