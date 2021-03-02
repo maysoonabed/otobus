@@ -30,8 +30,8 @@ class _UploadImagesState extends State<UploadImages> {
 
   Future upload(File im) async {
     var uri = Uri.parse("http://10.0.0.15/otobus/regdriver.php");
-    var request = http.MultipartRequest("POST", uri);
-    request.fields['type'] = type;
+    var request = http.MultipartRequest('POST', uri);
+    request.fields['name'] = _type.text;
     var pic = await http.MultipartFile.fromPath("image", im.path);
     request.files.add(pic);
     var response = await request.send();
