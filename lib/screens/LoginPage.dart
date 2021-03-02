@@ -1,10 +1,12 @@
 import 'dart:convert';
+
+import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
+import 'DriverMap.dart';
 import 'SignupPage.dart';
-import 'PassengerMap.dart';
 
 int id = 1;
 
@@ -14,20 +16,55 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   String password, phone;
   String errormsg;
-  int idtype;
   bool error, showprogress;
   TextEditingController _password = TextEditingController();
   TextEditingController _phone = TextEditingController();
   bool _obscureText = true;
 
   startLogin() async {
-    String apiurl = "http://10.0.0.15/otobus/logpass.php"; //10.0.0.15
-    var response = await http.post(apiurl,
-        body: {'phone': phone, 'password': password, 'id': idtype});
+    String apiurl = "http://192.168.1.107:8089/otobus/login.php"; //10.0.0.15
 
-    print(idtype);
+    var response = await http.post(apiurl, body: {
+      'phone': phone,
+      'password': password,
+      'id': id.toString(),
+    });
+    //print(phone + password + id.toString());
+    //print(response.statusCode);
+    //print(response.body);
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body); //json.decode
+      if (jsondata["error"] == 1) {
+        setState(() {
+          showprogress = false;
+          error = true;
+          errormsg = jsondata["message"];
+        });
+      } else {
+        if (jsondata["value"] == 1) {
+          setState(() {
+            error = false;
+            showprogress = false;
+          });
+          if (id == 2) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => PassengerMap()));
+          } else {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => DriverMap()));
+          }
+        }
+      }
+    } else {
+      setState(() {
+        showprogress = false; //don't show progress indicator
+        error = true;
+        errormsg = "Error during connecting to server.";
+      });
+    }
   }
 
   @override
@@ -64,128 +101,137 @@ class _LoginPageState extends State<LoginPage> {
         ), //show linear gradient background of page
 
         padding: EdgeInsets.all(20),
-        child: Column(children: <Widget>[
-          /*************************************************************/
-          Container(
-            margin: EdgeInsets.only(top: 60),
-            child: Text(
-              "تسجيل الدخول",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontFamily: 'Lemonada', //'ArefRuqaaR',
-                  fontWeight: FontWeight.bold),
-            ), //title text
-          ),
-          /*************************************************************/
-          Container(
-            //show error message here
-            margin: EdgeInsets.only(top: 10),
-            padding: EdgeInsets.all(10),
-            child: error ? errmsg(errormsg) : Container(),
-            //if error == true then show error message
-            //else set empty container as child
-          ),
-          /*************************************************************/
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            margin: EdgeInsets.only(top: 10),
-            child: TextFormField(
-              textAlign: TextAlign.center,
-              controller: _phone,
-              maxLength: 13,
-              style: TextStyle(
-                  color: Colors.white, fontSize: 20, fontFamily: 'Lemonada'),
-              keyboardType: TextInputType.number,
-              decoration: myInputDecoration(
-                label: "رقم الهاتف",
-                icon: Icons.phone_android,
-              ),
-              onChanged: (value) {
-                phone = value;
-              },
-            ),
-          ),
-          /*************************************************************/
-          Container(
-            padding: EdgeInsets.all(10),
-            child: TextField(
-              textAlign: TextAlign.center,
-              controller: _password,
-              style: TextStyle(
-                  color: Colors.white, fontSize: 20, fontFamily: 'Lemonada'),
-              obscureText: _obscureText,
-              decoration: myPasswordDecoration(
-                label: "كلمة السر",
-                icon: Icons.lock,
-              ),
-              onChanged: (value) {
-                password = value;
-              },
-            ),
-          ),
-          /*************************************************************/
-          RadioGroup(),
-          /*************************************************************/
-          Container(
-            padding: EdgeInsets.all(10),
-            // margin: EdgeInsets.only(top: 20),
-            child: SizedBox(
-              height: 60,
-              width: double.infinity,
-              child: RaisedButton(
-                onPressed: () {
-                  /*    setState(() {
-                    //show progress indicator on click
-                    //  showprogress = true;
-                  }); */
-                  startLogin();
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => PassengerMap()));
-                },
-                child: showprogress
-                    ? SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: CircularProgressIndicator(
-                          backgroundColor: apcolor,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.lightGreenAccent),
-                        ),
-                      )
-                    : Text(
-                        "تسجيل الدخول",
-                        style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
-                      ),
-                // if showprogress == true then show progress indicator
-                // else show "LOGIN NOW" text
-                colorBrightness: Brightness.dark,
-                color: apcolor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)
-                    //button corner radius
-                    ),
-              ),
-            ),
-          ),
-          /*************************************************************/
-          Container(
-            padding: EdgeInsets.all(10),
-            //margin: EdgeInsets.only(top: 20),
-            child: InkResponse(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignupPage()));
-                },
+        child: Form(
+            key: _formKey,
+            child: Column(children: <Widget>[
+              /*************************************************************/
+              Container(
+                margin: EdgeInsets.only(top: 60),
                 child: Text(
-                  "ليس لديك حساب؟ إنشاء حساب جديد",
+                  "تسجيل الدخول",
                   style: TextStyle(
-                      color: Colors.white, //ba2color,
-                      fontSize: 15,
-                      fontFamily: 'Lemonada'), //
-                )),
-          )
-        ]),
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontFamily: 'Lemonada', //'ArefRuqaaR',
+                      fontWeight: FontWeight.bold),
+                ), //title text
+              ),
+              /*************************************************************/
+              Container(
+                margin: EdgeInsets.only(top: 10),
+                padding: EdgeInsets.all(10),
+                child: error ? errmsg(errormsg) : Container(),
+              ),
+              /*************************************************************/
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                margin: EdgeInsets.only(top: 10),
+                child: TextFormField(
+                  textAlign: TextAlign.center,
+                  controller: _phone,
+                  maxLength: 13,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: 'Lemonada'),
+                  keyboardType: TextInputType.number,
+                  decoration: myInputDecoration(
+                    label: "رقم الهاتف",
+                    icon: Icons.phone_android,
+                  ),
+                  onChanged: (value) {
+                    phone = value;
+                  },
+                  validator: (phone) {
+                    if (phone.isEmpty) {
+                      return 'Please enter some text';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              /*************************************************************/
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextField(
+                  textAlign: TextAlign.center,
+                  controller: _password,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontFamily: 'Lemonada'),
+                  obscureText: _obscureText,
+                  decoration: myPasswordDecoration(
+                    label: "كلمة السر",
+                    icon: Icons.lock,
+                  ),
+                  onChanged: (value) {
+                    password = value;
+                  },
+                ),
+              ),
+              /*************************************************************/
+              RadioGroup(),
+              /*************************************************************/
+              Container(
+                padding: EdgeInsets.all(10),
+                // margin: EdgeInsets.only(top: 20),
+                child: SizedBox(
+                  height: 60,
+                  width: double.infinity,
+                  child: RaisedButton(
+                    onPressed: () {
+                      setState(() {
+                        showprogress = true;
+                      });
+                      startLogin();
+                    },
+                    child: showprogress
+                        ? SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: CircularProgressIndicator(
+                              backgroundColor: apcolor,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.lightGreenAccent),
+                            ),
+                          )
+                        : Text(
+                            "تسجيل الدخول",
+                            style:
+                                TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                          ),
+                    // if showprogress == true then show progress indicator
+                    // else show "LOGIN NOW" text
+                    colorBrightness: Brightness.dark,
+                    color: apcolor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)
+                        //button corner radius
+                        ),
+                  ),
+                ),
+              ),
+              /*************************************************************/
+              Container(
+                padding: EdgeInsets.all(10),
+                //margin: EdgeInsets.only(top: 20),
+                child: InkResponse(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SignupPage()));
+                    },
+                    child: Text(
+                      "ليس لديك حساب؟ إنشاء حساب جديد",
+                      style: TextStyle(
+                          color: Colors.white, //ba2color,
+                          fontSize: 15,
+                          fontFamily: 'Lemonada'), //
+                    )),
+              )
+            ])),
       )),
     );
   }

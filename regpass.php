@@ -13,7 +13,7 @@
     			$json['message'] = ' Phone number Already Used: ' .$Mobile;
     			
     		}else{
-    			$query = "INSERT INTO passenger ( name, email, phonenum, Password) VALUES ('$Name','$Email','$Mobile','$Password')";
+    			$query = "INSERT INTO passenger (name, email, phonenum, password) VALUES ('$Name','$Email','$Mobile','$Password')";
     			$inserted = mysqli_query($connect, $query);
     			
     			if($inserted == 1 ){    			
