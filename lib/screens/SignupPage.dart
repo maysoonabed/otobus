@@ -241,7 +241,7 @@ class _SignupPageState extends State<SignupPage> {
                         setState(() {
                           showprogress = false;
                           error = true;
-                          errormsg = 'الرجاء ملء كافة البيانات';
+                          errormsg = 'الرجاء تعبئة كافة البيانات';
                         });
                       } else if (!emailValid) {
                         setState(() {
