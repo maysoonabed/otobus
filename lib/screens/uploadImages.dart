@@ -104,7 +104,8 @@ class _UploadImagesState extends State<UploadImages> {
           Container(
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
             margin: EdgeInsets.only(top: 10),
-            child: TextField(
+            child:
+                /* TextField(
               textAlign: TextAlign.center,
               controller: _type, //set username controller
               style: TextStyle(color: Colors.green[100], fontSize: 20),
@@ -116,7 +117,24 @@ class _UploadImagesState extends State<UploadImages> {
                 //set username  text on change
                 type = value;
               },
-            ),
+            ), */
+                DropdownButton(
+                    value: type,
+                    items: [
+                      DropdownMenuItem(
+                        child: Text("باص أصفر"),
+                        value: 1,
+                      ),
+                      DropdownMenuItem(
+                        child: Text("باص أبيض"),
+                        value: 2,
+                      )
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        type = value;
+                      });
+                    }),
           ),
           /*************************************************************/
           Container(
