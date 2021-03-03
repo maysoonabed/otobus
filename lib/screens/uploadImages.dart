@@ -18,6 +18,7 @@ class _UploadImagesState extends State<UploadImages> {
   var _busId = TextEditingController();
   var _numpass = TextEditingController();
   var _type = TextEditingController();
+  var items = ['باص أبيض', 'باص أصفر'];
 
   File _idcard, _license;
   String _idcardname, _licensename;
@@ -50,9 +51,6 @@ class _UploadImagesState extends State<UploadImages> {
       'idcardname': fname1,
       'licenseimg': base64license,
       'licensename': fname2,
-      'busId': busId,
-      'numpass': numpass,
-      'type': type,
     });
     print(response.body);
     //if(response.body==200){}else{//error}
@@ -104,11 +102,10 @@ class _UploadImagesState extends State<UploadImages> {
           ),
 
           /*************************************************************/
-          Container(
+          /*     Container(
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
             margin: EdgeInsets.only(top: 10),
-            child:
-                /* TextField(
+            child: TextField(
               textAlign: TextAlign.center,
               controller: _type, //set username controller
               style: TextStyle(color: Colors.green[100], fontSize: 20),
@@ -120,26 +117,9 @@ class _UploadImagesState extends State<UploadImages> {
                 //set username  text on change
                 type = value;
               },
-            ), */
-                DropdownButton(
-                    value: type,
-                    items: [
-                      DropdownMenuItem(
-                        child: Text("باص أصفر"),
-                        value: 1,
-                      ),
-                      DropdownMenuItem(
-                        child: Text("باص أبيض"),
-                        value: 2,
-                      )
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        type = value;
-                      });
-                    }),
-          ),
-          /*************************************************************/
+            ),
+          ), */
+
           Container(
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
             margin: EdgeInsets.only(top: 10),
@@ -176,6 +156,49 @@ class _UploadImagesState extends State<UploadImages> {
                 //set username  text on change
                 numpass = value;
               },
+            ),
+          ),
+          /*************************************************************/
+          Container(
+            child: new Column(
+              children: [
+                new Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: new Row(
+                    children: <Widget>[
+                      new Expanded(
+                          child: new TextField(
+                        readOnly: true,
+                        controller: _type,
+                        textAlign: TextAlign.center,
+                        style:
+                            TextStyle(color: Colors.green[100], fontSize: 20),
+                        decoration: myInputDecoration(
+                          label: "نوع الباص",
+                          icon: Icons.directions_bus,
+                        ),
+                        onChanged: (value) {
+                          //set username  text on change
+                          type = value;
+                        },
+                      )),
+                      new PopupMenuButton<String>(
+                        icon: const Icon(Icons.arrow_drop_down),
+                        onSelected: (String value) {
+                          _type.text = value;
+                        },
+                        itemBuilder: (BuildContext context) {
+                          return items
+                              .map<PopupMenuItem<String>>((String value) {
+                            return new PopupMenuItem(
+                                child: new Text(value), value: value);
+                          }).toList();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           /*************************************************************/
