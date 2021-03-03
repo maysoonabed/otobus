@@ -50,6 +50,9 @@ class _UploadImagesState extends State<UploadImages> {
       'idcardname': fname1,
       'licenseimg': base64license,
       'licensename': fname2,
+      'busId': busId,
+      'numpass': numpass,
+      'type': type,
     });
     print(response.body);
     //if(response.body==200){}else{//error}
