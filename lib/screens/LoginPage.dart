@@ -181,10 +181,18 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   child: RaisedButton(
                     onPressed: () {
-                      setState(() {
-                        showprogress = true;
-                      });
-                      startLogin();
+                      if (phone.isEmpty || password.isEmpty) {
+                        setState(() {
+                          showprogress = false;
+                          error = true;
+                          errormsg = 'الرجاء تعبئة كافة البيانات';
+                        });
+                      } else {
+                        setState(() {
+                          showprogress = true;
+                        });
+                        startLogin();
+                      }
                     },
                     child: showprogress
                         ? SizedBox(
