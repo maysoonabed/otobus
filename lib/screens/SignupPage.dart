@@ -226,11 +226,11 @@ class _SignupPageState extends State<SignupPage> {
                   width: double.infinity,
                   child: RaisedButton(
                     onPressed: () {
-                      /*   setState(() {
+                      setState(() {
                         //show progress indicator on click
                         showprogress = true;
                       });
-                      */
+
                       bool emailValid = RegExp(
                               r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                           .hasMatch(email);
