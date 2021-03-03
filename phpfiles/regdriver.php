@@ -4,10 +4,10 @@
 		echo"Database connection failed";		
 	}
     /*************************************************/
-    $Name = 'Samah5';//$_POST['name'];
-    $Email = 'gyh@gmail.com';//$_POST['email'];
-    $Mobile = '575372';//$_POST['phone'];
-    $Password = 'hdyhei1234';//($_POST['password']);  
+    $Name = $_POST['name'];
+    $Email = $_POST['email'];
+    $Mobile = $_POST['phone'];
+    $Password = md5($_POST['password']);  
     /**************************************************/
     $busid=$_POST['busId'];
     $numpass=$_POST['numpass'];

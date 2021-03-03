@@ -10,6 +10,13 @@ import 'SignupPage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UploadImages extends StatefulWidget {
+  UploadImages(this.name, this.phone, this.email, this.pass);
+
+  final String name;
+  final String email;
+  final String phone;
+  final String pass;
+
   @override
   _UploadImagesState createState() => _UploadImagesState();
 }
@@ -49,7 +56,8 @@ class _UploadImagesState extends State<UploadImages> {
     byt2 = Io.File(im2.path).readAsBytesSync();
     base64idcard = base64Encode(byt1);
     base64license = base64Encode(byt2);
-    String url = "http://192.168.1.107:8089/otobus/phpfiles/regdriver.php";
+    String url =
+        "http://10.0.0.15/otobus/phpfiles/regdriver.php"; //192.168.1.107:8089
     var response = await http.post(url, body: {
       'busId': busId,
       'numpass': numpass,
@@ -58,6 +66,10 @@ class _UploadImagesState extends State<UploadImages> {
       'idcardname': fname1,
       'licenseimg': base64license,
       'licensename': fname2,
+      'name': widget.name, //get the username text
+      'email': widget.email,
+      'phone': widget.phone,
+      'password': widget.pass, //get password text
     });
     print(response.body);
     if (response.statusCode == 200) {
