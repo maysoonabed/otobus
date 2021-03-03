@@ -249,7 +249,7 @@ class _SignupPageState extends State<SignupPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                UploadImages(name, email, phone, password)));
+                                UploadImages(name, phone, email, password)));
                   }
                 },
                 child: showprogress
