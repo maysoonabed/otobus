@@ -8,6 +8,10 @@
     $licenseimg = $_POST['licenseimg'];
     $licensename = $_POST['licensename'];
 
+    'busId': busId,
+    'numpass': numpass,
+    'type': type,
+    
     $idcardImage = base64_decode($idcardimg);
     $licenseImage= base64_decode($licenseimg);
  
