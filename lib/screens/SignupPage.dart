@@ -234,30 +234,30 @@ class _SignupPageState extends State<SignupPage> {
                       bool emailValid = RegExp(
                               r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                           .hasMatch(email);
-                      if (email.isEmpty ||
-                          phone.isEmpty ||
-                          name.isEmpty ||
-                          password.isEmpty) {
-                        setState(() {
-                          showprogress = false;
-                          error = true;
-                          errormsg = 'الرجاء تعبئة كافة البيانات';
-                        });
-                      } else if (!emailValid) {
-                        setState(() {
-                          showprogress = false;
-                          error = true;
-                          errormsg = 'عنوان البريد الإلكتروني غير صالح';
-                        });
-                      } else {
-                        if (id == 2) {
-                          startLogin();
+                      if (id == 2) {
+                        if (email.isEmpty ||
+                            phone.isEmpty ||
+                            name.isEmpty ||
+                            password.isEmpty) {
+                          setState(() {
+                            showprogress = false;
+                            error = true;
+                            errormsg = 'الرجاء تعبئة كافة البيانات';
+                          });
+                        } else if (!emailValid) {
+                          setState(() {
+                            showprogress = false;
+                            error = true;
+                            errormsg = 'عنوان البريد الإلكتروني غير صالح';
+                          });
                         } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => UploadImages()));
+                          startLogin();
                         }
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => UploadImages()));
                       }
                     },
                     child: showprogress
