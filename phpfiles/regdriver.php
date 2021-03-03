@@ -4,10 +4,10 @@
 		echo"Database connection failed";		
 	}
     /*************************************************/
-    $Name = "Samah";//$_POST['name'];
-    $Email = "gyh@ndb.com";//$_POST['email'];
-    $Mobile = "575372";//$_POST['phone'];
-    $Password = "hdyhei";//md5($_POST['password']);  
+    $Name = 'Samah5';//$_POST['name'];
+    $Email = 'gyh@gmail.com';//$_POST['email'];
+    $Mobile = '575372';//$_POST['phone'];
+    $Password = 'hdyhei1234';//($_POST['password']);  
     /**************************************************/
     $busid=$_POST['busId'];
     $numpass=$_POST['numpass'];
@@ -29,15 +29,15 @@
     if(mysqli_num_rows($result)>0){
         $json['value'] = 2;
         $json['error'] =1;
-        $json['message'] = ' رقم الهاتف مستخدم' .$Mobile;
+        $json['message'] = '  رقم الهاتف مستخدم  ' .$Mobile;
         
     }else{
         $query1="INSERT INTO bus(busid ,type,idcard,numofpass)VALUES('$busid','$type','$idcardname','$numpass')";
         $inserted1 = mysqli_query($connect, $query1);
-        $query2= "INSERT INTO driver(name, email, phonenum,busid,license,password) VALUES ('$Name','$Email','$Mobile','$idcardname','$licensename','$Password')";
+        $query2= "INSERT INTO driver(name, email, phonenum,busid,license,password) VALUES ('$Name','$Email','$Mobile','$busid','$licensename','$Password')";
         $inserted2 = mysqli_query($connect, $query2);
         	
-    			if($inserted1 == 1 && $inserted2==1 ){    
+    			if($inserted2 == 1 && $inserted1==1 ){   
     				$json['value'] = 1;
 					$json['error'] =0;
     				$json['message'] = 'تم تسجيل معلوماتك بنجاح في انتظار موافقة المسؤول';

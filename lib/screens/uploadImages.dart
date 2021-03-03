@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
+import 'LoginPage.dart';
 import 'SignupPage.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -25,6 +26,9 @@ class _UploadImagesState extends State<UploadImages> {
   final picker = ImagePicker();
   var byt1, byt2;
   String base64idcard, base64license = "";
+  String errormsg = "";
+  bool error = false;
+  bool showprogress = false;
 
   Future upIm1() async {
     var picked = await picker.getImage(source: ImageSource.gallery);
@@ -47,13 +51,40 @@ class _UploadImagesState extends State<UploadImages> {
     base64license = base64Encode(byt2);
     String url = "http://192.168.1.107:8089/otobus/phpfiles/regdriver.php";
     var response = await http.post(url, body: {
+      'busId': busId,
+      'numpass': numpass,
+      'type': type,
       'idcardimg': base64idcard,
       'idcardname': fname1,
       'licenseimg': base64license,
       'licensename': fname2,
     });
     print(response.body);
-    //if(response.body==200){}else{//error}
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body); //json.decode
+      if (jsondata["error"] == 1) {
+        setState(() {
+          showprogress = false;
+          error = true;
+          errormsg = jsondata["message"];
+        });
+      } else {
+        if (jsondata["value"] == 1) {
+          setState(() {
+            error = false;
+            showprogress = false;
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => LoginPage()));
+          });
+        } else {
+          setState(() {
+            showprogress = false;
+            error = true;
+            errormsg = "هناك مشكلة في الاتصال بالسيرفر";
+          });
+        }
+      }
+    }
   }
 
   Widget build(BuildContext context) {
@@ -90,7 +121,7 @@ class _UploadImagesState extends State<UploadImages> {
         child: Column(children: <Widget>[
           /*************************************************************/
           Container(
-            margin: EdgeInsets.only(top: 80),
+            margin: EdgeInsets.only(top: 50),
             child: Text(
               "استكمال التسجيل",
               style: TextStyle(
@@ -100,26 +131,13 @@ class _UploadImagesState extends State<UploadImages> {
                   fontWeight: FontWeight.bold),
             ), //title text
           ),
-
           /*************************************************************/
-          /*     Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+          Container(
             margin: EdgeInsets.only(top: 10),
-            child: TextField(
-              textAlign: TextAlign.center,
-              controller: _type, //set username controller
-              style: TextStyle(color: Colors.green[100], fontSize: 20),
-              decoration: myInputDecoration(
-                label: "نوع الباص",
-                icon: Icons.directions_bus,
-              ),
-              onChanged: (value) {
-                //set username  text on change
-                type = value;
-              },
-            ),
-          ), */
-
+            padding: EdgeInsets.all(10),
+            child: error ? errmsg(errormsg) : Container(),
+          ),
+          /*************************************************************/
           Container(
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
             margin: EdgeInsets.only(top: 10),
@@ -186,6 +204,7 @@ class _UploadImagesState extends State<UploadImages> {
                         icon: const Icon(Icons.arrow_drop_down),
                         onSelected: (String value) {
                           _type.text = value;
+                          type = value;
                         },
                         itemBuilder: (BuildContext context) {
                           return items
@@ -201,6 +220,7 @@ class _UploadImagesState extends State<UploadImages> {
               ],
             ),
           ),
+
           /*************************************************************/
           IconButton(
               icon: Icon(Icons.camera),
@@ -248,9 +268,12 @@ class _UploadImagesState extends State<UploadImages> {
               width: double.infinity,
               child: RaisedButton(
                 onPressed: () {
+                  setState(() {
+                    showprogress = true;
+                  });
                   _idcardname = _idcard.path.split('/').last;
                   _licensename = _license.path.split('/').last;
-                  upload(_idcard, _idcardname, _license, _licensename); //
+                  upload(_idcard, _idcardname, _license, _licensename);
                 },
                 child: Text(
                   "إنشاء حساب",
@@ -305,6 +328,31 @@ class _UploadImagesState extends State<UploadImages> {
       //focus border
       fillColor: apcolor,
       filled: false, //set true if you want to show input background
+    );
+  }
+
+  Widget errmsg(String text) {
+    return Container(
+      padding: EdgeInsets.all(15.00),
+      margin: EdgeInsets.only(bottom: 10.00),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: Colors.white,
+          border: Border.all(color: Colors.red[300], width: 2)),
+      child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment.center, //Center Row contents horizontally,
+          crossAxisAlignment:
+              CrossAxisAlignment.center, //Center Row contents vertically,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(right: 6.00),
+              child: Icon(Icons.info, color: Colors.red),
+            ), // icon for error message
+
+            Text(text, style: TextStyle(color: Colors.red, fontSize: 18)),
+            //show error message text
+          ]),
     );
   }
 }
