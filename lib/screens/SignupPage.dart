@@ -17,7 +17,7 @@ class SignupPage extends StatefulWidget {
 enum SingingCharacter { driver, passenger }
 
 class _SignupPageState extends State<SignupPage> {
-  SingingCharacter _character = SingingCharacter.passenger;
+  //SingingCharacter _character = SingingCharacter.passenger;
   String name, email, password, phone;
   String errormsg;
   bool error, showprogress;
@@ -27,7 +27,8 @@ class _SignupPageState extends State<SignupPage> {
   var _phone = TextEditingController();
   bool _obscureText = true;
   startLogin() async {
-    String apiurl = "http://10.0.0.15/otobus/regpass.php"; //10.0.0.15
+    String apiurl =
+        "http://192.168.1.107:8089/otobus/phpfiles/regpass.php"; //10.0.0.15
     var response = await http.post(apiurl, body: {
       'name': name, //get the username text
       'email': email,
@@ -234,30 +235,30 @@ class _SignupPageState extends State<SignupPage> {
                       bool emailValid = RegExp(
                               r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                           .hasMatch(email);
-                      if (email.isEmpty ||
-                          phone.isEmpty ||
-                          name.isEmpty ||
-                          password.isEmpty) {
-                        setState(() {
-                          showprogress = false;
-                          error = true;
-                          errormsg = 'الرجاء تعبئة كافة البيانات';
-                        });
-                      } else if (!emailValid) {
-                        setState(() {
-                          showprogress = false;
-                          error = true;
-                          errormsg = 'عنوان البريد الإلكتروني غير صالح';
-                        });
-                      } else {
-                        if (id == 2) {
-                          startLogin();
+                      if (id == 2) {
+                        if (email.isEmpty ||
+                            phone.isEmpty ||
+                            name.isEmpty ||
+                            password.isEmpty) {
+                          setState(() {
+                            showprogress = false;
+                            error = true;
+                            errormsg = 'الرجاء تعبئة كافة البيانات';
+                          });
+                        } else if (!emailValid) {
+                          setState(() {
+                            showprogress = false;
+                            error = true;
+                            errormsg = 'عنوان البريد الإلكتروني غير صالح';
+                          });
                         } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => UploadImages()));
+                          startLogin();
                         }
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => UploadImages()));
                       }
                     },
                     child: showprogress
@@ -371,7 +372,7 @@ class _SignupPageState extends State<SignupPage> {
           });
         },
         child: Icon(
-          _obscureText ? Icons.visibility : Icons.visibility_off,
+          _obscureText ? Icons.visibility_off : Icons.visibility,
           color: Colors.white,
         ),
       ),

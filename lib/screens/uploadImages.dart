@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:io' as Io;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -19,27 +20,39 @@ class _UploadImagesState extends State<UploadImages> {
   var _type = TextEditingController();
 
   File _idcard, _license;
+  String _idcardname, _licensename;
   final picker = ImagePicker();
+  var byt1, byt2;
+  String base64idcard, base64license = "";
 
-  Future upIm() async {
+  Future upIm1() async {
     var picked = await picker.getImage(source: ImageSource.gallery);
     setState(() {
       _idcard = File(picked.path);
     });
   }
 
-  Future upload(File im) async {
-    var uri = Uri.parse("http://10.0.0.15/otobus/regdriver.php");
-    var request = http.MultipartRequest('POST', uri);
-    request.fields['name'] = _type.text;
-    var pic = await http.MultipartFile.fromPath("image", im.path);
-    request.files.add(pic);
-    var response = await request.send();
-    if (response.statusCode == 200) {
-      print("Image Uploaded");
-    } else {
-      print("Image not Uploaded");
-    }
+  Future upIm2() async {
+    var picked = await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      _license = File(picked.path);
+    });
+  }
+
+  Future upload(File im1, String fname1, File im2, String fname2) async {
+    byt1 = Io.File(im1.path).readAsBytesSync();
+    byt2 = Io.File(im2.path).readAsBytesSync();
+    base64idcard = base64Encode(byt1);
+    base64license = base64Encode(byt2);
+    String url = "http://192.168.1.107:8089/otobus/phpfiles/regdriver.php";
+    var response = await http.post(url, body: {
+      'idcardimg': base64idcard,
+      'idcardname': fname1,
+      'licenseimg': base64license,
+      'licensename': fname2,
+    });
+    print(response.body);
+    //if(response.body==200){}else{//error}
   }
 
   Widget build(BuildContext context) {
@@ -148,7 +161,7 @@ class _UploadImagesState extends State<UploadImages> {
           IconButton(
               icon: Icon(Icons.camera),
               onPressed: () {
-                upIm();
+                upIm1();
               }),
           Container(
             child: _idcard == null
@@ -164,6 +177,24 @@ class _UploadImagesState extends State<UploadImages> {
           ),
 
           /*************************************************************/
+          IconButton(
+              icon: Icon(Icons.camera),
+              onPressed: () {
+                upIm2();
+              }),
+          Container(
+            child: _license == null
+                ? Text(
+                    'لم يتم رفع الصورة',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.4),
+                      fontSize: 10,
+                      fontFamily: 'Lemonada',
+                    ),
+                  )
+                : Image.file(_license),
+          ),
+          /*************************************************************/
 
           Container(
             padding: EdgeInsets.all(10),
@@ -173,7 +204,9 @@ class _UploadImagesState extends State<UploadImages> {
               width: double.infinity,
               child: RaisedButton(
                 onPressed: () {
-                  upload(_idcard);
+                  _idcardname = _idcard.path.split('/').last;
+                  _licensename = _license.path.split('/').last;
+                  upload(_idcard, _idcardname, _license, _licensename); //
                 },
                 child: Text(
                   "إنشاء حساب",
