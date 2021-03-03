@@ -21,7 +21,7 @@
 					$json['success'] = 1;
     				$json['value'] = 1;
 					$json['error'] =0;
-    				$json['message'] = 'User Successfully Registered';
+    				$json['message'] = 'تم التسجيل بنجاح';
     			}else{
     				$json['value'] = 0;
 					$json['error'] =1;
