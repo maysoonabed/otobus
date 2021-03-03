@@ -26,6 +26,11 @@ class _SignupPageState extends State<SignupPage> {
   var _password = TextEditingController();
   var _phone = TextEditingController();
   bool _obscureText = true;
+
+  Future pf() {
+    showprogress = false;
+  }
+
   startLogin() async {
     String apiurl =
         "http://10.0.0.15/otobus/phpfiles/regpass.php"; //192.168.1.107:8089
@@ -246,10 +251,11 @@ class _SignupPageState extends State<SignupPage> {
                     startLogin();
                   } else {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                UploadImages(name, phone, email, password)));
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    UploadImages(name, phone, email, password)))
+                        .whenComplete(pf);
                   }
                 },
                 child: showprogress
