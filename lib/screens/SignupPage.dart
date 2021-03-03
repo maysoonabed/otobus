@@ -371,7 +371,7 @@ class _SignupPageState extends State<SignupPage> {
           });
         },
         child: Icon(
-          _obscureText ? Icons.visibility : Icons.visibility_off,
+          _obscureText ? Icons.visibility_off : Icons.visibility,
           color: Colors.white,
         ),
       ),
