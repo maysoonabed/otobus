@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'LoginPage.dart';
-import 'SignupPage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class UploadImages extends StatefulWidget {
@@ -22,6 +21,8 @@ class UploadImages extends StatefulWidget {
 }
 
 class _UploadImagesState extends State<UploadImages> {
+  final _formKey = GlobalKey<FormState>();
+
   String busId, numpass, type;
   var _busId = TextEditingController();
   var _numpass = TextEditingController();
@@ -36,6 +37,74 @@ class _UploadImagesState extends State<UploadImages> {
   String errormsg = "";
   bool error = false;
   bool showprogress = false;
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            contentPadding: EdgeInsets.only(top: 10.0),
+            content: Container(
+              width: 300.0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Center(
+                    child: Text(
+                      "تم التسجيل بنجاح",
+                      style: TextStyle(fontSize: 24.0),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 30.0, right: 30.0),
+                    child: TextField(
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        hintText:
+                            "سيتم إرسال بريد إلكتروني حال موافقة الآدمن, يرجى الانتظار",
+                        border: InputBorder.none,
+                      ),
+                      maxLines: 5,
+                    ),
+                  ),
+                  InkWell(
+                    child: Container(
+                      padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF1abc9c),
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(32.0),
+                            bottomRight: Radius.circular(32.0)),
+                      ),
+                      child: Text(
+                        "حسنًا",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontFamily: 'Lemonada', //'ArefRuqaaR',
+                            fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => LoginPage()));
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
 
   Future upIm1() async {
     var picked = await picker.getImage(source: ImageSource.gallery);
@@ -85,8 +154,7 @@ class _UploadImagesState extends State<UploadImages> {
           setState(() {
             error = false;
             showprogress = false;
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => LoginPage()));
+            _showMyDialog();
           });
         } else {
           setState(() {
@@ -107,7 +175,6 @@ class _UploadImagesState extends State<UploadImages> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.red,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         //   backgroundColor: Color(0x44000000),
@@ -115,196 +182,313 @@ class _UploadImagesState extends State<UploadImages> {
       ),
       body: SingleChildScrollView(
           child: Container(
-        constraints:
-            BoxConstraints(minHeight: MediaQuery.of(context).size.height
-                //set minimum height equal to 100% of VH
-                ),
-        width: MediaQuery.of(context).size.width,
-        //make width of outer wrapper to 100%
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: myGradients1,
-          ),
-        ), //show linear gradient background of page
-
-        padding: EdgeInsets.all(20),
-        child: Column(children: <Widget>[
-          /*************************************************************/
-          Container(
-            margin: EdgeInsets.only(top: 50),
-            child: Text(
-              "استكمال التسجيل",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontFamily: 'Lemonada', //'ArefRuqaaR',
-                  fontWeight: FontWeight.bold),
-            ), //title text
-          ),
-          /*************************************************************/
-          Container(
-            margin: EdgeInsets.only(top: 10),
-            padding: EdgeInsets.all(10),
-            child: error ? errmsg(errormsg) : Container(),
-          ),
-          /*************************************************************/
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            margin: EdgeInsets.only(top: 10),
-            child: TextField(
-              textAlign: TextAlign.center,
-              controller: _busId, //set username controller
-              style: TextStyle(color: Colors.green[100], fontSize: 20),
-              decoration: myInputDecoration(
-                label: "لوحة التسجيل",
-                icon: Icons.money,
-              ),
-              onChanged: (value) {
-                //set username  text on change
-                busId = value;
-              },
-            ),
-          ),
-          /*************************************************************/
-
-          Container(
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-            margin: EdgeInsets.only(top: 10),
-            child: TextField(
-              textAlign: TextAlign.center,
-              maxLength: 2,
-              keyboardType: TextInputType.number,
-              controller: _numpass, //set username controller
-              style: TextStyle(color: Colors.green[100], fontSize: 20),
-              decoration: myInputDecoration(
-                label: "عدد الركاب",
-                icon: Icons.people,
-              ),
-              onChanged: (value) {
-                //set username  text on change
-                numpass = value;
-              },
-            ),
-          ),
-          /*************************************************************/
-          Container(
-            child: new Column(
-              children: [
-                new Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: new Row(
-                    children: <Widget>[
-                      new Expanded(
-                          child: new TextField(
-                        readOnly: true,
-                        controller: _type,
-                        textAlign: TextAlign.center,
-                        style:
-                            TextStyle(color: Colors.green[100], fontSize: 20),
-                        decoration: myInputDecoration(
-                          label: "نوع الباص",
-                          icon: Icons.directions_bus,
-                        ),
-                        onChanged: (value) {
-                          //set username  text on change
-                          type = value;
-                        },
-                      )),
-                      new PopupMenuButton<String>(
-                        icon: const Icon(Icons.arrow_drop_down),
-                        onSelected: (String value) {
-                          _type.text = value;
-                          type = value;
-                        },
-                        itemBuilder: (BuildContext context) {
-                          return items
-                              .map<PopupMenuItem<String>>((String value) {
-                            return new PopupMenuItem(
-                                child: new Text(value), value: value);
-                          }).toList();
-                        },
+              constraints:
+                  BoxConstraints(minHeight: MediaQuery.of(context).size.height
+                      //set minimum height equal to 100% of VH
                       ),
-                    ],
-                  ),
+              width: MediaQuery.of(context).size.width,
+              //make width of outer wrapper to 100%
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: myGradients1,
                 ),
-              ],
-            ),
-          ),
+              ), //show linear gradient background of page
 
-          /*************************************************************/
-          IconButton(
-              icon: Icon(Icons.camera),
-              onPressed: () {
-                upIm1();
-              }),
-          Container(
-            child: _idcard == null
-                ? Text(
-                    'لم يتم رفع الصورة',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.4),
-                      fontSize: 10,
-                      fontFamily: 'Lemonada',
-                    ),
-                  )
-                : Image.file(_idcard),
-          ),
+              padding: EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                    /*   mainAxisAlignment:
+                MainAxisAlignment.center, //Center Column contents vertically,
+            crossAxisAlignment:
+                CrossAxisAlignment.start, //Center Column contents horizontally,
+          */
+                    children: <Widget>[
+                      /*************************************************************/
+                      Container(
+                        margin: EdgeInsets.only(top: 50),
+                        child: Text(
+                          "استكمال التسجيل",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontFamily: 'Lemonada', //'ArefRuqaaR',
+                              fontWeight: FontWeight.bold),
+                        ), //title text
+                      ),
+                      /*************************************************************/
+                      Container(
+                        margin: EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.all(10),
+                        child: error ? errmsg(errormsg) : Container(),
+                      ),
+                      /*************************************************************/
+                      Container(
+                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        margin: EdgeInsets.only(top: 10),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: _busId, //set username controller
+                          style:
+                              TextStyle(color: Colors.green[100], fontSize: 20),
+                          decoration: myInputDecoration(
+                            label: "لوحة التسجيل",
+                            icon: Icons.money,
+                          ),
+                          onChanged: (value) {
+                            //set username  text on change
+                            busId = value;
+                          },
+                        ),
+                      ),
+                      /*************************************************************/
 
-          /*************************************************************/
-          IconButton(
-              icon: Icon(Icons.camera),
-              onPressed: () {
-                upIm2();
-              }),
-          Container(
-            child: _license == null
-                ? Text(
-                    'لم يتم رفع الصورة',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.4),
-                      fontSize: 10,
-                      fontFamily: 'Lemonada',
-                    ),
-                  )
-                : Image.file(_license),
-          ),
-          /*************************************************************/
+                      Container(
+                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        margin: EdgeInsets.only(top: 10),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          maxLength: 2,
+                          keyboardType: TextInputType.number,
+                          controller: _numpass, //set username controller
+                          style:
+                              TextStyle(color: Colors.green[100], fontSize: 20),
+                          decoration: myInputDecoration(
+                            label: "عدد الركاب",
+                            icon: Icons.people,
+                          ),
+                          onChanged: (value) {
+                            //set username  text on change
+                            numpass = value;
+                          },
+                        ),
+                      ),
+                      /*************************************************************/
+                      Container(
+                        child: new Column(
+                          children: [
+                            new Padding(
+                              padding: const EdgeInsets.only(left: 10.0),
+                              child: new Row(
+                                children: <Widget>[
+                                  new Expanded(
+                                      child: new TextField(
+                                    readOnly: true,
+                                    controller: _type,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.green[100], fontSize: 20),
+                                    decoration: myInputDecoration(
+                                      label: "نوع الباص",
+                                      icon: Icons.directions_bus,
+                                    ),
+                                    onChanged: (value) {
+                                      //set username  text on change
+                                      type = value;
+                                    },
+                                  )),
+                                  new PopupMenuButton<String>(
+                                    icon: const Icon(Icons.arrow_drop_down),
+                                    onSelected: (String value) {
+                                      _type.text = value;
+                                      type = value;
+                                    },
+                                    itemBuilder: (BuildContext context) {
+                                      return items.map<PopupMenuItem<String>>(
+                                          (String value) {
+                                        return new PopupMenuItem(
+                                            child: new Text(value),
+                                            value: value);
+                                      }).toList();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      /*************************************************************/
 
-          Container(
-            padding: EdgeInsets.all(10),
-            margin: EdgeInsets.only(top: 20),
-            child: SizedBox(
-              height: 60,
-              width: double.infinity,
-              child: RaisedButton(
-                onPressed: () {
-                  setState(() {
-                    showprogress = true;
-                  });
-                  _idcardname = _idcard.path.split('/').last;
-                  _licensename = _license.path.split('/').last;
-                  upload(_idcard, _idcardname, _license, _licensename);
-                },
-                child: Text(
-                  "إنشاء حساب",
-                  style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
-                ),
-                // if showprogress == true then show progress indicator
-                // else show "LOGIN NOW" text
-                colorBrightness: Brightness.dark,
-                color: apcolor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)
-                    //button corner radius
-                    ),
-              ),
-            ),
-          ),
-          /*************************************************************/
-        ]),
-      )),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      /*************************************************************/
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, //Center Row contents horizontally,
+                        crossAxisAlignment: CrossAxisAlignment
+                            .center, //Center Row contents vertically,
+                        children: [
+                          IconButton(
+                              icon: Icon(Icons.camera),
+                              onPressed: () {
+                                upIm1();
+                              }),
+                          Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              //  margin: EdgeInsets.only(top: 10),
+                              child: Text(
+                                "نسخة عن رخصة المركبة",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontFamily: 'Lemonada',
+                                ),
+                              )),
+                        ],
+                      ),
+                      /*************************************************************/
+
+                      const Divider(
+                        height: 10,
+                        thickness: 2,
+                        indent: 20,
+                        color: Color(0xFF1ABC9C),
+                        endIndent: 20,
+                      ),
+                      /*************************************************************/
+
+                      Container(
+                        child: _idcard == null
+                            ? Text(
+                                'لم يتم رفع الصورة',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 10,
+                                  fontFamily: 'Lemonada',
+                                ),
+                              )
+                            : InkResponse(
+                                onTap: () async {
+                                  await showDialog(
+                                      context: context,
+                                      builder: (_) => ImageDialog(_idcard));
+                                },
+                                child: Text(
+                                  "معاينة الصورة؟",
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 10,
+                                    fontFamily: 'Lemonada',
+                                  ), //
+                                ),
+                              ),
+                      ),
+
+                      /*************************************************************/
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, //Center Row contents horizontally,
+                        crossAxisAlignment: CrossAxisAlignment
+                            .center, //Center Row contents vertically,
+                        children: [
+                          IconButton(
+                              icon: Icon(Icons.camera),
+                              onPressed: () {
+                                upIm2();
+                              }),
+                          Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              //  margin: EdgeInsets.only(top: 10),
+                              child: Text(
+                                "نسخة عن رخصة القيادة ",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontFamily: 'Lemonada',
+                                ),
+                              )),
+                        ],
+                      ),
+                      /*************************************************************/
+
+                      const Divider(
+                        height: 10,
+                        thickness: 2,
+                        indent: 20,
+                        color: Color(0xFF1ABC9C),
+                        endIndent: 20,
+                      ),
+                      /*************************************************************/
+
+                      Container(
+                        child: _license == null
+                            ? Text(
+                                'لم يتم رفع الصورة',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 10,
+                                  fontFamily: 'Lemonada',
+                                ),
+                              )
+                            : InkResponse(
+                                onTap: () async {
+                                  await showDialog(
+                                      context: context,
+                                      builder: (_) => ImageDialog(_license));
+                                },
+                                child: Text(
+                                  "معاينة الصورة؟",
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 10,
+                                    fontFamily: 'Lemonada',
+                                  ), //
+                                ),
+                              ),
+                      ),
+                      /*************************************************************/
+
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 20),
+                        child: SizedBox(
+                          height: 60,
+                          width: double.infinity,
+                          child: RaisedButton(
+                            onPressed: () {
+                              if (numpass == "" ||
+                                  busId == "" ||
+                                  type == "" ||
+                                  _idcard == null ||
+                                  _license == null) {
+                                setState(() {
+                                  showprogress = false;
+                                  error = true;
+                                  errormsg = 'الرجاء تعبئة كافة البيانات';
+                                });
+                              } else {
+                                setState(() {
+                                  showprogress = true;
+                                });
+                                _idcardname = _idcard.path.split('/').last;
+                                _licensename = _license.path.split('/').last;
+                                upload(_idcard, _idcardname, _license,
+                                    _licensename);
+                              }
+                            },
+                            child: Text(
+                              "إنشاء حساب",
+                              style: TextStyle(
+                                  fontSize: 20, fontFamily: 'Lemonada'),
+                            ),
+                            // if showprogress == true then show progress indicator
+                            // else show "LOGIN NOW" text
+                            colorBrightness: Brightness.dark,
+                            color: apcolor,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)
+                                //button corner radius
+                                ),
+                          ),
+                        ),
+                      ),
+                      /*************************************************************/
+                    ]),
+              ))),
     );
   }
 
@@ -365,6 +549,24 @@ class _UploadImagesState extends State<UploadImages> {
             Text(text, style: TextStyle(color: Colors.red, fontSize: 18)),
             //show error message text
           ]),
+    );
+  }
+}
+
+class ImageDialog extends StatelessWidget {
+  ImageDialog(this.image);
+  final File image;
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        width: 200,
+        height: 200,
+        decoration: BoxDecoration(
+            color: Color(0xFF094338),
+            image: DecorationImage(
+                image: ExactAssetImage(image.path), fit: BoxFit.scaleDown)),
+      ),
     );
   }
 }
