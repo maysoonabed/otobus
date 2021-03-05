@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "452074360684",
+    "project_id": "otobus-6d0fc",
+    "storage_bucket": "otobus-6d0fc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452074360684:android:0dfdab41d1403dc5842d49",
+        "android_client_info": {
+          "package_name": "com.example.OtoBus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "452074360684-f7delu6hvl80n2qjb355e992aol9bg6v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCU1zRGJNhBvwMisg1zsPg3oOW6Yymq2Sk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "452074360684-f7delu6hvl80n2qjb355e992aol9bg6v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

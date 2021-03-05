@@ -1,3 +1,4 @@
+import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/LoginPage.dart';
@@ -180,6 +181,26 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ),*/
                         //*********************************
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: ElevatedButton(
+                              child: Text('passenger map'),
+                              style: ElevatedButton.styleFrom(
+                                primary: apBcolor,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PassengerMap()));
+                              },
+                            ),
+                          ),
+                        ),
+
+                        //*********************************
+
                         Center(
                           child: Builder(builder: (BuildContext mContext) {
                             return Padding(
