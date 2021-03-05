@@ -12,7 +12,7 @@ class _PassengerMapState extends State<PassengerMap> {
     return MaterialApp(
       debugShowCheckedModeBanner: false, //لإخفاء شريط depug
       home: Scaffold(
-        backgroundColor: bacolor,
+        backgroundColor: ba1color,
         appBar: AppBar(
           title: Center(
             child: Text(
@@ -45,7 +45,8 @@ class _PassengerMapState extends State<PassengerMap> {
                       heightFactor: 0.6,
                       child: FloatingActionButton(
                         onPressed: () {},
-                        backgroundColor: Colors.black,
+                        backgroundColor: mypink,
+                        //Color(0xFF0e6655),  //Colors.black,
                         child: Icon(Icons.search),
                         elevation: 0.1,
                       ),
@@ -63,14 +64,18 @@ class _PassengerMapState extends State<PassengerMap> {
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.home), onPressed: () {}),
+                                  icon: Icon(Icons.home),
+                                  color: Colors.white,
+                                  onPressed: () {}),
                             ),
                             Material(
                               color: Colors.transparent,
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.message), onPressed: () {}),
+                                  icon: Icon(Icons.message),
+                                  color: Colors.white,
+                                  onPressed: () {}),
                             ),
                             Container(
                               width: size.width * 0.20,
@@ -81,6 +86,7 @@ class _PassengerMapState extends State<PassengerMap> {
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
                                   icon: Icon(Icons.notifications),
+                                  color: Colors.white,
                                   onPressed: () {}),
                             ),
                             Material(
@@ -88,7 +94,9 @@ class _PassengerMapState extends State<PassengerMap> {
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.person), onPressed: () {}),
+                                  icon: Icon(Icons.person),
+                                  color: Colors.white,
+                                  onPressed: () {}),
                             ),
                           ],
                         ))
