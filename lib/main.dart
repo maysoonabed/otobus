@@ -3,14 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 Color apcolor = const Color(0xFF1ABC9C);
 Color apBcolor = const Color(0xFF00796B);
-Color bacolor = const Color(0xFFBDBDBD);
+Color iconBack = const Color(0xFF0e6655);
 
-Color mypink = const Color(0xFFde1f11);
-Color ba2color = const Color(0xFFbba6aa);
+Color bacolor = const Color(0xFFBDBDBD);
+Color ba1color = const Color(0xFFf2f1e3);
+
+Color mypink = const Color(0xFFbc1a3a);
+Color myOrange = const Color(0xFFbc4b1a);
+Color myPink = const Color(0xFFbc1a8b);
+Color myplue = const Color(0xFF1a8bbc);
+Color mygreen = const Color(0xFF1abc4b);
 
 const List<Color> myGradients1 = [
   Color(0xFF02100d),
