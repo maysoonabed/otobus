@@ -37,10 +37,18 @@
         $query2= "INSERT INTO driver(name, email, phonenum,busid,license,password) VALUES ('$Name','$Email','$Mobile','$busid','$licensename','$Password')";
         $inserted2 = mysqli_query($connect, $query2);
         	
-    			if($inserted2 == 1 && $inserted1==1 ){   
+
+    			if($inserted2 == 1 ){ //&& 
+                    if($inserted1==1){  
     				$json['value'] = 1;
 					$json['error'] =0;
     				$json['message'] = 'تم تسجيل معلوماتك بنجاح في انتظار موافقة المسؤول';
+                    }
+                    else{
+                        $json['value'] = 1;
+                        $json['error'] =1;
+    				    $json['message'] = 'هذا الباص مُسجل سابقاً';
+                    }
     			}else{
     				$json['value'] = 0;
 					$json['error'] =1;
