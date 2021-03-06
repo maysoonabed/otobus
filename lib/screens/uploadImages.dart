@@ -559,11 +559,12 @@ class ImageDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.transparent,
       child: Container(
-        width: 200,
-        height: 200,
+        width: 300,
+        height: 500,
         decoration: BoxDecoration(
-            color: Color(0xFF094338),
+            color: Colors.transparent,
             image: DecorationImage(
                 image: ExactAssetImage(image.path), fit: BoxFit.scaleDown)),
       ),
