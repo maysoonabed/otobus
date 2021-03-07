@@ -33,7 +33,7 @@ class _SignupPageState extends State<SignupPage> {
 
   startLogin() async {
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/regpass.php"; //10.0.0.15
+        "http://10.0.0.13/otobus/phpfiles/regpass.php"; //10.0.0.13//192.168.1.107:8089
     var response = await http.post(apiurl, body: {
       'name': name, //get the username text
       'email': email,

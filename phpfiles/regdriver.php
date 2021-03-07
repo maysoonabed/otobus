@@ -24,12 +24,12 @@
     file_put_contents('cardlic/'.$licensename, $licenseImage);
     //echo "Image Uploaded Successfully.";
     /**************************************************/
-    $query = "SELECT * FROM driver WHERE phonenum='$Mobile'";
+    $query = "SELECT * FROM driver WHERE phonenum='$Mobile' or email='$Email' ";
     $result = mysqli_query($connect, $query);
     if(mysqli_num_rows($result)>0){
         $json['value'] = 2;
         $json['error'] =1;
-        $json['message'] = '  رقم الهاتف مستخدم  ' .$Mobile;
+        $json['message'] = '  رقم الهاتف أو البريد الإلكتروني مستخدم  ' ;
         
     }else{
         $query1="INSERT INTO bus(busid ,type,idcard,numofpass)VALUES('$busid','$type','$idcardname','$numpass')";

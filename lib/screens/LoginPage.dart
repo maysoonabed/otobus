@@ -25,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
 
   startLogin() async {
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/login.php"; //10.0.0.15
+        "http://10.0.0.13/otobus/phpfiles/login.php"; //10.0.0.13//192.168.1.107:8089
 
     var response = await http.post(apiurl, body: {
       'phone': phone,

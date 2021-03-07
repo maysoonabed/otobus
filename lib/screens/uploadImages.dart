@@ -126,7 +126,7 @@ class _UploadImagesState extends State<UploadImages> {
     base64idcard = base64Encode(byt1);
     base64license = base64Encode(byt2);
     String url =
-        "http://192.168.1.107:8089/otobus/phpfiles/regdriver.php"; //10.0.0.15
+        "http://10.0.0.13/otobus/phpfiles/regdriver.php"; //10.0.0.13//192.168.1.107:8089
     var response = await http.post(url, body: {
       'busId': busId,
       'numpass': numpass,

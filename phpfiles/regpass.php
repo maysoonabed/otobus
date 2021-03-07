@@ -5,13 +5,13 @@
              $Mobile = $_POST['phone'];
              $Password = md5($_POST['password']);   
 			    		
-            $query = "SELECT * FROM passenger WHERE phonenum='$Mobile'";
+            $query = "SELECT * FROM passenger WHERE phonenum='$Mobile' or email='$Email'";
         	$result = mysqli_query($connect, $query);
         	
     		if(mysqli_num_rows($result)>0){
     			$json['value'] = 2;
 				$json['error'] =1;
-    			$json['message'] = ' رقم الهاتف مستخدم' .$Mobile;
+    			$json['message'] = ' رقم الهاتف أو البريد الإلكتروني مستخدم ' ;
     			
     		}else{
     			$query = "INSERT INTO passenger (name, email, phonenum, password) VALUES ('$Name','$Email','$Mobile','$Password')";
