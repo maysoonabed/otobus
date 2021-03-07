@@ -64,7 +64,7 @@ class _PassengerMapState extends State<PassengerMap> {
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.home),
+                                  icon: Icon(Icons.home_outlined),
                                   color: Colors.white,
                                   // iconBack, //mypink, //apcolor,
                                   onPressed: () {}),
@@ -74,7 +74,7 @@ class _PassengerMapState extends State<PassengerMap> {
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.message),
+                                  icon: Icon(Icons.message_outlined),
                                   color: Colors.white,
                                   onPressed: () {}),
                             ),
@@ -86,17 +86,18 @@ class _PassengerMapState extends State<PassengerMap> {
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.notifications),
+                                  icon: Icon(Icons.notifications_outlined),
                                   color: Colors.white,
                                   onPressed: () {}),
                             ),
                             Material(
-                              color: Colors.transparent,
+                              color: Color(0xFF1ccdaa),
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.person),
-                                  color: Colors.white,
+                                  icon:
+                                      Icon(Icons.person /* _outline_rounded */),
+                                  color: mypink,
                                   onPressed: () {}),
                             ),
                           ],
