@@ -54,6 +54,8 @@ flutter_icons:
 # The following section is specific to Flutter.
 flutter:
   uses-material-design: true
+  assets:
+    - lib/Images/
   fonts:
     - family: Pacifico
       fonts:
@@ -67,3 +69,4 @@ flutter:
     - family: Lemonada
       fonts:  
         - asset: lib/Font/Lemonada-VariableFont_wght.ttf              
+  

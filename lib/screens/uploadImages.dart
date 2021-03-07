@@ -424,7 +424,9 @@ class _UploadImagesState extends State<UploadImages> {
                                   fontFamily: 'Lemonada',
                                 ),
                               )
-                            : InkResponse(
+                            :
+                            //Image.file(_license),
+                            InkResponse(
                                 onTap: () async {
                                   await showDialog(
                                       context: context,
@@ -561,8 +563,8 @@ class ImageDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
-        width: 300,
-        height: 500,
+        width: 200,
+        height: 400,
         decoration: BoxDecoration(
             color: Colors.transparent,
             image: DecorationImage(
