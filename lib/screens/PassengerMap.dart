@@ -14,7 +14,6 @@ class _PassengerMapState extends State<PassengerMap> {
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
   GoogleMapController newGoogleMapController;
   double mapBottomPadding = 0;
-  double mapTopPadding = 0;
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
@@ -39,7 +38,7 @@ class _PassengerMapState extends State<PassengerMap> {
       debugShowCheckedModeBanner: false, //لإخفاء شريط depug
       home: Scaffold(
         backgroundColor: ba1color,
-        /* appBar: AppBar(
+        appBar: AppBar(
           title: Center(
             child: Text(
               "OtoBüs",
@@ -51,16 +50,16 @@ class _PassengerMapState extends State<PassengerMap> {
             ),
           ),
           backgroundColor: apcolor,
-        ), */
+        ),
         body: Stack(
           children: [
             GoogleMap(
               padding: EdgeInsets.only(bottom: mapBottomPadding),
               mapType: MapType.normal,
-              myLocationButtonEnabled: false,
               myLocationEnabled: true,
               zoomGesturesEnabled: true,
-              zoomControlsEnabled: true,
+              zoomControlsEnabled: false,
+              myLocationButtonEnabled: true,
               initialCameraPosition: _kGooglePlex,
               onMapCreated: (GoogleMapController controller) {
                 _controllerGoogleMap.complete(controller);
@@ -71,7 +70,7 @@ class _PassengerMapState extends State<PassengerMap> {
                 setupPositionLocator();
               },
             ),
-            /* Positioned(
+            Positioned(
               bottom: 0,
               left: 0,
               child: Container(
@@ -148,7 +147,7 @@ class _PassengerMapState extends State<PassengerMap> {
                   ],
                 ),
               ),
-            ) */
+            )
           ],
         ),
       ),
