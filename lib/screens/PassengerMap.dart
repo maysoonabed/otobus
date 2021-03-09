@@ -15,7 +15,7 @@ class _PassengerMapState extends State<PassengerMap> {
   GoogleMapController newGoogleMapController;
   double mapBottomPadding = 0;
   static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+    target: LatLng(31.947351, 35.227163),
     zoom: 14.4746,
   );
 
@@ -58,7 +58,7 @@ class _PassengerMapState extends State<PassengerMap> {
               mapType: MapType.normal,
               myLocationEnabled: true,
               zoomGesturesEnabled: true,
-              zoomControlsEnabled: false,
+              zoomControlsEnabled: true,
               myLocationButtonEnabled: true,
               initialCameraPosition: _kGooglePlex,
               onMapCreated: (GoogleMapController controller) {
