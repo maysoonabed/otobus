@@ -102,12 +102,12 @@ class _PassengerMapState extends State<PassengerMap> {
 
                           children: [
                             Material(
-                              color: Colors.transparent, //ba1color,
+                              color: Color(0xFF1ccdaa),
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon: Icon(Icons.home_outlined),
-                                  color: Colors.white,
+                                  icon: Icon(Icons.home),
+                                  color: mypink,
                                   // iconBack, //mypink, //apcolor,
                                   onPressed: () {}),
                             ),
@@ -133,13 +133,12 @@ class _PassengerMapState extends State<PassengerMap> {
                                   onPressed: () {}),
                             ),
                             Material(
-                              color: Color(0xFF1ccdaa),
+                              color: Colors.transparent,
                               shape: CircleBorder(),
                               clipBehavior: Clip.hardEdge,
                               child: IconButton(
-                                  icon:
-                                      Icon(Icons.person /* _outline_rounded */),
-                                  color: mypink,
+                                  icon: Icon(Icons.person_outline_rounded),
+                                  color: Colors.white,
                                   onPressed: () {}),
                             ),
                           ],
