@@ -8,7 +8,6 @@ import 'package:http/http.dart';
 import '../main.dart';
 import 'package:geocoder/geocoder.dart';
 
-
 const keyWeather = 'f15dc897b26e405fe05f3b7de952c0aa';
 
 class PassengerMap extends StatefulWidget {
@@ -22,7 +21,7 @@ class _PassengerMapState extends State<PassengerMap> {
   GoogleMapController newGoogleMapController;
   var geoLocator = Geolocator();
   Position currentPosition;
-  Key src_loc, dest_loc;
+  var src_loc = TextEditingController();
 
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
@@ -34,8 +33,10 @@ class _PassengerMapState extends State<PassengerMap> {
         'http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long&appid=$keyWeather');
     if (response.statusCode == 200) {
       String data = response.body;
-      print(jsonDecode(data)['name']);
-
+      setState(() {
+        src_loc.text = jsonDecode(data)['name'];
+        //print(jsonDecode(data)['name']);
+      });
     } else {
       print(response.statusCode);
     }
@@ -46,17 +47,18 @@ class _PassengerMapState extends State<PassengerMap> {
         desiredAccuracy: LocationAccuracy.bestForNavigation);
     currentPosition = position;
 
-   /*  LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
+    LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
-    getData(currentPosition.latitude, currentPosition.longitude); */
+    getData(currentPosition.latitude, currentPosition.longitude);
 
-        debugPrint('location: ${position.latitude}');
-        final coordinates = new Coordinates(position.latitude, position.longitude);
-        var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
-        var first = addresses.first;
-        print("${first.featureName} : ${first.addressLine}");
+    /*  debugPrint('location: ${position.latitude}');
+    final coordinates = new Coordinates(position.latitude, position.longitude);
+    var addresses =
+        await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first; "${first.featureName} : ${first.addressLine}";
 
+    }); */
 
     //*********************************************************
     /* List<Location> locations = await locationFromAddress("Tamun");
@@ -81,18 +83,18 @@ class _PassengerMapState extends State<PassengerMap> {
             child: Column(
               children: <Widget>[
                 new Expanded(
-                  key: src_loc,
                   child: new TextField(
+                    controller: src_loc,
+                    readOnly: true,
                     autofocus: false,
-                    decoration: new InputDecoration(
-                        labelText: 'Source Location', hintText: 'Tammon'),
+                    decoration:
+                        new InputDecoration(labelText: 'Source Location'),
                   ),
                 ),
                 /* SizedBox(
               height: 10,
             ), */
                 new Expanded(
-                  key: dest_loc,
                   child: new TextField(
                     autofocus: true,
                     decoration: new InputDecoration(
