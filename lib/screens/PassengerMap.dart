@@ -7,6 +7,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart';
 import '../main.dart';
 
+const keyWeather = 'f15dc897b26e405fe05f3b7de952c0aa';
+
 class PassengerMap extends StatefulWidget {
   @override
   _PassengerMapState createState() => _PassengerMapState();
@@ -25,6 +27,17 @@ class _PassengerMapState extends State<PassengerMap> {
     zoom: 14.4746,
   );
 
+  void getData(double lat, double long) async {
+    Response response = await get(
+        'http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long&appid=$keyWeather');
+    if (response.statusCode == 200) {
+      String data = response.body;
+      print(jsonDecode(data)['name']);
+    } else {
+      print(response.statusCode);
+    }
+  }
+
   void setupPositionLocator() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
@@ -33,6 +46,7 @@ class _PassengerMapState extends State<PassengerMap> {
     LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+    getData(currentPosition.latitude, currentPosition.longitude);
 
     //*********************************************************
     /* List<Location> locations = await locationFromAddress("Tamun");
@@ -40,17 +54,16 @@ class _PassengerMapState extends State<PassengerMap> {
 
     //print(currentPosition.latitude);
     //print(currentPosition.longitude);
-    List<Placemark> placemarks = await placemarkFromCoordinates(
+    /*  List<Placemark> placemarks = await placemarkFromCoordinates(
         currentPosition.latitude, currentPosition.longitude);
-    print(placemarks[0].subLocality);
+    print(placemarks[0].subLocality); */
     //jsonDecode(placemarks)['country'];
     //*********************************************************
   }
 
   Future<void> _searchDialog() async {
     return showDialog<void>(
-      context: context,
-      child: new AlertDialog(
+      builder: (context) => new AlertDialog(
         contentPadding: EdgeInsets.all(20.0),
         content: Container(
             width: 300.0,
@@ -91,6 +104,7 @@ class _PassengerMapState extends State<PassengerMap> {
               })
         ],
       ),
+      context: context,
     );
   }
 
