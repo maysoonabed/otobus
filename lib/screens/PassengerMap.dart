@@ -6,6 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart';
 import '../main.dart';
+import 'package:geocoder/geocoder.dart';
+
 
 const keyWeather = 'f15dc897b26e405fe05f3b7de952c0aa';
 
@@ -33,6 +35,7 @@ class _PassengerMapState extends State<PassengerMap> {
     if (response.statusCode == 200) {
       String data = response.body;
       print(jsonDecode(data)['name']);
+
     } else {
       print(response.statusCode);
     }
@@ -43,10 +46,17 @@ class _PassengerMapState extends State<PassengerMap> {
         desiredAccuracy: LocationAccuracy.bestForNavigation);
     currentPosition = position;
 
-    LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
+   /*  LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
-    getData(currentPosition.latitude, currentPosition.longitude);
+    getData(currentPosition.latitude, currentPosition.longitude); */
+
+        debugPrint('location: ${position.latitude}');
+        final coordinates = new Coordinates(position.latitude, position.longitude);
+        var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+        var first = addresses.first;
+        print("${first.featureName} : ${first.addressLine}");
+
 
     //*********************************************************
     /* List<Location> locations = await locationFromAddress("Tamun");
