@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart';
 import '../main.dart';
 
@@ -11,25 +13,85 @@ class PassengerMap extends StatefulWidget {
 }
 
 class _PassengerMapState extends State<PassengerMap> {
+  double mapBottomPadding = 0;
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
   GoogleMapController newGoogleMapController;
-  double mapBottomPadding = 0;
+  var geoLocator = Geolocator();
+  Position currentPosition;
+  Key src_loc, dest_loc;
+
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 14.4746,
   );
-
-  var geoLocator = Geolocator();
-  Position currentPosition;
 
   void setupPositionLocator() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
     currentPosition = position;
 
-    LatLng pos = LatLng(position.latitude, position.longitude);
+    LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+
+    //*********************************************************
+    /* List<Location> locations = await locationFromAddress("Tamun");
+    print(locations.toString()); */
+
+    //print(currentPosition.latitude);
+    //print(currentPosition.longitude);
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        currentPosition.latitude, currentPosition.longitude);
+    print(placemarks[0].subLocality);
+    //jsonDecode(placemarks)['country'];
+    //*********************************************************
+  }
+
+  Future<void> _searchDialog() async {
+    return showDialog<void>(
+      context: context,
+      child: new AlertDialog(
+        contentPadding: EdgeInsets.all(20.0),
+        content: Container(
+            width: 300.0,
+            height: 200.0,
+            child: Column(
+              children: <Widget>[
+                new Expanded(
+                  key: src_loc,
+                  child: new TextField(
+                    autofocus: false,
+                    decoration: new InputDecoration(
+                        labelText: 'Source Location', hintText: 'Tammon'),
+                  ),
+                ),
+                /* SizedBox(
+              height: 10,
+            ), */
+                new Expanded(
+                  key: dest_loc,
+                  child: new TextField(
+                    autofocus: true,
+                    decoration: new InputDecoration(
+                        labelText: 'Destination Location', hintText: 'Nablus'),
+                  ),
+                )
+              ],
+            )),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+          new FlatButton(
+              child: const Text('CHOOSE'),
+              onPressed: () {
+                Navigator.pop(context);
+              })
+        ],
+      ),
+    );
   }
 
   Widget build(BuildContext context) {
@@ -86,7 +148,9 @@ class _PassengerMapState extends State<PassengerMap> {
                     Center(
                       heightFactor: 0.6,
                       child: FloatingActionButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _searchDialog();
+                        },
                         backgroundColor: mypink,
                         //Color(0xFF0e6655),  //Colors.black,
                         child: Icon(Icons.search),
