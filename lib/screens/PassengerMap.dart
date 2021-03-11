@@ -8,7 +8,7 @@ import 'package:http/http.dart';
 import '../main.dart';
 import 'package:geocoder/geocoder.dart';
 
-const keyWeather = 'f15dc897b26e405fe05f3b7de952c0aa';
+const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 
 class PassengerMap extends StatefulWidget {
   @override
@@ -30,11 +30,11 @@ class _PassengerMapState extends State<PassengerMap> {
 
   void getData(double lat, double long) async {
     Response response = await get(
-        'http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$long&appid=$keyWeather');
+      'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
     if (response.statusCode == 200) {
       String data = response.body;
       setState(() {
-        src_loc.text = jsonDecode(data)['name'];
+        src_loc.text = jsonDecode(data)['data'][0]['locality'] ;
         //print(jsonDecode(data)['name']);
       });
     } else {
