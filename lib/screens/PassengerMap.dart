@@ -30,11 +30,11 @@ class _PassengerMapState extends State<PassengerMap> {
 
   void getData(double lat, double long) async {
     Response response = await get(
-      'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
+        'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
     if (response.statusCode == 200) {
       String data = response.body;
       setState(() {
-        src_loc.text = jsonDecode(data)['data'][0]['locality'] ;
+        src_loc.text = jsonDecode(data)['data'][0]['label'];
         //print(jsonDecode(data)['name']);
       });
     } else {
@@ -86,6 +86,8 @@ class _PassengerMapState extends State<PassengerMap> {
                   child: new TextField(
                     controller: src_loc,
                     readOnly: true,
+                    minLines: 1,
+                    maxLines: 4,
                     autofocus: false,
                     decoration:
                         new InputDecoration(labelText: 'Source Location'),
