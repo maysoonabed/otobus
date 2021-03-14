@@ -35,6 +35,9 @@ class _PassengerMapState extends State<PassengerMap> {
       String data = response.body;
       setState(() {
         src_loc.text = jsonDecode(data)['data'][0]['label'];
+        Address curr = new Address();
+        
+
         //print(jsonDecode(data)['name']);
       });
     } else {
@@ -87,7 +90,7 @@ class _PassengerMapState extends State<PassengerMap> {
                     controller: src_loc,
                     readOnly: true,
                     minLines: 1,
-                    maxLines: 4,
+                    maxLines: null,
                     autofocus: false,
                     decoration:
                         new InputDecoration(labelText: 'Source Location'),
