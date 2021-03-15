@@ -7,6 +7,9 @@ import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart';
 import '../main.dart';
 import 'package:geocoder/geocoder.dart';
+import 'package:OtoBus/dataProvider/address.dart';
+import 'package:provider/provider.dart';
+import 'package:OtoBus/dataProvider/appData.dart';
 
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 
@@ -34,11 +37,14 @@ class _PassengerMapState extends State<PassengerMap> {
     if (response.statusCode == 200) {
       String data = response.body;
       setState(() {
-        src_loc.text = jsonDecode(data)['data'][0]['label'];
-        Address curr = new Address();
-        
+        Adress pickUp = new Adress();
+        pickUp.placeLabel = jsonDecode(data)['data'][0]['label'];
+        pickUp.placeName = jsonDecode(data)['data'][0]['locality'];
+        pickUp.long = long;
+        pickUp.lat = lat;
+        src_loc.text = pickUp.placeLabel;
 
-        //print(jsonDecode(data)['name']);
+        Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });
     } else {
       print(response.statusCode);
