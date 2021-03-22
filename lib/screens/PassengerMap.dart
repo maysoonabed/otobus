@@ -10,11 +10,16 @@ import 'package:geocoder/geocoder.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
+import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 const keyOpS = 'e29278e269d34185897708d17cb83bc4';
 const keyGeo = 'AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4';
+const tokenkey =
+    'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class PassengerMap extends StatefulWidget {
   @override
   _PassengerMapState createState() => _PassengerMapState();
@@ -63,6 +68,7 @@ class _PassengerMapState extends State<PassengerMap> {
     }
   }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void setupPositionLocator() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
@@ -72,28 +78,10 @@ class _PassengerMapState extends State<PassengerMap> {
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
     getData(currentPosition.latitude, currentPosition.longitude);
-
-    /*  debugPrint('location: ${position.latitude}');
-    final coordinates = new Coordinates(position.latitude, position.longitude);
-    var addresses =
-        await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var first = addresses.first; "${first.featureName} : ${first.addressLine}";
-
-    }); */
-
-    //*********************************************************
-    /* List<Location> locations = await locationFromAddress("Tamun");
-    print(locations.toString()); */
-
-    //print(currentPosition.latitude);
-    //print(currentPosition.longitude);
-    /*  List<Placemark> placemarks = await placemarkFromCoordinates(
-        currentPosition.latitude, currentPosition.longitude);
-    print(placemarks[0].subLocality); */
-    //jsonDecode(placemarks)['country'];
-    //*********************************************************
   }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  final _startPointController = TextEditingController();
   Future<void> _searchDialog() async {
     return showDialog<void>(
       builder: (context) => new AlertDialog(
@@ -118,14 +106,36 @@ class _PassengerMapState extends State<PassengerMap> {
               height: 10,
             ), */
                 new Expanded(
-                  child: new TextField(
+                  /* child: new TextField(
                     controller: des_loc,
                     autocorrect: false,
                     autofocus: true,
                     decoration: new InputDecoration(
                       labelText: 'Destination Location',
                       hintText: 'Where to',
-                    ),
+                    ), */
+
+                  child: CustomTextField(
+                    hintText: "Select starting point",
+                    textController: _startPointController,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MapBoxAutoCompleteWidget(
+                            apiKey: tokenkey,
+                            hint: "Select starting point",
+                            onSelect: (place) {
+                              _startPointController.text = place.placeName;
+                            },
+                            limit: 30,
+                            country: 'Ps',
+                            //language: 'ar',
+                          ),
+                        ),
+                      );
+                    },
+                    enabled: true,
                   ),
                 )
               ],
@@ -147,6 +157,7 @@ class _PassengerMapState extends State<PassengerMap> {
     );
   }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return MaterialApp(
@@ -271,6 +282,7 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class CusPaint extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -296,3 +308,4 @@ class CusPaint extends CustomPainter {
     return false;
   }
 }
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
