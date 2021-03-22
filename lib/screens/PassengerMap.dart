@@ -13,6 +13,7 @@ import 'package:OtoBus/dataProvider/appData.dart';
 
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 const keyOpS = 'e29278e269d34185897708d17cb83bc4';
+const keyGeo = 'AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4';
 
 class PassengerMap extends StatefulWidget {
   @override
@@ -28,9 +29,6 @@ class _PassengerMapState extends State<PassengerMap> {
   var src_loc = TextEditingController();
   var des_loc = TextEditingController();
 
-
-
-  
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 14.4746,
@@ -38,6 +36,8 @@ class _PassengerMapState extends State<PassengerMap> {
 
   void getData(double lat, double long) async {
     Response response = await get(
+//'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$long&key=$keyGeo'
+
         'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long'
         //'https://api.opencagedata.com/geocode/v1/json?q=$lat+$long&key=$keyOpS'
         );
@@ -48,6 +48,8 @@ class _PassengerMapState extends State<PassengerMap> {
         Adress pickUp = new Adress();
         pickUp.placeLabel = jsonDecode(data)['data'][0]['label'];
         pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+
+        //  pickUp.placeLabel = jsonDecode(data)['results'][0]['formatted_address'];
 
         //pickUp.placeLabel = jsonDecode(data)['results'][0]['formatted'];
         pickUp.long = long;
@@ -93,9 +95,6 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 
   Future<void> _searchDialog() async {
-
-
-    
     return showDialog<void>(
       builder: (context) => new AlertDialog(
         contentPadding: EdgeInsets.all(20.0),
@@ -127,7 +126,6 @@ class _PassengerMapState extends State<PassengerMap> {
                       labelText: 'Destination Location',
                       hintText: 'Where to',
                     ),
-                    
                   ),
                 )
               ],
@@ -148,8 +146,6 @@ class _PassengerMapState extends State<PassengerMap> {
       context: context,
     );
   }
-
-
 
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
