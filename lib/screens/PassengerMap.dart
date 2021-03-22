@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
+const keyOpS = 'e29278e269d34185897708d17cb83bc4';
 
 class PassengerMap extends StatefulWidget {
   @override
@@ -25,7 +26,11 @@ class _PassengerMapState extends State<PassengerMap> {
   var geoLocator = Geolocator();
   Position currentPosition;
   var src_loc = TextEditingController();
+  var des_loc = TextEditingController();
 
+
+
+  
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 14.4746,
@@ -33,13 +38,18 @@ class _PassengerMapState extends State<PassengerMap> {
 
   void getData(double lat, double long) async {
     Response response = await get(
-        'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
+        'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long'
+        //'https://api.opencagedata.com/geocode/v1/json?q=$lat+$long&key=$keyOpS'
+        );
+
     if (response.statusCode == 200) {
       String data = response.body;
       setState(() {
         Adress pickUp = new Adress();
         pickUp.placeLabel = jsonDecode(data)['data'][0]['label'];
-        pickUp.placeName = jsonDecode(data)['data'][0]['locality'];
+        pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+
+        //pickUp.placeLabel = jsonDecode(data)['results'][0]['formatted'];
         pickUp.long = long;
         pickUp.lat = lat;
         src_loc.text = pickUp.placeLabel;
@@ -83,6 +93,9 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 
   Future<void> _searchDialog() async {
+
+
+    
     return showDialog<void>(
       builder: (context) => new AlertDialog(
         contentPadding: EdgeInsets.all(20.0),
@@ -107,9 +120,14 @@ class _PassengerMapState extends State<PassengerMap> {
             ), */
                 new Expanded(
                   child: new TextField(
+                    controller: des_loc,
+                    autocorrect: false,
                     autofocus: true,
                     decoration: new InputDecoration(
-                        labelText: 'Destination Location', hintText: 'Nablus'),
+                      labelText: 'Destination Location',
+                      hintText: 'Where to',
+                    ),
+                    
                   ),
                 )
               ],
@@ -130,6 +148,8 @@ class _PassengerMapState extends State<PassengerMap> {
       context: context,
     );
   }
+
+
 
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
