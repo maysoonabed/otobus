@@ -80,15 +80,6 @@ class _SignupPageState extends State<SignupPage> {
           ));
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => PassengerMap()));
-
-          /* 
-          Scaffold.of(context).showSnackBar(SnackBar(
-            content: Text("Wellcome " + name),
-          ));
-          Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => ToastContext(),
-              ));
-         */
         } else {
           showprogress = false; //don't show progress indicator
           error = true;
