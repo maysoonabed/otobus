@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart';
 import '../main.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
@@ -18,6 +17,8 @@ const keyOpS = 'e29278e269d34185897708d17cb83bc4';
 const keyGeo = 'AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4';
 const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class PassengerMap extends StatefulWidget {
@@ -163,6 +164,7 @@ class _PassengerMapState extends State<PassengerMap> {
     return MaterialApp(
       debugShowCheckedModeBanner: false, //لإخفاء شريط depug
       home: Scaffold(
+        key: _scaffoldKey,
         backgroundColor: ba1color,
         appBar: AppBar(
           title: Center(
@@ -176,6 +178,28 @@ class _PassengerMapState extends State<PassengerMap> {
             ),
           ),
           backgroundColor: apcolor,
+        ),
+        endDrawer: Drawer(
+          child: ListView(
+            children: <Widget>[
+              FutureBuilder(
+                  future: FlutterSession().get('token'),
+                  builder: (context, snapshot) {
+                    return Text(
+                        snapshot.hasData ? snapshot.data : 'loading...');
+                  }),
+              MaterialButton(
+                color: Colors.blue,
+                onPressed: () {
+                  FlutterSession().set('token', '');
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MyApp()));
+                },
+                child: Text('Logout'),
+              ),
+              ListTile(),
+            ],
+          ),
         ),
         body: Stack(
           children: [
@@ -267,7 +291,11 @@ class _PassengerMapState extends State<PassengerMap> {
                               child: IconButton(
                                   icon: Icon(Icons.person_outline_rounded),
                                   color: Colors.white,
-                                  onPressed: () {}),
+                                  onPressed: () {
+                                    _scaffoldKey.currentState.openEndDrawer();
+
+                                    //Navigator.of(context).pop();  //For close the drawer
+                                  }),
                             ),
                           ],
                         ))

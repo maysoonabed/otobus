@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'DriverMap.dart';
@@ -25,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
 
   startLogin() async {
     String apiurl =
-        "http://10.0.0.13/otobus/phpfiles/login.php"; //10.0.0.13//192.168.1.107:8089
+        "http://192.168.1.107:8089/otobus/phpfiles/login.php"; //10.0.0.13//192.168.1.107:8089
 
     var response = await http.post(apiurl, body: {
       'phone': phone,
@@ -50,6 +51,7 @@ class _LoginPageState extends State<LoginPage> {
             showprogress = false;
           });
           if (id == 2) {
+            await FlutterSession().set('token', "l " + phone);
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => PassengerMap()));
           } else {

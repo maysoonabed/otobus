@@ -3,9 +3,11 @@ import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:OtoBus/screens/uploadImages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'LoginPage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 int id = 1;
 
@@ -32,8 +34,9 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   startLogin() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://10.0.0.13/otobus/phpfiles/regpass.php"; //10.0.0.13//192.168.1.107:8089
+        "http://192.168.1.107:8089/otobus/phpfiles/regpass.php"; //10.0.0.13//192.168.1.107:8089
     var response = await http.post(apiurl, body: {
       'name': name, //get the username text
       'email': email,
@@ -55,8 +58,37 @@ class _SignupPageState extends State<SignupPage> {
             error = false;
             showprogress = false;
           });
+          await FlutterSession().set('token', email);
+          FlutterToast(context).showToast(
+              child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25.0),
+              color: Colors.greenAccent,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check),
+                SizedBox(
+                  width: 20.0,
+                ),
+                Text("أهلاً بك " + name),
+              ],
+            ),
+          ));
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => PassengerMap()));
+
+          /* 
+          Scaffold.of(context).showSnackBar(SnackBar(
+            content: Text("Wellcome " + name),
+          ));
+          Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => ToastContext(),
+              ));
+         */
         } else {
           showprogress = false; //don't show progress indicator
           error = true;

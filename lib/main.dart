@@ -2,11 +2,11 @@ import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'screens/DriverMap.dart';
 import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
 import 'package:provider/provider.dart';
-
 
 Color apcolor = const Color(0xFF1ABC9C);
 Color apBcolor = const Color(0xFF00796B);
@@ -81,9 +81,13 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
+  //***********Session*************
+  WidgetsFlutterBinding.ensureInitialized();
+  dynamic token = FlutterSession().get('token');
+  //*******************************
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-    home: MyApp(),
+    home: /*token != '' ? PassengerMap() : */ MyApp(), //
   ));
 }
 
@@ -144,10 +148,9 @@ class BottomCircle extends StatelessWidget {
 
 class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider
-    (
-       create: (context)=> AppData(),
-          child: Material(
+    return ChangeNotifierProvider(
+      create: (context) => AppData(),
+      child: Material(
           // debugShowCheckedModeBanner: false, //لإخفاء شريط depug
           type: MaterialType.transparency,
           child: new Container(
@@ -205,7 +208,8 @@ class _MyAppState extends State<MyApp> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => PassengerMap()));
+                                          builder: (context) =>
+                                              PassengerMap()));
                                 },
                               ),
                             ),
@@ -272,15 +276,16 @@ class _MyAppState extends State<MyApp> {
                                             ),
                                           ],
                                         ),
-                                        child: Text("  تسجيل الدخول", //"Sign up"
+                                        child: Text(
+                                            "  تسجيل الدخول", //"Sign up"
                                             style: TextStyle(
                                                 color: Colors.white, //bacolor,
                                                 fontSize: 15, //18
                                                 fontFamily:
                                                     'Lemonada', // 'ArefRuqaaR', //Pacifico',
                                                 fontWeight: FontWeight.w500)),
-                                        padding:
-                                            EdgeInsets.only(top: 16, bottom: 16),
+                                        padding: EdgeInsets.only(
+                                            top: 16, bottom: 16),
                                       ),
                                     )
                                   ],
@@ -308,13 +313,15 @@ class _MyAppState extends State<MyApp> {
                                         },
                                         child: new Container(
                                           alignment: Alignment.center,
-                                          width:
-                                              MediaQuery.of(mContext).size.width /
-                                                  1.7,
+                                          width: MediaQuery.of(mContext)
+                                                  .size
+                                                  .width /
+                                              1.7,
                                           decoration: ShapeDecoration(
                                             shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(30.0)),
+                                                    BorderRadius.circular(
+                                                        30.0)),
                                             gradient: LinearGradient(
                                                 colors: myGradients2,
                                                 begin: Alignment.topLeft,
@@ -334,7 +341,8 @@ class _MyAppState extends State<MyApp> {
                                           child: Text(
                                               "إنشاء حساب", //"Log in""إنشاء حساب   "
                                               style: TextStyle(
-                                                  color: Colors.white, //bacolor,
+                                                  color:
+                                                      Colors.white, //bacolor,
                                                   fontSize: 15,
                                                   fontFamily:
                                                       'Lemonada', //'ArefRuqaaR',25 //Pacifico',18
