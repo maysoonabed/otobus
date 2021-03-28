@@ -25,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscureText = true;
 
   startLogin() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
         "http://192.168.1.107:8089/otobus/phpfiles/login.php"; //10.0.0.13//192.168.1.107:8089
 
@@ -51,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
             showprogress = false;
           });
           if (id == 2) {
-            await FlutterSession().set('token', "l " + phone);
+            await FlutterSession().set('token', "log " + phone);
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => PassengerMap()));
           } else {

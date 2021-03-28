@@ -87,7 +87,7 @@ void main() {
   //*******************************
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-    home: /*token != '' ? PassengerMap() : */ MyApp(), //
+    home: token != '' ? PassengerMap() : MyApp(), //
   ));
 }
 
