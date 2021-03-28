@@ -167,6 +167,9 @@ class _PassengerMapState extends State<PassengerMap> {
         key: _scaffoldKey,
         backgroundColor: ba1color,
         appBar: AppBar(
+            actions: <Widget>[
+          new Container(),
+        ],
           title: Center(
             child: Text(
               "OtoBüs",
