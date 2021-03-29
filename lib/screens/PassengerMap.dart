@@ -83,6 +83,7 @@ class _PassengerMapState extends State<PassengerMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   final _startPointController = TextEditingController();
+  Adress destinationAdd = new Adress();
   Future<void> _searchDialog() async {
     return showDialog<void>(
       builder: (context) => new AlertDialog(
@@ -128,6 +129,8 @@ class _PassengerMapState extends State<PassengerMap> {
                             hint: "Select starting point",
                             onSelect: (place) {
                               _startPointController.text = place.placeName;
+                              destinationAdd.lat = place.center[1];
+                              destinationAdd.long = place.center[0];
                             },
                             limit: 30,
                             country: 'Ps',
@@ -150,6 +153,11 @@ class _PassengerMapState extends State<PassengerMap> {
           new FlatButton(
               child: const Text('CHOOSE'),
               onPressed: () {
+                LatLng pos = LatLng(destinationAdd.lat, destinationAdd.long);
+                CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
+                newGoogleMapController
+                    .animateCamera(CameraUpdate.newCameraPosition(cp));
+                getData(currentPosition.latitude, currentPosition.longitude);
                 Navigator.pop(context);
               })
         ],
@@ -167,9 +175,9 @@ class _PassengerMapState extends State<PassengerMap> {
         key: _scaffoldKey,
         backgroundColor: ba1color,
         appBar: AppBar(
-            actions: <Widget>[
-          new Container(),
-        ],
+          actions: <Widget>[
+            new Container(),
+          ],
           title: Center(
             child: Text(
               "OtoBüs",

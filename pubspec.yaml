@@ -37,7 +37,9 @@ dependencies:
   geocoding: ^1.0.5
   geocoder: ^0.2.1
   provider: ^4.1.2
-  flutter_mapbox_autocomplete: ^1.0.4
+  flutter_mapbox_autocomplete: 
+    git:
+      url: https://github.com/maysoonabed/flutter_mapbox_autocomplete.git
   flutter_session: ^0.1.1
   fluttertoast: ^6.0.0
 
