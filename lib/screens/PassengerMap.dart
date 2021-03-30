@@ -131,6 +131,7 @@ class _PassengerMapState extends State<PassengerMap> {
                               _startPointController.text = place.placeName;
                               destinationAdd.lat = place.center[1];
                               destinationAdd.long = place.center[0];
+                              destinationAdd.placeName=place.placeName;
                             },
                             limit: 30,
                             country: 'Ps',
@@ -153,11 +154,7 @@ class _PassengerMapState extends State<PassengerMap> {
           new FlatButton(
               child: const Text('CHOOSE'),
               onPressed: () {
-                LatLng pos = LatLng(destinationAdd.lat, destinationAdd.long);
-                CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
-                newGoogleMapController
-                    .animateCamera(CameraUpdate.newCameraPosition(cp));
-                getData(currentPosition.latitude, currentPosition.longitude);
+                
                 Navigator.pop(context);
               })
         ],
