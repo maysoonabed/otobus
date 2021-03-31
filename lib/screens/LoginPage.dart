@@ -17,11 +17,11 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  String password, phone;
+  String password, email;
   String errormsg;
   bool error, showprogress;
   TextEditingController _password = TextEditingController();
-  TextEditingController _phone = TextEditingController();
+  TextEditingController _email = TextEditingController();
   bool _obscureText = true;
 
   startLogin() async {
@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
         "http://192.168.1.107:8089/otobus/phpfiles/login.php"; //10.0.0.13//192.168.1.107:8089
 
     var response = await http.post(apiurl, body: {
-      'phone': phone,
+      'email': email,
       'password': password,
       'id': id.toString(),
     });
@@ -52,7 +52,8 @@ class _LoginPageState extends State<LoginPage> {
             showprogress = false;
           });
           if (id == 2) {
-            await FlutterSession().set('token', "log " + phone);
+            //String ph = phone.toString();
+            await FlutterSession().set('token', email); //
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => PassengerMap()));
           } else {
@@ -72,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    phone = "";
+    email = "";
     password = "";
     errormsg = "";
     error = false;
@@ -129,27 +130,21 @@ class _LoginPageState extends State<LoginPage> {
               Container(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 margin: EdgeInsets.only(top: 10),
-                child: TextFormField(
+                child: TextField(
+                  keyboardType: TextInputType.emailAddress,
                   textAlign: TextAlign.center,
-                  controller: _phone,
-                  maxLength: 13,
+                  controller: _email, //set username controller
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 15,
                       fontFamily: 'Lemonada'),
-                  keyboardType: TextInputType.number,
                   decoration: myInputDecoration(
-                    label: "رقم الهاتف",
-                    icon: Icons.phone_android,
+                    label: "البريد الإلكتروني",
+                    icon: Icons.email,
                   ),
                   onChanged: (value) {
-                    phone = value;
-                  },
-                  validator: (phone) {
-                    if (phone.isEmpty) {
-                      return 'Please enter some text';
-                    }
-                    return null;
+                    //set username  text on change
+                    email = value;
                   },
                 ),
               ),
@@ -184,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   child: RaisedButton(
                     onPressed: () {
-                      if (phone.isEmpty || password.isEmpty) {
+                      if (email.isEmpty || password.isEmpty) {
                         setState(() {
                           showprogress = false;
                           error = true;

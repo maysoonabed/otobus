@@ -1,7 +1,7 @@
 <?php
     $connect = mysqli_connect("localhost","root","","otobus");      
  
-    $Mobile = $_POST['phone'];
+    $Email = $_POST['email'];
     $Password = md5($_POST['password']);   
     $idtype=(int)($_POST['id']);
     //echo  $Password;
@@ -9,9 +9,9 @@
     if ($connect) {
        $json['error'] =0;
        if($idtype==2){     
-          $query = "SELECT * FROM `passenger` WHERE `phonenum`='$Mobile' AND `password` ='$Password'";
+          $query = "SELECT * FROM `passenger` WHERE `email`='$Email' AND `password` ='$Password'";
        }else{
-       $query = "SELECT * FROM `driver` WHERE `phonenum`='$Mobile' AND `password` ='$Password'"; 
+       $query = "SELECT * FROM `driver` WHERE `email`='$Email' AND `password` ='$Password'"; 
        }
        //echo $query;
       $result = $connect->query($query);

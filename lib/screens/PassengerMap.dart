@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import '../main.dart';
 import 'package:OtoBus/dataProvider/address.dart';
@@ -19,6 +20,8 @@ const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+String name, email, password, errormsg, phone;
+bool error = false;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class PassengerMap extends StatefulWidget {
@@ -80,6 +83,51 @@ class _PassengerMapState extends State<PassengerMap> {
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
     getData(currentPosition.latitude, currentPosition.longitude);
   }
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  profileConnection() async {
+    String apiurl =
+        "http://192.168.1.107:8089/otobus/phpfiles/profile.php"; //10.0.0.13//192.168.1.107:8089
+
+    var response = await http.post(apiurl, body: {
+      'email': email,
+    });
+    //print(response.statusCode);
+    print(response.body);
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body); //json.decode
+      if (jsondata["error"] == 1) {
+        setState(() {
+          error = true;
+          errormsg = jsondata["message"];
+        });
+      } else {
+        setState(() {
+          name = jsondata["name"];
+          phone = jsondata["phonenum"];
+          password = jsondata["password"];
+          //jsondata["image"];
+        });
+      }
+    } else {
+      setState(() {
+        error = true;
+        errormsg = "هناك مشكلة في الاتصال بالسيرفر";
+      });
+    }
+  }
+
+  void initState() {
+    name = "";
+    email = "";
+    phone = "";
+    password = "";
+    errormsg = "";
+    error = false;
+    //_name.text = "defaulttext";
+    //_password.text = "defaultpassword";
+    super.initState();
+  }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   final _startPointController = TextEditingController();
@@ -131,7 +179,7 @@ class _PassengerMapState extends State<PassengerMap> {
                               _startPointController.text = place.placeName;
                               destinationAdd.lat = place.center[1];
                               destinationAdd.long = place.center[0];
-                              destinationAdd.placeName=place.placeName;
+                              destinationAdd.placeName = place.placeName;
                             },
                             limit: 30,
                             country: 'Ps',
@@ -154,7 +202,6 @@ class _PassengerMapState extends State<PassengerMap> {
           new FlatButton(
               child: const Text('CHOOSE'),
               onPressed: () {
-                
                 Navigator.pop(context);
               })
         ],
@@ -165,6 +212,7 @@ class _PassengerMapState extends State<PassengerMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Widget build(BuildContext context) {
+    profileConnection();
     final Size size = MediaQuery.of(context).size;
     return MaterialApp(
       debugShowCheckedModeBanner: false, //لإخفاء شريط depug
@@ -193,6 +241,7 @@ class _PassengerMapState extends State<PassengerMap> {
               FutureBuilder(
                   future: FlutterSession().get('token'),
                   builder: (context, snapshot) {
+                    email = snapshot.hasData ? snapshot.data : '';
                     return Text(
                         snapshot.hasData ? snapshot.data : 'loading...');
                   }),
@@ -205,7 +254,9 @@ class _PassengerMapState extends State<PassengerMap> {
                 },
                 child: Text('Logout'),
               ),
-              ListTile(),
+              ListTile(title: Text(name)),
+              ListTile(title: Text(phone)),
+              ListTile(title: Text(password)),
             ],
           ),
         ),
@@ -278,7 +329,12 @@ class _PassengerMapState extends State<PassengerMap> {
                               child: IconButton(
                                   icon: Icon(Icons.message_outlined),
                                   color: Colors.white,
-                                  onPressed: () {}),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => MyApp()));
+                                  }),
                             ),
                             Container(
                               width: size.width * 0.20,
