@@ -1,5 +1,4 @@
 import 'package:OtoBus/dataProvider/appData.dart';
-import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:OtoBus/screens/PassengerPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -197,45 +196,6 @@ class _MyAppState extends State<MyApp> {
                             ),
                           ),*/
                           //*********************************
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: ElevatedButton(
-                                child: Text('passenger map'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: apBcolor,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              PassengerMap()));
-                                },
-                              ),
-                            ),
-                          ),
-
-                          //*********************************
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: ElevatedButton(
-                                child: Text('driver map'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: apBcolor,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => DriverMap()));
-                                },
-                              ),
-                            ),
-                          ),
-
-                          //*********************************
 
                           Center(
                             child: Builder(builder: (BuildContext mContext) {
@@ -356,6 +316,26 @@ class _MyAppState extends State<MyApp> {
                               );
                             }),
                           ),
+                          //*********************************
+
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: ElevatedButton(
+                                child: Text('driver map'),
+                                style: ElevatedButton.styleFrom(
+                                  primary: apBcolor,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DriverMap()));
+                                },
+                              ),
+                            ),
+                          ),
+
                           //*********************************
                         ],
                       ))))),
