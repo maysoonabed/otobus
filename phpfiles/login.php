@@ -40,7 +40,7 @@
      }else{
          $json['value'] = 2;
          $json['error'] =1;
-         $json['message'] = 'رقم الهاتف أو كلمة المرور غير صحيحة'; 
+         $json['message'] = 'البريد الإلكتروني أو كلمة المرور غير صحيحة'; 
       }
    } else {
       $json['error'] =1;
