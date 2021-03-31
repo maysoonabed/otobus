@@ -3,6 +3,7 @@ import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../main.dart';
+import 'PassengerMap.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -164,6 +165,7 @@ class _PassengerPageState extends State<PassengerPage> {
         //#######################################
         body: Stack(
           children: [
+            PassengerMap(),
             Positioned(
               bottom: 0,
               left: 0,
