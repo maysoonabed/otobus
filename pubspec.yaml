@@ -60,8 +60,8 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
-    - lib/Images/
-    
+    - lib/Images/Defultprof.jpg
+    - lib/Images/passengercover.jpg
   fonts:
     - family: Pacifico
       fonts:
