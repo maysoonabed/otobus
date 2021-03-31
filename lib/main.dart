@@ -1,5 +1,6 @@
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/screens/PassengerMap.dart';
+import 'package:OtoBus/screens/PassengerPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -87,7 +88,7 @@ void main() {
   //*******************************
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-    home: token != '' ? PassengerMap() : MyApp(), //
+    home: token != '' ? PassengerPage() : MyApp(), //
   ));
 }
 

@@ -3,14 +3,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
+//import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import '../main.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
+import 'package:flutter_map/flutter_map.dart';
+import "package:latlong/latlong.dart" as latLng;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
@@ -20,8 +21,6 @@ const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-String name, email, password, errormsg, phone;
-bool error = false;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class PassengerMap extends StatefulWidget {
@@ -31,17 +30,20 @@ class PassengerMap extends StatefulWidget {
 
 class _PassengerMapState extends State<PassengerMap> {
   double mapBottomPadding = 0;
-  Completer<GoogleMapController> _controllerGoogleMap = Completer();
-  GoogleMapController newGoogleMapController;
+  /*  Completer<GoogleMapController> _controllerGoogleMap = Completer();
+  GoogleMapController newGoogleMapController; */
+  MapController _mapct = MapController();
+
   var geoLocator = Geolocator();
   Position currentPosition;
+  latLng.LatLng currLatLng;
   var src_loc = TextEditingController();
   var des_loc = TextEditingController();
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
+  /*  static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 14.4746,
-  );
+  ); */
 
   void getData(double lat, double long) async {
     Response response = await get(
@@ -64,6 +66,9 @@ class _PassengerMapState extends State<PassengerMap> {
         pickUp.long = long;
         pickUp.lat = lat;
         src_loc.text = pickUp.placeLabel;
+        setState(() {
+          currLatLng = latLng.LatLng(lat, long);
+        });
 
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });
@@ -74,59 +79,18 @@ class _PassengerMapState extends State<PassengerMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void setupPositionLocator() async {
-    Position position = await Geolocator.getCurrentPosition(
+    Position currentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
-    currentPosition = position;
 
-    LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
-    CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
+    /*
+   currentPosition = position;
+
+    latLng.LatLng pos = latLng.LatLng(currentPosition.latitude, currentPosition.longitude);
+     */
+    /*   CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+   */
     getData(currentPosition.latitude, currentPosition.longitude);
-  }
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  profileConnection() async {
-    String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/profile.php"; //10.0.0.13//192.168.1.107:8089
-
-    var response = await http.post(apiurl, body: {
-      'email': email,
-    });
-    //print(response.statusCode);
-    print(response.body);
-    if (response.statusCode == 200) {
-      var jsondata = jsonDecode(response.body); //json.decode
-      if (jsondata["error"] == 1) {
-        setState(() {
-          error = true;
-          errormsg = jsondata["message"];
-        });
-      } else {
-        setState(() {
-          name = jsondata["name"];
-          phone = jsondata["phonenum"];
-          password = jsondata["password"];
-          //jsondata["image"];
-        });
-      }
-    } else {
-      setState(() {
-        error = true;
-        errormsg = "هناك مشكلة في الاتصال بالسيرفر";
-      });
-    }
-  }
-
-  void initState() {
-    name = "";
-    email = "";
-    phone = "";
-    password = "";
-    errormsg = "";
-    error = false;
-    //_name.text = "defaulttext";
-    //_password.text = "defaultpassword";
-    super.initState();
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,9 +116,6 @@ class _PassengerMapState extends State<PassengerMap> {
                         new InputDecoration(labelText: 'Source Location'),
                   ),
                 ),
-                /* SizedBox(
-              height: 10,
-            ), */
                 new Expanded(
                   /* child: new TextField(
                     controller: des_loc,
@@ -177,9 +138,11 @@ class _PassengerMapState extends State<PassengerMap> {
                             hint: "Select starting point",
                             onSelect: (place) {
                               _startPointController.text = place.placeName;
-                              destinationAdd.lat = place.center[1];
-                              destinationAdd.long = place.center[0];
-                              destinationAdd.placeName = place.placeName;
+                              setState(() {
+                                destinationAdd.lat = place.center[1];
+                                destinationAdd.long = place.center[0];
+                                destinationAdd.placeName = place.placeName;
+                              });
                             },
                             limit: 30,
                             country: 'Ps',
@@ -212,7 +175,13 @@ class _PassengerMapState extends State<PassengerMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Widget build(BuildContext context) {
-    profileConnection();
+    /*   if(currLatLng.latitude!=null){
+    _mapct.move(currLatLng,10);} */
+    List<latLng.LatLng> points = [
+      currLatLng,
+      latLng.LatLng(destinationAdd.lat, destinationAdd.long)
+    ];
+
     final Size size = MediaQuery.of(context).size;
     return MaterialApp(
       debugShowCheckedModeBanner: false, //لإخفاء شريط depug
@@ -241,7 +210,6 @@ class _PassengerMapState extends State<PassengerMap> {
               FutureBuilder(
                   future: FlutterSession().get('token'),
                   builder: (context, snapshot) {
-                    email = snapshot.hasData ? snapshot.data : '';
                     return Text(
                         snapshot.hasData ? snapshot.data : 'loading...');
                   }),
@@ -254,15 +222,28 @@ class _PassengerMapState extends State<PassengerMap> {
                 },
                 child: Text('Logout'),
               ),
-              ListTile(title: Text(name)),
-              ListTile(title: Text(phone)),
-              ListTile(title: Text(password)),
+              ListTile(),
             ],
           ),
         ),
         body: Stack(
           children: [
-            GoogleMap(
+            FlutterMap(
+              options: MapOptions(
+                center: currLatLng,
+                zoom: 10.0,
+              ),
+              layers: [
+                TileLayerOptions(
+                  urlTemplate:
+                      "https://api.mapbox.com/styles/v1/mmyxt/ckmwm6oay1mpc17pgcsw3k0xc/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w",
+                  additionalOptions: {
+                    'accessToken':
+                        'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w',
+                    'id': 'mapbox.mapbox-streets-v8',
+                  },
+                ),
+                /*     GoogleMap(
               padding: EdgeInsets.only(bottom: mapBottomPadding),
               mapType: MapType.normal,
               myLocationEnabled: true,
@@ -277,7 +258,42 @@ class _PassengerMapState extends State<PassengerMap> {
                   mapBottomPadding = 65;
                 });
                 setupPositionLocator();
-              },
+              }, */
+                MarkerLayerOptions(
+                  markers: [
+                    Marker(
+                      width: 80.0,
+                      height: 80.0,
+                      point: currLatLng,
+                      builder: (ctx) => Container(
+                          child: Icon(
+                        Icons.location_on,
+                        color: mypink,
+                        size: 45,
+                      )),
+                    ),
+                    Marker(
+                      width: 80.0,
+                      height: 80.0,
+                      point: latLng.LatLng(
+                          destinationAdd.lat, destinationAdd.long),
+                      builder: (ctx) => Container(
+                          child: Icon(
+                        Icons.directions_bus,
+                        color: mypink,
+                        size: 45,
+                      )),
+                    ),
+                  ],
+                ),
+                PolylineLayerOptions(polylines: [
+                  Polyline(
+                    points: points,
+                    strokeWidth: 5.0,
+                    color: Colors.blue,
+                  )
+                ])
+              ],
             ),
             Positioned(
               bottom: 0,
@@ -329,12 +345,7 @@ class _PassengerMapState extends State<PassengerMap> {
                               child: IconButton(
                                   icon: Icon(Icons.message_outlined),
                                   color: Colors.white,
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MyApp()));
-                                  }),
+                                  onPressed: () {}),
                             ),
                             Container(
                               width: size.width * 0.20,
@@ -371,6 +382,15 @@ class _PassengerMapState extends State<PassengerMap> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    currLatLng = latLng.LatLng(31.947351, 35.227163);
+    destinationAdd.lat = currLatLng.latitude;
+    destinationAdd.long = currLatLng.longitude;
+    setupPositionLocator();
   }
 }
 

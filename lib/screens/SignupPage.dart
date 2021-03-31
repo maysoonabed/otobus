@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:OtoBus/screens/uploadImages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'LoginPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'PassengerPage.dart';
 
 int id = 1;
 
@@ -78,8 +78,8 @@ class _SignupPageState extends State<SignupPage> {
               ],
             ),
           ));
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => PassengerMap()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => PassengerPage()));
         } else {
           showprogress = false; //don't show progress indicator
           error = true;

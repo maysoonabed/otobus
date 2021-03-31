@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:OtoBus/screens/PassengerMap.dart';
+import 'package:OtoBus/screens/PassengerPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
             //String ph = phone.toString();
             await FlutterSession().set('token', email); //
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => PassengerMap()));
+                MaterialPageRoute(builder: (context) => PassengerPage()));
           } else {
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => DriverMap()));
