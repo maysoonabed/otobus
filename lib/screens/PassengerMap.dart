@@ -39,7 +39,9 @@ class _PassengerMapState extends State<PassengerMap> {
 
   void getData(double lat, double long) async {
     Response response = await get(
-        'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
+        'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long'
+        
+        );
 
     if (response.statusCode == 200) {
       String data = response.body;
@@ -85,13 +87,7 @@ class _PassengerMapState extends State<PassengerMap> {
       ),
       layers: [
         TileLayerOptions(
-          urlTemplate:
-              "https://api.mapbox.com/styles/v1/mmyxt/ckmwm6oay1mpc17pgcsw3k0xc/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w",
-          additionalOptions: {
-            'accessToken':
-                'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w',
-            'id': 'mapbox.mapbox-streets-v8',
-          },
+          urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         ),
         MarkerLayerOptions(
           markers: [
