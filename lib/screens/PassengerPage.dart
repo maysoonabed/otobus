@@ -1,4 +1,6 @@
+import 'package:OtoBus/dataProvider/address.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,7 +12,12 @@ import 'PassengerMap.dart';
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 String name, email, password, errormsg, phone;
 bool error = false;
+final _startPointController = TextEditingController();
+Adress destinationAdd = new Adress();
+var src_loc = TextEditingController();
+var des_loc = TextEditingController();
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class PassengerPage extends StatefulWidget {
   @override
@@ -56,6 +63,76 @@ class _PassengerPageState extends State<PassengerPage> {
     errormsg = "";
     error = false;
     super.initState();
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Future<void> _searchDialog() async {
+    return showDialog<void>(
+      builder: (context) => new AlertDialog(
+        contentPadding: EdgeInsets.all(20.0),
+        content: Container(
+            width: 300.0,
+            height: 200.0,
+            child: Column(
+              children: <Widget>[
+                new Expanded(
+                  child: new TextField(
+                    controller: src_loc,
+                    readOnly: true,
+                    minLines: 1,
+                    maxLines: null,
+                    autofocus: false,
+                    decoration:
+                        new InputDecoration(labelText: 'Source Location'),
+                  ),
+                ),
+                new Expanded(
+                  child: CustomTextField(
+                    hintText: "Select starting point",
+                    textController: _startPointController,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MapBoxAutoCompleteWidget(
+                            apiKey: tokenkey,
+                            hint: "Select starting point",
+                            onSelect: (place) {
+                              _startPointController.text = place.placeName;
+                              setState(() {
+                                destinationAdd.lat = place.center[1];
+                                destinationAdd.long = place.center[0];
+                                destinationAdd.placeName = place.placeName;
+                              });
+                            },
+                            limit: 30,
+                            country: 'Ps',
+                            //language: 'ar',
+                          ),
+                        ),
+                      );
+                    },
+                    enabled: true,
+                  ),
+                )
+              ],
+            )),
+        actions: <Widget>[
+          new FlatButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+          new FlatButton(
+              child: const Text('CHOOSE'),
+              onPressed: () {
+                Navigator.pop(context);
+              })
+        ],
+      ),
+      context: context,
+    );
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -183,7 +260,7 @@ class _PassengerPageState extends State<PassengerPage> {
                       heightFactor: 0.6,
                       child: FloatingActionButton(
                         onPressed: () {
-                          // _searchDialog();
+                          _searchDialog();
                         },
                         backgroundColor: mypink,
                         //Color(0xFF0e6655),  //Colors.black,

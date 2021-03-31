@@ -11,6 +11,7 @@ import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong/latlong.dart" as latLng;
+import 'PassengerPage.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
@@ -34,8 +35,6 @@ class _PassengerMapState extends State<PassengerMap> {
   var geoLocator = Geolocator();
   Position currentPosition;
   latLng.LatLng currLatLng;
-  var src_loc = TextEditingController();
-  var des_loc = TextEditingController();
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void getData(double lat, double long) async {
@@ -70,79 +69,6 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  final _startPointController = TextEditingController();
-  Adress destinationAdd = new Adress();
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  Future<void> _searchDialog() async {
-    return showDialog<void>(
-      builder: (context) => new AlertDialog(
-        contentPadding: EdgeInsets.all(20.0),
-        content: Container(
-            width: 300.0,
-            height: 200.0,
-            child: Column(
-              children: <Widget>[
-                new Expanded(
-                  child: new TextField(
-                    controller: src_loc,
-                    readOnly: true,
-                    minLines: 1,
-                    maxLines: null,
-                    autofocus: false,
-                    decoration:
-                        new InputDecoration(labelText: 'Source Location'),
-                  ),
-                ),
-                new Expanded(
-                  child: CustomTextField(
-                    hintText: "Select starting point",
-                    textController: _startPointController,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MapBoxAutoCompleteWidget(
-                            apiKey: tokenkey,
-                            hint: "Select starting point",
-                            onSelect: (place) {
-                              _startPointController.text = place.placeName;
-                              setState(() {
-                                destinationAdd.lat = place.center[1];
-                                destinationAdd.long = place.center[0];
-                                destinationAdd.placeName = place.placeName;
-                              });
-                            },
-                            limit: 30,
-                            country: 'Ps',
-                            //language: 'ar',
-                          ),
-                        ),
-                      );
-                    },
-                    enabled: true,
-                  ),
-                )
-              ],
-            )),
-        actions: <Widget>[
-          new FlatButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          new FlatButton(
-              child: const Text('CHOOSE'),
-              onPressed: () {
-                Navigator.pop(context);
-              })
-        ],
-      ),
-      context: context,
-    );
-  }
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
   Widget build(BuildContext context) {
     /*   if(currLatLng.latitude!=null){
     _mapct.move(currLatLng,10);} */
