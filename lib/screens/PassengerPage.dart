@@ -37,9 +37,9 @@ class _PassengerPageState extends State<PassengerPage> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   setPolyLines() {
-  
+    setState(() {
       polyLines.isNotEmpty ? polyLines.clear() : null;
-  
+    });
 
     Polyline polyline = Polyline(
       points: points,
@@ -184,7 +184,9 @@ class _PassengerPageState extends State<PassengerPage> {
           new FlatButton(
               child: const Text('CHOOSE'),
               onPressed: () {
+                setState(() {
                   markers.length == 2 ? markers.removeAt(1) : null;
+                });
 
                 markers.insert(
                   1,
@@ -425,8 +427,8 @@ class _PassengerPageState extends State<PassengerPage> {
                                     notispress = false;
                                     proispress = true;
                                   });
-                                  
-                                  //  _scaffoldKey.currentState.openEndDrawer();
+
+                                  //_scaffoldKey.currentState.openEndDrawer();
                                   //Scaffold.of(context).openEndDrawer();
                                   //Navigator.of(context).pop();  //For close the drawer
                                 }),
