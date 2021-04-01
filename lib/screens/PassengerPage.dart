@@ -44,7 +44,7 @@ class _PassengerPageState extends State<PassengerPage> {
     Polyline polyline = Polyline(
       points: points,
       strokeWidth: 5.0,
-      color: Colors.lightBlue,
+      color: myblue,
     );
     polyLines.add(polyline);
     setState(() {});
@@ -53,7 +53,7 @@ class _PassengerPageState extends State<PassengerPage> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   profileConnection() async {
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/profile.php"; //10.0.0.13//192.168.1.107:8089
+        "http://10.0.0.10/otobus/phpfiles/profile.php"; //10.0.0.13//192.168.1.107:8089
 
     var response = await http.post(apiurl, body: {
       'email': email,
