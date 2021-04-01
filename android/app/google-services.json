@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "307201306561-oj2dvspa5cvochgd7vm8qgu15552qu48.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.OtoBus",
+            "certificate_hash": "952cf04bbf9a4099167e4f426eea88255e3aa03f"
+          }
+        },
+        {
           "client_id": "307201306561-k4coidr0603rhjleuo3jmtg8r2dtaphu.apps.googleusercontent.com",
           "client_type": 3
         }
