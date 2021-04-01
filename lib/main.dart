@@ -8,6 +8,8 @@ import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
 import 'package:provider/provider.dart';
 
+import 'screens/fire.dart';
+
 Color apcolor = const Color(0xFF1ABC9C);
 Color apBcolor = const Color(0xFF00796B);
 Color iconBack = const Color(0xFF0e6655);
@@ -87,7 +89,7 @@ void main() {
   //*******************************
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-    home: token != '' ? PassengerPage() : MyApp(), //
+    home: MyApp(), // token != '' ? PassengerPage() :
   ));
 }
 
@@ -337,7 +339,7 @@ class _MyAppState extends State<MyApp> {
                           ),
 
                           //*********************************
-                          
+
                           Center(
                             child: Padding(
                               padding: const EdgeInsets.all(15.0),
@@ -350,15 +352,13 @@ class _MyAppState extends State<MyApp> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => DriverMap()));
+                                          builder: (context) => Fire()));
                                 },
                               ),
                             ),
                           ),
 
-                          
                           //*********************************
-                        
                         ],
                       ))))),
     );
