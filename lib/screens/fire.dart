@@ -21,6 +21,7 @@ class _FireState extends State<Fire> {
               apiKey: 'AIzaSyD_shO5mfO9lhy2TVWhfo1VUmARKlG4suk',
               projectId: 'flutter-firebase-plugins',
               messagingSenderId: '297855924061',
+              //307201306561
               databaseURL: 'https://flutterfire-cd2f7.firebaseio.com',
             )
           : const FirebaseOptions(
@@ -45,8 +46,8 @@ class _FireState extends State<Fire> {
             child: MaterialButton(
               onPressed: () {
                 DatabaseReference df =
-                    FirebaseDatabase.instance.reference().child('Samah');
-                df.set('Tobasi');
+                    FirebaseDatabase.instance.reference().child('yyyy');
+                df.set('uyi');
               },
               height: 50,
               minWidth: 300,
