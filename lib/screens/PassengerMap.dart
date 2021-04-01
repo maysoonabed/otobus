@@ -101,7 +101,7 @@ class _PassengerMapState extends State<PassengerMap> {
     final Size size = MediaQuery.of(context).size;
     return FlutterMap(
       options: MapOptions(
-        center: latLng.LatLng(32.2929, 35.1747),
+        center: latLng.LatLng( 32.0442, 35.2242),
         zoom: 10.0,
       ),
       layers: [

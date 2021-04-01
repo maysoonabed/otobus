@@ -299,6 +299,10 @@ class _PassengerPageState extends State<PassengerPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
               onPressed: () {
+                points.isNotEmpty ? points.clear() : null;
+                markers.isNotEmpty ? markers.clear() : null;
+                polyLines.isNotEmpty ? polyLines.clear() : null;
+
                 FlutterSession().set('token', '');
                 Navigator.push(
                     context, MaterialPageRoute(builder: (context) => MyApp()));
@@ -423,6 +427,7 @@ class _PassengerPageState extends State<PassengerPage> {
                                     notispress = false;
                                     proispress = true;
                                   });
+                                  
                                   //  _scaffoldKey.currentState.openEndDrawer();
                                   //Scaffold.of(context).openEndDrawer();
                                   //Navigator.of(context).pop();  //For close the drawer
