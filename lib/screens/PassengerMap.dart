@@ -30,7 +30,7 @@ final List<latLng.LatLng> points = [
 final List<Polyline> polyLines = [];
 final List<Marker> markers = [];
 var data;
-  latLng.LatLng currLatLng;
+latLng.LatLng currLatLng;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -47,7 +47,6 @@ class _PassengerMapState extends State<PassengerMap> {
   var geoLocator = Geolocator();
   Position currentPosition;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
   void getData(double lat, double long) async {
     Response response = await get(
@@ -101,17 +100,19 @@ class _PassengerMapState extends State<PassengerMap> {
     final Size size = MediaQuery.of(context).size;
     return FlutterMap(
       options: MapOptions(
-        center: latLng.LatLng( 32.0442, 35.2242),
+        center: latLng.LatLng(32.0442, 35.2242),
         zoom: 10.0,
       ),
       layers: [
         TileLayerOptions(
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         ),
+        PolylineLayerOptions(
+          polylines: polyLines,
+        ),
         MarkerLayerOptions(
           markers: markers,
         ),
-        PolylineLayerOptions(polylines: polyLines)
       ],
     );
   }
