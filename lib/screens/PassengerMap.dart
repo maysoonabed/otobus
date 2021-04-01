@@ -21,6 +21,18 @@ const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+final List<latLng.LatLng> points = [
+  /* 
+      currLatLng,
+      latLng.LatLng(destinationAdd.lat, destinationAdd.long)
+     */
+];
+final List<Polyline> polyLines = [];
+final List<Marker> markers = [];
+var data;
+  latLng.LatLng currLatLng;
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 class PassengerMap extends StatefulWidget {
   @override
   _PassengerMapState createState() => _PassengerMapState();
@@ -34,14 +46,12 @@ class _PassengerMapState extends State<PassengerMap> {
 
   var geoLocator = Geolocator();
   Position currentPosition;
-  latLng.LatLng currLatLng;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
   void getData(double lat, double long) async {
     Response response = await get(
-        'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long'
-        
-        );
+        'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
 
     if (response.statusCode == 200) {
       String data = response.body;
@@ -55,6 +65,19 @@ class _PassengerMapState extends State<PassengerMap> {
         setState(() {
           currLatLng = latLng.LatLng(lat, long);
         });
+        markers.add(
+          Marker(
+            width: 80.0,
+            height: 80.0,
+            point: currLatLng,
+            builder: (ctx) => Container(
+                child: Icon(
+              Icons.location_on,
+              color: mypink,
+              size: 40,
+            )),
+          ),
+        );
 
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });
@@ -74,15 +97,11 @@ class _PassengerMapState extends State<PassengerMap> {
   Widget build(BuildContext context) {
     /*   if(currLatLng.latitude!=null){
     _mapct.move(currLatLng,10);} */
-    List<latLng.LatLng> points = [
-      currLatLng,
-      latLng.LatLng(destinationAdd.lat, destinationAdd.long)
-    ];
 
     final Size size = MediaQuery.of(context).size;
     return FlutterMap(
       options: MapOptions(
-        center: currLatLng,
+        center: latLng.LatLng(32.2929, 35.1747),
         zoom: 10.0,
       ),
       layers: [
@@ -90,38 +109,9 @@ class _PassengerMapState extends State<PassengerMap> {
           urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
         ),
         MarkerLayerOptions(
-          markers: [
-            Marker(
-              width: 80.0,
-              height: 80.0,
-              point: currLatLng,
-              builder: (ctx) => Container(
-                  child: Icon(
-                Icons.location_on,
-                color: mypink,
-                size: 45,
-              )),
-            ),
-            Marker(
-              width: 80.0,
-              height: 80.0,
-              point: latLng.LatLng(destinationAdd.lat, destinationAdd.long),
-              builder: (ctx) => Container(
-                  child: Icon(
-                Icons.directions_bus,
-                color: mypink,
-                size: 45,
-              )),
-            ),
-          ],
+          markers: markers,
         ),
-        PolylineLayerOptions(polylines: [
-          Polyline(
-            points: points,
-            strokeWidth: 5.0,
-            color: Colors.blue,
-          )
-        ])
+        PolylineLayerOptions(polylines: polyLines)
       ],
     );
   }
@@ -130,9 +120,6 @@ class _PassengerMapState extends State<PassengerMap> {
   @override
   void initState() {
     super.initState();
-    currLatLng = latLng.LatLng(31.947351, 35.227163);
-    destinationAdd.lat = currLatLng.latitude;
-    destinationAdd.long = currLatLng.longitude;
     setupPositionLocator();
   }
 }

@@ -8,6 +8,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../main.dart';
 import 'PassengerMap.dart';
+import 'package:flutter_map/flutter_map.dart';
+import "package:latlong/latlong.dart" as latLng;
+import 'NetworkHelper.dart';
+import 'LineString.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -30,6 +34,23 @@ class PassengerPage extends StatefulWidget {
 }
 
 class _PassengerPageState extends State<PassengerPage> {
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  setPolyLines() {
+    setState(() {
+      polyLines.isNotEmpty ? polyLines.clear() : null;
+    });
+
+    Polyline polyline = Polyline(
+      points: points,
+      strokeWidth: 5.0,
+      color: Colors.lightBlue,
+    );
+    polyLines.add(polyline);
+    setState(() {});
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   profileConnection() async {
     String apiurl =
         "http://192.168.1.107:8089/otobus/phpfiles/profile.php"; //10.0.0.13//192.168.1.107:8089
@@ -74,6 +95,35 @@ class _PassengerPageState extends State<PassengerPage> {
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  void getJsonData() async {
+    // Create an instance of Class NetworkHelper which uses http package
+    // for requesting data to the server and receiving response as JSON format
+    points.isNotEmpty ? points.clear() : null;
+    NetworkHelper network = NetworkHelper(
+      startLat: currLatLng.latitude,
+      startLng: currLatLng.longitude,
+      endLat: destinationAdd.lat,
+      endLng: destinationAdd.long,
+    );
+
+    try {
+      // getData() returns a json Decoded data
+      data = await network.getData();
+
+      // We can reach to our desired JSON data manually as following
+      LineString ls =
+          LineString(data['features'][0]['geometry']['coordinates']);
+
+      for (int i = 0; i < ls.lineString.length; i++) {
+        points.add(latLng.LatLng(ls.lineString[i][1], ls.lineString[i][0]));
+      }
+      setPolyLines();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future<void> _searchDialog() async {
     return showDialog<void>(
       builder: (context) => new AlertDialog(
@@ -134,6 +184,26 @@ class _PassengerPageState extends State<PassengerPage> {
           new FlatButton(
               child: const Text('CHOOSE'),
               onPressed: () {
+                setState(() {
+                  markers.length == 2 ? markers.removeAt(1) : null;
+                });
+
+                markers.insert(
+                  1,
+                  Marker(
+                    width: 80.0,
+                    height: 80.0,
+                    point:
+                        latLng.LatLng(destinationAdd.lat, destinationAdd.long),
+                    builder: (ctx) => Container(
+                        child: Icon(
+                      Icons.directions_bus,
+                      color: Colors.black,
+                      size: 40,
+                    )),
+                  ),
+                );
+                getJsonData();
                 Navigator.pop(context);
               })
         ],
