@@ -337,6 +337,28 @@ class _MyAppState extends State<MyApp> {
                           ),
 
                           //*********************************
+                          
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: ElevatedButton(
+                                child: Text('FIRE'),
+                                style: ElevatedButton.styleFrom(
+                                  primary: apBcolor,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DriverMap()));
+                                },
+                              ),
+                            ),
+                          ),
+
+                          
+                          //*********************************
+                        
                         ],
                       ))))),
     );
