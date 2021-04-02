@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 //import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -31,6 +33,7 @@ final List<Polyline> polyLines = [];
 final List<Marker> markers = [];
 var data;
 latLng.LatLng currLatLng;
+DatabaseReference rideReq;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -47,6 +50,14 @@ class _PassengerMapState extends State<PassengerMap> {
   var geoLocator = Geolocator();
   Position currentPosition;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void createRequest() {
+    rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
+    var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
+    var destination =
+        Provider.of<AppData>(context, listen: false).destinationAddress;
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void getData(double lat, double long) async {
     Response response = await get(
@@ -56,11 +67,11 @@ class _PassengerMapState extends State<PassengerMap> {
       String data = response.body;
       setState(() {
         Adress pickUp = new Adress();
-        pickUp.placeLabel = jsonDecode(data)['data'][0]['label'];
-        pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+        pickUp.placeName= jsonDecode(data)['data'][0]['label'];
+     //   pickUp.placeName = jsonDecode(data)['data'][0]['county'];
         pickUp.long = long;
         pickUp.lat = lat;
-        src_loc.text = pickUp.placeLabel;
+        src_loc.text = pickUp.placeName;
         setState(() {
           currLatLng = latLng.LatLng(lat, long);
         });
@@ -93,13 +104,14 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  bool isExtended = false;
+
   Widget build(BuildContext context) {
     /*   if(currLatLng.latitude!=null){
     _mapct.move(currLatLng,10);} */
 
     final Size size = MediaQuery.of(context).size;
     return Stack(children: [
-
       FlutterMap(
         options: MapOptions(
           center: latLng.LatLng(32.0442, 35.2242),
@@ -117,35 +129,43 @@ class _PassengerMapState extends State<PassengerMap> {
           ),
         ],
       ),
-            Padding(
-        padding: const EdgeInsets.only(bottom: 100,left: 5),
-        child: Align(
-          alignment: Alignment.bottomLeft,
-          heightFactor: 80,
-          child: new FloatingActionButton(
-            backgroundColor: apBcolor,
-            onPressed: () {
-              markers.add(
-                Marker(
-                  width: 80.0,
-                  height: 80.0,
-                  point: currLatLng,
-                  builder: (ctx) => Container(
-                      child: Icon(
-                    Icons.location_on,
-                    color: myOrange,
-                    size: 40,
-                  )),
+      markers.length > 1
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 100, right: 10),
+              child: SizedBox(
+                height: 50,
+                width: 50,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: FloatingActionButton.extended(
+                    backgroundColor: apBcolor,
+                    isExtended: isExtended,
+                    onPressed: () {
+                      setState(
+                        () {
+                          isExtended = !isExtended;
+                        },
+                      );
+                    },
+                    label: isExtended
+                        ? Row(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Icon(Icons.check),
+                              ),
+                              Text("اظهار الباصات"),
+                            ],
+                          )
+                        : Icon(Icons.directions_bus),
+                  ),
                 ),
-              );
-            },
-            child: new Icon(
-              Icons.check,
-              color: Colors.white,
+              ),
+            )
+          : Container(
+              height: 0.1,
+              width: 0.1,
             ),
-          ),
-        ),
-      ),
     ]);
   }
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

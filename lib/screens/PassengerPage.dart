@@ -1,6 +1,8 @@
 import 'dart:ui';
-
+import 'package:OtoBus/dataProvider/appData.dart';
+import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/address.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -12,6 +14,8 @@ import 'package:flutter_map/flutter_map.dart';
 import "package:latlong/latlong.dart" as latLng;
 import 'NetworkHelper.dart';
 import 'LineString.dart';
+import 'CurrUserInfo.dart';
+import 'package:OtoBus/configMaps.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -69,9 +73,9 @@ class _PassengerPageState extends State<PassengerPage> {
       } else {
         if (this.mounted) {
           setState(() {
-            email = email;
-            name = jsondata["name"];
-            phone = jsondata["phonenum"];
+            thisUser.email = email = email;
+            thisUser.name = name = jsondata["name"];
+            thisUser.phone = phone = jsondata["phonenum"];
             //jsondata["image"];
           });
         }
@@ -161,6 +165,8 @@ class _PassengerPageState extends State<PassengerPage> {
                                 destinationAdd.lat = place.center[1];
                                 destinationAdd.long = place.center[0];
                                 destinationAdd.placeName = place.placeName;
+                                Provider.of<AppData>(context, listen: false)
+                                    .updateDestAddress(destinationAdd);
                               });
                             },
                             limit: 30,
@@ -197,7 +203,7 @@ class _PassengerPageState extends State<PassengerPage> {
                         latLng.LatLng(destinationAdd.lat, destinationAdd.long),
                     builder: (ctx) => Container(
                         child: Icon(
-                      Icons.directions_bus,
+                      Icons.location_on,
                       color: Colors.black,
                       size: 40,
                     )),
@@ -319,7 +325,6 @@ class _PassengerPageState extends State<PassengerPage> {
       //#######################################
       body: Stack(
         children: [
-          
           PassengerMap(),
           Positioned(
             bottom: 0,

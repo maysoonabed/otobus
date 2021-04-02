@@ -53,9 +53,9 @@ class _DriverMapState extends State<DriverMap> {
       String data = response.body;
       setState(() {
         Adress pickUp = new Adress();
-        pickUp.placeLabel = jsonDecode(data)['data'][0]['label'];
-        pickUp.placeName = jsonDecode(data)['data'][0]['county'];
-        _currName = pickUp.placeLabel;
+        pickUp.placeName = jsonDecode(data)['data'][0]['label'];
+      //  pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+        _currName = pickUp.placeName;
         //src_loc.text = _currName;
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });

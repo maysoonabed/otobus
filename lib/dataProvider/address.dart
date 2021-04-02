@@ -2,7 +2,6 @@ class Adress {
   String placeName;
   double long;
   double lat;
-  String placeLabel;
 
 
 Adress({
@@ -10,7 +9,7 @@ Adress({
   this.placeName,
   this.long,
   this.lat,
-  this.placeLabel,});
+ });
 
 
 }
