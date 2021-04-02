@@ -151,9 +151,10 @@ class BottomCircle extends StatelessWidget {
 
 class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return ChangeNotifierProvider<AppData>(
       create: (context) => AppData(),
-      child: Material(
+      child: Consumer<AppData>(
+      builder: (context, model, _) => Material(
           // debugShowCheckedModeBanner: false, //لإخفاء شريط depug
           type: MaterialType.transparency,
           child: new Container(
@@ -362,7 +363,7 @@ class _MyAppState extends State<MyApp> {
 
                           //*********************************
                         ],
-                      ))))),
+                      )))))),
     );
   }
 

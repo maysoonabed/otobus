@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/login.php"; //10.0.0.8//192.168.1.107:8089
+        "http://10.0.0.12/otobus/phpfiles/login.php"; //10.0.0.8//192.168.1.107:8089
 
     var response = await http.post(apiurl, body: {
       'email': email,
@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
             //String ph = phone.toString();
             await FlutterSession().set('token', email); //
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => PassMap()));
+                context, MaterialPageRoute(builder: (context) => PassengerPage()));
           } else {
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => DriverMap()));

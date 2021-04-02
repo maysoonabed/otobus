@@ -153,34 +153,30 @@ class _PassengerMapState extends State<PassengerMap> {
       markers.length > 1
           ? Padding(
               padding: const EdgeInsets.only(bottom: 100, right: 10),
-              child: SizedBox(
-                height: 50,
-                width: 50,
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: FloatingActionButton.extended(
-                    backgroundColor: apBcolor,
-                    isExtended: isExtended,
-                    onPressed: () {
-                      setState(
-                        () {
-                          createRequest();
-                          isExtended = !isExtended;
-                        },
-                      );
-                    },
-                    label: isExtended
-                        ? Row(
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: Icon(Icons.check),
-                              ),
-                              Text("اظهار الباصات"),
-                            ],
-                          )
-                        : Icon(Icons.directions_bus),
-                  ),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton.extended(
+                  backgroundColor: apBcolor,
+                  isExtended: isExtended,
+                  onPressed: () {
+                    setState(
+                      () {
+                        isExtended = !isExtended;
+                      },
+                    );
+                    createRequest();
+                  },
+                  label: isExtended
+                      ? Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(Icons.check),
+                            ),
+                            Text("اظهار الباصات"),
+                          ],
+                        )
+                      : Icon(Icons.directions_bus),
                 ),
               ),
             )
