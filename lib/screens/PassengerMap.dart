@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:OtoBus/configMaps.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -55,6 +56,26 @@ class _PassengerMapState extends State<PassengerMap> {
     var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
     var destination =
         Provider.of<AppData>(context, listen: false).destinationAddress;
+
+    Map pickUpMap = {
+      'longitude': pickUp.long.toString(),
+      'latitude': pickUp.lat.toString(),
+    };
+    Map destinationMap = {
+      'longitude': destination.long.toString(),
+      'latitude': destination.lat.toString(),
+    };
+    Map rideMap = {
+      'createdAt': DateTime.now().toString(),
+      'passengerName': thisUser.name,
+      'passengerPhone': thisUser.phone,
+      'pickUpAddress': pickUp.placeName,
+      'destinationAddress': destination.placeName,
+      'location': pickUpMap,
+      'destination': destinationMap,
+      'driver_id': 'waiting',
+    };
+    rideReq.set(rideMap);
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -67,8 +88,8 @@ class _PassengerMapState extends State<PassengerMap> {
       String data = response.body;
       setState(() {
         Adress pickUp = new Adress();
-        pickUp.placeName= jsonDecode(data)['data'][0]['label'];
-     //   pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+        pickUp.placeName = jsonDecode(data)['data'][0]['label'];
+        //   pickUp.placeName = jsonDecode(data)['data'][0]['county'];
         pickUp.long = long;
         pickUp.lat = lat;
         src_loc.text = pickUp.placeName;
@@ -143,6 +164,7 @@ class _PassengerMapState extends State<PassengerMap> {
                     onPressed: () {
                       setState(
                         () {
+                          createRequest();
                           isExtended = !isExtended;
                         },
                       );
