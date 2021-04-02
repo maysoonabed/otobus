@@ -8,6 +8,7 @@ import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'screens/PassMap.dart';
 import 'screens/fire.dart';
 
 Color apcolor = const Color(0xFF1ABC9C);
@@ -89,7 +90,7 @@ void main() {
   //*******************************
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-    home: MyApp(), // token != '' ? PassengerPage() :
+    home: token != '' ? PassMap() : MyApp(), //
   ));
 }
 
