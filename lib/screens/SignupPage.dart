@@ -8,8 +8,11 @@ import '../main.dart';
 import 'LoginPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'PassengerPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:connectivity/connectivity.dart';
 
 int id = 1;
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class SignupPage extends StatefulWidget {
   @override
@@ -33,10 +36,22 @@ class _SignupPageState extends State<SignupPage> {
     showprogress = false;
   }
 
+  void regFire() async {
+    final FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    ))
+        .user;
+    if (user != null)
+      print('registFFFire');
+    else
+      print('regFFFFAAAAAAIIIILLL');
+  }
+
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/regpass.php"; //10.0.0.8//192.168.1.107:8089
+        "http://10.0.0.12/otobus/phpfiles/regpass.php"; //10.0.0.8//192.168.1.107:8089
     var response = await http.post(apiurl, body: {
       'name': name, //get the username text
       'email': email,
@@ -58,6 +73,9 @@ class _SignupPageState extends State<SignupPage> {
             error = false;
             showprogress = false;
           });
+
+         regFire();
+
           await FlutterSession().set('token', email);
           FlutterToast(context).showToast(
               child: Container(
@@ -227,7 +245,7 @@ class _SignupPageState extends State<SignupPage> {
                   color: Colors.white, fontSize: 15, fontFamily: 'Lemonada'),
               obscureText: _obscureText,
               decoration: myPasswordDecoration(
-                label: "كلمة السر",
+                label: "كلمة السر, 6 أحرف على الأقل",
                 icon: Icons.lock,
               ),
               onChanged: (value) {
@@ -245,30 +263,44 @@ class _SignupPageState extends State<SignupPage> {
               height: 60,
               width: double.infinity,
               child: RaisedButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     //show progress indicator on click
                     showprogress = true;
                   });
+                  var conn = await Connectivity().checkConnectivity();
 
                   bool emailValid = RegExp(
                           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                       .hasMatch(email);
 
-                  if (email.isEmpty ||
+                  if (conn != ConnectivityResult.mobile &&
+                      conn != ConnectivityResult.wifi) {
+                    setState(() {
+                      showprogress = false;
+                      error = true;
+                      errormsg = ' يرجى التحقق من الاتصال بالإنترنت';
+                    });
+                  } else if (email.isEmpty ||
                       phone.isEmpty ||
                       name.isEmpty ||
                       password.isEmpty) {
                     setState(() {
                       showprogress = false;
                       error = true;
-                      errormsg = 'الرجاء تعبئة كافة البيانات';
+                      errormsg = 'يرجى تعبئة كافة البيانات';
                     });
                   } else if (!emailValid) {
                     setState(() {
                       showprogress = false;
                       error = true;
                       errormsg = 'عنوان البريد الإلكتروني غير صالح';
+                    });
+                  } else if (password.length < 6) {
+                    setState(() {
+                      showprogress = false;
+                      error = true;
+                      errormsg = 'كلمة السر قصيرة';
                     });
                   } else if (id == 2) {
                     startLogin();
@@ -371,10 +403,10 @@ class _SignupPageState extends State<SignupPage> {
       //prefixText: '+97',
       hintStyle: TextStyle(
           color: Colors.white.withOpacity(0.4),
-          fontSize: 15,
+          fontSize: 14,
           fontFamily: 'Lemonada'), //hint text style
       suffixIcon: Padding(
-          padding: EdgeInsets.only(left: 20, right: 10),
+          padding: EdgeInsets.only(left: 10, right: 10),
           child: Icon(
             icon,
             color: Colors.white,

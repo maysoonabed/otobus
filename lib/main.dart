@@ -7,7 +7,7 @@ import 'screens/DriverMap.dart';
 import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
 import 'package:provider/provider.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'screens/fire.dart';
 
 Color apcolor = const Color(0xFF1ABC9C);
@@ -344,15 +344,16 @@ class _MyAppState extends State<MyApp> {
                             child: Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: ElevatedButton(
-                                child: Text('FIRE'),
+                                child: Text('Passenger'),
                                 style: ElevatedButton.styleFrom(
                                   primary: apBcolor,
                                 ),
                                 onPressed: () {
+                                  
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => Fire()));
+                                          builder: (context) => PassengerPage()));
                                 },
                               ),
                             ),
@@ -362,5 +363,14 @@ class _MyAppState extends State<MyApp> {
                         ],
                       ))))),
     );
+  }
+
+   @override
+  void initState() {
+    super.initState();
+    Firebase.initializeApp().whenComplete(() { 
+      print("completed");
+      setState(() {});
+    });
   }
 }

@@ -47,7 +47,7 @@ class _FireState extends State<Fire> {
               onPressed: () {
                 DatabaseReference df =
                     FirebaseDatabase.instance.reference().child('yyyy');
-                df.set('uyi');
+                df.set('naste');
               },
               height: 50,
               minWidth: 300,

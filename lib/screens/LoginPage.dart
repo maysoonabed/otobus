@@ -7,8 +7,11 @@ import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'DriverMap.dart';
 import 'SignupPage.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 int id = 1;
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -24,10 +27,22 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _email = TextEditingController();
   bool _obscureText = true;
 
+  void logFire() async {
+    final User user = (await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    ))
+        .user;
+    if (user != null)
+      print('logFFFire');
+    else
+      print('logFFFFAAAAAAIIIILLL');
+  }
+
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/login.php"; //10.0.0.8//192.168.1.107:8089
+        "http://10.0.0.12/otobus/phpfiles/login.php"; //10.0.0.8//192.168.1.107:8089
 
     var response = await http.post(apiurl, body: {
       'email': email,
@@ -51,6 +66,7 @@ class _LoginPageState extends State<LoginPage> {
             error = false;
             showprogress = false;
           });
+          logFire();
           if (id == 2) {
             //String ph = phone.toString();
             await FlutterSession().set('token', email); //
@@ -178,8 +194,22 @@ class _LoginPageState extends State<LoginPage> {
                   height: 60,
                   width: double.infinity,
                   child: RaisedButton(
-                    onPressed: () {
-                      if (email.isEmpty || password.isEmpty) {
+                    onPressed: () async {
+                      setState(() {
+                        //show progress indicator on click
+                        showprogress = true;
+                      });
+
+                      var conn = await Connectivity().checkConnectivity();
+
+                      if (conn != ConnectivityResult.mobile &&
+                          conn != ConnectivityResult.wifi) {
+                        setState(() {
+                          showprogress = false;
+                          error = true;
+                          errormsg = ' يرجى التحقق من الاتصال بالإنترنت';
+                        });
+                      } else if (email.isEmpty || password.isEmpty) {
                         setState(() {
                           showprogress = false;
                           error = true;

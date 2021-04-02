@@ -98,23 +98,55 @@ class _PassengerMapState extends State<PassengerMap> {
     _mapct.move(currLatLng,10);} */
 
     final Size size = MediaQuery.of(context).size;
-    return FlutterMap(
-      options: MapOptions(
-        center: latLng.LatLng(32.0442, 35.2242),
-        zoom: 10.0,
+    return Stack(children: [
+
+      FlutterMap(
+        options: MapOptions(
+          center: latLng.LatLng(32.0442, 35.2242),
+          zoom: 10.0,
+        ),
+        layers: [
+          TileLayerOptions(
+            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          ),
+          PolylineLayerOptions(
+            polylines: polyLines,
+          ),
+          MarkerLayerOptions(
+            markers: markers,
+          ),
+        ],
       ),
-      layers: [
-        TileLayerOptions(
-          urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            Padding(
+        padding: const EdgeInsets.only(bottom: 100,left: 5),
+        child: Align(
+          alignment: Alignment.bottomLeft,
+          heightFactor: 80,
+          child: new FloatingActionButton(
+            backgroundColor: apBcolor,
+            onPressed: () {
+              markers.add(
+                Marker(
+                  width: 80.0,
+                  height: 80.0,
+                  point: currLatLng,
+                  builder: (ctx) => Container(
+                      child: Icon(
+                    Icons.location_on,
+                    color: myOrange,
+                    size: 40,
+                  )),
+                ),
+              );
+            },
+            child: new Icon(
+              Icons.check,
+              color: Colors.white,
+            ),
+          ),
         ),
-        PolylineLayerOptions(
-          polylines: polyLines,
-        ),
-        MarkerLayerOptions(
-          markers: markers,
-        ),
-      ],
-    );
+      ),
+    ]);
   }
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
