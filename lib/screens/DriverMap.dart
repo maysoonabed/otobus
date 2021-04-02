@@ -10,7 +10,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
-import "package:latlong/latlong.dart" as latLng;
 import '../main.dart';
 
 class DriverMap extends StatefulWidget {
@@ -19,19 +18,23 @@ class DriverMap extends StatefulWidget {
 }
 
 Position currentPosition;
-latLng.LatLng currLatLng;
 double _originLatitude;
 double _originLongitude;
-double _destLatitude; //= 31.947351
-double _destLongitude; //= 35.227163
-Map<MarkerId, Marker> markers = {};
+double _destLatitude;
+double _destLongitude;
+String _currName;
+String _destName;
+var currltlg;
+var destltlg;
+
+Set<Marker> markers = {};
+Set<Circle> circles = {};
 PolylinePoints polylinePoints = PolylinePoints();
 Map<PolylineId, Polyline> polylines = {};
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 final _startPointController = TextEditingController();
-Adress destinationAdd = new Adress();
 
 class _DriverMapState extends State<DriverMap> {
   Completer<GoogleMapController> _controller = Completer();
@@ -52,12 +55,8 @@ class _DriverMapState extends State<DriverMap> {
         Adress pickUp = new Adress();
         pickUp.placeLabel = jsonDecode(data)['data'][0]['label'];
         pickUp.placeName = jsonDecode(data)['data'][0]['county'];
-        pickUp.long = long;
-        pickUp.lat = lat;
-        //src_loc.text = pickUp.placeLabel;
-        setState(() {
-          currLatLng = latLng.LatLng(lat, long);
-        });
+        _currName = pickUp.placeLabel;
+        //src_loc.text = _currName;
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });
     } else {
@@ -71,17 +70,65 @@ class _DriverMapState extends State<DriverMap> {
         desiredAccuracy: LocationAccuracy.bestForNavigation);
     currentPosition = position;
     LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
-    /* print(currentPosition.latitude);print(currentPosition.longitude); */
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
     getData(currentPosition.latitude, currentPosition.longitude);
     _originLatitude = currentPosition.latitude;
     _originLongitude = currentPosition.longitude;
-    _addMarker(
-      LatLng(_originLatitude, _originLongitude),
-      "origin",
-      BitmapDescriptor.defaultMarker,
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void butMarker() {
+    LatLngBounds bounds;
+    currltlg = LatLng(_originLatitude, _originLongitude);
+    destltlg = LatLng(_destLatitude, _destLongitude);
+    Marker currMarker = Marker(
+        markerId: MarkerId("current"),
+        position: currltlg,
+        icon: BitmapDescriptor.defaultMarker,
+        infoWindow: InfoWindow(title: _currName, snippet: 'My Location'));
+    Marker destMarker = Marker(
+        markerId: MarkerId("destination"),
+        position: destltlg,
+        icon: BitmapDescriptor.defaultMarkerWithHue(90),
+        infoWindow: InfoWindow(title: _destName, snippet: 'Destination'));
+    markers.add(currMarker);
+    markers.add(destMarker);
+
+    Circle currCircle = Circle(
+      circleId: CircleId('current'),
+      strokeColor: Colors.green,
+      strokeWidth: 3,
+      radius: 40,
+      center: currltlg,
+      fillColor: Colors.green,
     );
+    Circle destCircle = Circle(
+      circleId: CircleId('current'),
+      strokeColor: Colors.green,
+      strokeWidth: 3,
+      radius: 40,
+      center: destltlg,
+      fillColor: Colors.green,
+    );
+    circles.add(currCircle);
+    circles.add(destCircle);
+    //*************************************//
+    if (_originLatitude > _destLatitude && _originLongitude > _destLongitude) {
+      bounds = LatLngBounds(southwest: destltlg, northeast: currltlg);
+    } else if (_originLongitude > _destLongitude) {
+      bounds = LatLngBounds(
+          southwest: LatLng(_originLatitude, _destLongitude),
+          northeast: LatLng(_destLatitude, _originLongitude));
+    } else if (_originLatitude > _destLatitude) {
+      bounds = LatLngBounds(
+          southwest: LatLng(_destLatitude, _originLongitude),
+          northeast: LatLng(_originLatitude, _destLongitude));
+    } else {
+      bounds = LatLngBounds(southwest: currltlg, northeast: destltlg);
+    }
+    newGoogleMapController
+        .animateCamera(CameraUpdate.newLatLngBounds(bounds, 70));
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -120,26 +167,15 @@ class _DriverMapState extends State<DriverMap> {
                             onSelect: (place) {
                               _startPointController.text = place.placeName;
                               setState(() {
-                                destinationAdd.lat = place.center[1];
-                                destinationAdd.long = place.center[0];
-                                destinationAdd.placeName = place.placeName;
-                                _destLatitude = destinationAdd.lat;
-                                _destLongitude = destinationAdd.long;
-                                _addMarker(
-                                  LatLng(_destLatitude, _destLongitude),
-                                  "destination",
-                                  BitmapDescriptor.defaultMarkerWithHue(90),
-                                );
-
-                                _getPolyline();
-                                //***********************
-                                LatLng posd = LatLng(
-                                    destinationAdd.lat, destinationAdd.long);
+                                _destLatitude = place.center[1];
+                                _destLongitude = place.center[0];
+                                _destName = place.placeName;
+                                LatLng posd =
+                                    LatLng(_destLatitude, _destLongitude);
                                 CameraPosition cpd =
                                     new CameraPosition(target: posd, zoom: 14);
                                 newGoogleMapController.animateCamera(
                                     CameraUpdate.newCameraPosition(cpd));
-                                //***********************
                               });
                             },
                             limit: 30,
@@ -164,7 +200,8 @@ class _DriverMapState extends State<DriverMap> {
               child: const Text('CHOOSE'),
               onPressed: () {
                 setState(() {
-                  //getDirDetails();
+                  _getPolyline();
+                  butMarker();
                 });
                 Navigator.pop(context);
               })
@@ -198,12 +235,14 @@ class _DriverMapState extends State<DriverMap> {
               mapType: MapType.normal,
               initialCameraPosition: _kGooglePlex,
               myLocationEnabled: true,
+              myLocationButtonEnabled: true,
               tiltGesturesEnabled: true,
               compassEnabled: true,
               scrollGesturesEnabled: true,
               zoomGesturesEnabled: true,
               polylines: Set<Polyline>.of(polylines.values),
-              markers: Set<Marker>.of(markers.values),
+              markers: markers,
+              circles: circles,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
                 newGoogleMapController = controller;
@@ -240,14 +279,12 @@ class _DriverMapState extends State<DriverMap> {
         ));
   }
 
-  // This method will add markers to the map based on the LatLng position
-  _addMarker(LatLng position, String id, BitmapDescriptor descriptor) {
-    MarkerId markerId = MarkerId(id);
-    Marker marker =
-        Marker(markerId: markerId, icon: descriptor, position: position);
-    markers[markerId] = marker;
-  }
-
+  /*  _addCircle(LatLng position, String id) {
+      CircleId circleId = CircleId(id);
+    Circle circle =
+        Circle(circleId: circleId);
+    circle[circleId] = circle;
+  } */
   _addPolyLine(List<LatLng> polylineCoordinates) {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
