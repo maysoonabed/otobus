@@ -31,7 +31,7 @@ dependencies:
   firebase_auth: ^0.18.1+2
   firebase_database: ^4.1.1
   curved_navigation_bar: ^0.3.7
-  google_maps_flutter: ^0.5.28+1
+  google_maps_flutter: ^1.0.3
   geolocator: ^6.1.1
   cupertino_icons: ^1.0.0
   geocoding: ^1.0.5

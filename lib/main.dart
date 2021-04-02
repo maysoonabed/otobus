@@ -349,11 +349,11 @@ class _MyAppState extends State<MyApp> {
                                   primary: apBcolor,
                                 ),
                                 onPressed: () {
-                                  
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => PassengerPage()));
+                                          builder: (context) =>
+                                              PassengerPage()));
                                 },
                               ),
                             ),
@@ -365,10 +365,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-   @override
+  @override
   void initState() {
     super.initState();
-    Firebase.initializeApp().whenComplete(() { 
+    Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});
     });
