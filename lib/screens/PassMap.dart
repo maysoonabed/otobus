@@ -106,9 +106,9 @@ class _PassMapState extends State<PassMap> {
       String data = response.body;
       setState(() {
         Adress pickUp = new Adress();
-        pickUp.placeLabel = jsonDecode(data)['data'][0]['label'];
-        pickUp.placeName = jsonDecode(data)['data'][0]['county'];
-        _currName = pickUp.placeLabel;
+        pickUp.placeName = jsonDecode(data)['data'][0]['label'];
+        //pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+        _currName = pickUp.placeName;
         src_loc.text = _currName;
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });
@@ -359,7 +359,6 @@ class _PassMapState extends State<PassMap> {
                     msgispress = false;
                     notispress = false;
                     proispress = false;
-                    _currName = "";
                     _destName = "";
                     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                     FlutterSession().set('token', '');
