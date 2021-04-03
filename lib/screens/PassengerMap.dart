@@ -80,6 +80,16 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void cancelReq() {
+    rideReq.remove();
+    setState(() {
+      markers.removeAt(1);
+      points.clear();
+      polyLines.clear();
+    });
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void getData(double lat, double long) async {
     Response response = await get(
@@ -156,7 +166,7 @@ class _PassengerMapState extends State<PassengerMap> {
                 padding: const EdgeInsets.only(right: 8.0),
                 child: Icon(Icons.cancel),
               ),
-              Text("اخفاء الباصات"),
+              Text("إلغاء الأمر"),
             ],
           );
         }
@@ -205,15 +215,19 @@ class _PassengerMapState extends State<PassengerMap> {
                   backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
                   isExtended: isExtended > 0 ? true : false,
                   onPressed: () {
+                    if (isExtended == 1) {
+                      createRequest();
+                    } else if (isExtended == 2) {
+                      cancelReq();
+                    }
                     setState(
                       () {
                         if (isExtended < 2) {
                           isExtended++;
-                        }else
-                        isExtended =  0;
+                        } else
+                          isExtended = 0;
                       },
                     );
-                    isExtended == 1 ? null : createRequest();
                   },
                   label: getWidget(),
                 ),
