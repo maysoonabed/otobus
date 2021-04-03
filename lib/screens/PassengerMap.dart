@@ -51,18 +51,19 @@ class _PassengerMapState extends State<PassengerMap> {
   var geoLocator = Geolocator();
   Position currentPosition;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void createRequest()  {
-    rideReq =  FirebaseDatabase.instance.reference().child('rideRequest').push();
+  void createRequest() {
+    rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
 
-    var pickUp =  Provider.of<AppData>(context, listen: false).pickUpAdd;
-    var destination =  Provider.of<AppData>(context, listen: false).destinationAddress;
+    var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
+    var destination =
+        Provider.of<AppData>(context, listen: false).destinationAddress;
 
     Map pickUpMap = {
-      'longitude':pickUp.long.toString(),
+      'longitude': pickUp.long.toString(),
       'latitude': pickUp.lat.toString(),
     };
     Map destinationMap = {
-      'longitude':destination.long.toString(),
+      'longitude': destination.long.toString(),
       'latitude': destination.lat.toString(),
     };
     Map rideMap = {
@@ -124,9 +125,53 @@ class _PassengerMapState extends State<PassengerMap> {
         desiredAccuracy: LocationAccuracy.bestForNavigation);
     getData(currentPosition.latitude, currentPosition.longitude);
   }
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Widget getWidget() {
+    switch (isExtended) {
+      case 0:
+        {
+          return Icon(Icons.directions_bus);
+        }
+        break;
+
+      case 1:
+        {
+          return Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Icon(Icons.check),
+              ),
+              Text("اظهار الباصات"),
+            ],
+          );
+        }
+        break;
+      case 2:
+        {
+          return Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Icon(Icons.cancel),
+              ),
+              Text("اخفاء الباصات"),
+            ],
+          );
+        }
+        break;
+
+      default:
+        {
+          Icon(Icons.directions_bus);
+        }
+        break;
+    }
+  }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  bool isExtended = false;
+  int isExtended = 0;
 
   Widget build(BuildContext context) {
     /*   if(currLatLng.latitude!=null){
@@ -157,27 +202,20 @@ class _PassengerMapState extends State<PassengerMap> {
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: FloatingActionButton.extended(
-                  backgroundColor: apBcolor,
-                  isExtended: isExtended,
+                  backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
+                  isExtended: isExtended > 0 ? true : false,
                   onPressed: () {
                     setState(
                       () {
-                        isExtended = !isExtended;
+                        if (isExtended < 2) {
+                          isExtended++;
+                        }else
+                        isExtended =  0;
                       },
                     );
-                    isExtended ? null : createRequest();
+                    isExtended == 1 ? null : createRequest();
                   },
-                  label: isExtended
-                      ? Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Icon(Icons.check),
-                            ),
-                            Text("اظهار الباصات"),
-                          ],
-                        )
-                      : Icon(Icons.directions_bus),
+                  label: getWidget(),
                 ),
               ),
             )
