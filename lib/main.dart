@@ -88,10 +88,17 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   dynamic token = FlutterSession().get('token');
   //*******************************
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-    home: token != '' ? PassMap() : MyApp(), //
-  ));
+  //
+
+  //
+  runApp(ChangeNotifierProvider<AppData>(
+      create: (context) => AppData(),
+      child: Consumer<AppData>(
+        builder: (context, model, _) => MaterialApp(
+          debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+          home: MyApp(), //token != '' ? PassMap() : MyApp(), //
+        ),
+      )));
 }
 
 class MyApp extends StatefulWidget {
@@ -151,70 +158,126 @@ class BottomCircle extends StatelessWidget {
 
 class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AppData>(
-      create: (context) => AppData(),
-      child: Consumer<AppData>(
-      builder: (context, model, _) => Material(
-          // debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-          type: MaterialType.transparency,
-          child: new Container(
-              alignment: Alignment.bottomCenter,
-              width: double.infinity,
-              child: Container(
-                  color: Colors.white, //bacolor,
-                  child: CustomPaint(
-                      size: Size(
-                          100,
-                          (200 * 1.5)
-                              .toDouble()), //You can Replace [WIDTH] with your desired width for Custom Paint and height will be calculated automatically
-                      painter: RPSCustomPainter(),
-                      child: ListView(
-                        children: [
-                          BottomCircle(),
-                          //*********************************
-                          SizedBox(
-                            height: 250.0,
-                          ),
-                          //*********************************
-                          Center(
-                            child: Text(
-                              "OtoBüs",
-                              style: TextStyle(
-                                fontSize: 60,
-                                fontFamily: 'Pacifico',
-                                color: Color(
-                                    0xFF07322a), // Color(0xFF05211b) //Color(0xFF02100d),
-                              ),
+    return Material(
+        // debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+        type: MaterialType.transparency,
+        child: new Container(
+            alignment: Alignment.bottomCenter,
+            width: double.infinity,
+            child: Container(
+                color: Colors.white, //bacolor,
+                child: CustomPaint(
+                    size: Size(
+                        100,
+                        (200 * 1.5)
+                            .toDouble()), //You can Replace [WIDTH] with your desired width for Custom Paint and height will be calculated automatically
+                    painter: RPSCustomPainter(),
+                    child: ListView(
+                      children: [
+                        BottomCircle(),
+                        //*********************************
+                        SizedBox(
+                          height: 250.0,
+                        ),
+                        //*********************************
+                        Center(
+                          child: Text(
+                            "OtoBüs",
+                            style: TextStyle(
+                              fontSize: 60,
+                              fontFamily: 'Pacifico',
+                              color: Color(
+                                  0xFF07322a), // Color(0xFF05211b) //Color(0xFF02100d),
                             ),
                           ),
-                          //*********************************
-                          /*Center(
-                            child: Text(
-                              //"App saves your time and effort in booking buses",
-                              "   وفرّ وقتك و قلقك بشأن المواصلات بحجز الباص مسبقاً",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontFamily: 'ArefRuqaaR', //'Pacifico',
-                                color: Color(0xFF07322a), //Color(0xFF64726f),
-                              ),
+                        ),
+                        //*********************************
+                        /*Center(
+                          child: Text(
+                            //"App saves your time and effort in booking buses",
+                            "   وفرّ وقتك و قلقك بشأن المواصلات بحجز الباص مسبقاً",
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontFamily: 'ArefRuqaaR', //'Pacifico',
+                              color: Color(0xFF07322a), //Color(0xFF64726f),
                             ),
-                          ),*/
-                          //*********************************
+                          ),
+                        ),*/
+                        //*********************************
 
-                          Center(
-                            child: Builder(builder: (BuildContext mContext) {
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 10),
-                                child: Stack(
-                                  alignment: Alignment(1.0, 0.0),
-                                  children: <Widget>[
-                                    new GestureDetector(
+                        Center(
+                          child: Builder(builder: (BuildContext mContext) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: Stack(
+                                alignment: Alignment(1.0, 0.0),
+                                children: <Widget>[
+                                  new GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  LoginPage()));
+                                    },
+                                    child: new Container(
+                                      alignment: Alignment.center,
+                                      width:
+                                          MediaQuery.of(mContext).size.width /
+                                              1.7,
+                                      decoration: ShapeDecoration(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30.0)),
+                                        gradient: LinearGradient(
+                                            colors: myGradients1,
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight),
+                                        shadows: [
+                                          BoxShadow(
+                                            color: Color(0xFF07322a)
+                                                .withOpacity(0.5),
+                                            //Colors.grey,
+                                            spreadRadius: 3,
+                                            blurRadius: 7,
+                                            offset: Offset(0,
+                                                3), // changes position of shadow
+                                          ),
+                                        ],
+                                      ),
+                                      child: Text("  تسجيل الدخول", //"Sign up"
+                                          style: TextStyle(
+                                              color: Colors.white, //bacolor,
+                                              fontSize: 15, //18
+                                              fontFamily:
+                                                  'Lemonada', // 'ArefRuqaaR', //Pacifico',
+                                              fontWeight: FontWeight.w500)),
+                                      padding:
+                                          EdgeInsets.only(top: 16, bottom: 16),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            );
+                          }),
+                        ),
+                        //*********************************
+                        Center(
+                          child: Builder(builder: (BuildContext mContext) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: Stack(
+                                alignment: Alignment(1.0, 0.0),
+                                children: <Widget>[
+                                  new GestureDetector(
                                       onTap: () {
                                         Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    LoginPage()));
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SignupPage()),
+                                        );
+                                        //setState(() {});
                                       },
                                       child: new Container(
                                         alignment: Alignment.center,
@@ -226,7 +289,7 @@ class _MyAppState extends State<MyApp> {
                                               borderRadius:
                                                   BorderRadius.circular(30.0)),
                                           gradient: LinearGradient(
-                                              colors: myGradients1,
+                                              colors: myGradients2,
                                               begin: Alignment.topLeft,
                                               end: Alignment.bottomRight),
                                           shadows: [
@@ -242,129 +305,64 @@ class _MyAppState extends State<MyApp> {
                                           ],
                                         ),
                                         child: Text(
-                                            "  تسجيل الدخول", //"Sign up"
+                                            "إنشاء حساب", //"Log in""إنشاء حساب   "
                                             style: TextStyle(
                                                 color: Colors.white, //bacolor,
-                                                fontSize: 15, //18
+                                                fontSize: 15,
                                                 fontFamily:
-                                                    'Lemonada', // 'ArefRuqaaR', //Pacifico',
+                                                    'Lemonada', //'ArefRuqaaR',25 //Pacifico',18
                                                 fontWeight: FontWeight.w500)),
                                         padding: EdgeInsets.only(
                                             top: 16, bottom: 16),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              );
-                            }),
-                          ),
-                          //*********************************
-                          Center(
-                            child: Builder(builder: (BuildContext mContext) {
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 10),
-                                child: Stack(
-                                  alignment: Alignment(1.0, 0.0),
-                                  children: <Widget>[
-                                    new GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    SignupPage()),
-                                          );
-                                          //setState(() {});
-                                        },
-                                        child: new Container(
-                                          alignment: Alignment.center,
-                                          width: MediaQuery.of(mContext)
-                                                  .size
-                                                  .width /
-                                              1.7,
-                                          decoration: ShapeDecoration(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        30.0)),
-                                            gradient: LinearGradient(
-                                                colors: myGradients2,
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight),
-                                            shadows: [
-                                              BoxShadow(
-                                                color: Color(0xFF07322a)
-                                                    .withOpacity(0.5),
-                                                //Colors.grey,
-                                                spreadRadius: 3,
-                                                blurRadius: 7,
-                                                offset: Offset(0,
-                                                    3), // changes position of shadow
-                                              ),
-                                            ],
-                                          ),
-                                          child: Text(
-                                              "إنشاء حساب", //"Log in""إنشاء حساب   "
-                                              style: TextStyle(
-                                                  color:
-                                                      Colors.white, //bacolor,
-                                                  fontSize: 15,
-                                                  fontFamily:
-                                                      'Lemonada', //'ArefRuqaaR',25 //Pacifico',18
-                                                  fontWeight: FontWeight.w500)),
-                                          padding: EdgeInsets.only(
-                                              top: 16, bottom: 16),
-                                        )),
-                                  ],
-                                ),
-                              );
-                            }),
-                          ),
-                          //*********************************
-
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: ElevatedButton(
-                                child: Text('driver map'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: apBcolor,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => DriverMap()));
-                                },
+                                      )),
+                                ],
                               ),
+                            );
+                          }),
+                        ),
+                        //*********************************
+
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: ElevatedButton(
+                              child: Text('driver map'),
+                              style: ElevatedButton.styleFrom(
+                                primary: apBcolor,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DriverMap()));
+                              },
                             ),
                           ),
+                        ),
 
-                          //*********************************
+                        //*********************************
 
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: ElevatedButton(
-                                child: Text('Passenger'),
-                                style: ElevatedButton.styleFrom(
-                                  primary: apBcolor,
-                                ),
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              PassengerPage()));
-                                },
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: ElevatedButton(
+                              child: Text('Passenger'),
+                              style: ElevatedButton.styleFrom(
+                                primary: apBcolor,
                               ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PassengerPage()));
+                              },
                             ),
                           ),
+                        ),
 
-                          //*********************************
-                        ],
-                      )))))),
-    );
+                        //*********************************
+                      ],
+                    )))));
   }
 
   @override
