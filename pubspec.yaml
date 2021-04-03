@@ -64,6 +64,9 @@ flutter:
   assets:
     - lib/Images/Defultprof.jpg
     - lib/Images/passengercover.jpg
+    - lib/Images/icon1.png
+    - lib/Images/icon2.png
+    - lib/Images/icon2_t.png
   fonts:
     - family: Pacifico
       fonts:
