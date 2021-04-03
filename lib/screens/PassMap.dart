@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -13,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
+import 'dart:math' show cos, sqrt, asin;
 
 class PassMap extends StatefulWidget {
   @override
@@ -29,7 +29,9 @@ String _currName;
 String _destName;
 var currltlg;
 var destltlg;
+var disltlg;
 var src_loc = TextEditingController();
+var distance = TextEditingController();
 Set<Marker> markers = {};
 Set<Circle> circles = {};
 PolylinePoints polylinePoints = PolylinePoints();
@@ -45,16 +47,20 @@ bool msgispress = false;
 bool notispress = false;
 bool proispress = false;
 double mapBottomPadding = 0;
+BitmapDescriptor myIcon;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
   Completer<GoogleMapController> _controller = Completer();
   GoogleMapController newGoogleMapController;
+  double totalDistance = 0.0;
+  double llat, llng;
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 9.4746,
   );
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   profileConnection() async {
     String apiurl =
@@ -110,6 +116,8 @@ class _PassMapState extends State<PassMap> {
         //pickUp.placeName = jsonDecode(data)['data'][0]['county'];
         _currName = pickUp.placeName;
         src_loc.text = _currName;
+        llat = lat;
+        llng = long;
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });
     } else {
@@ -131,10 +139,13 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void butMarker() {
-    LatLngBounds bounds;
     currltlg = LatLng(_originLatitude, _originLongitude);
     destltlg = LatLng(_destLatitude, _destLongitude);
+    disltlg = LatLng((_originLatitude + _destLatitude) / 2,
+        (_originLongitude + _destLongitude) / 2);
     Marker currMarker = Marker(
         markerId: MarkerId("current"),
         position: currltlg,
@@ -143,11 +154,10 @@ class _PassMapState extends State<PassMap> {
     Marker destMarker = Marker(
         markerId: MarkerId("destination"),
         position: destltlg,
-        icon: BitmapDescriptor.defaultMarkerWithHue(90),
+        icon: BitmapDescriptor.defaultMarkerWithHue(90), //myIcon,
         infoWindow: InfoWindow(title: _destName, snippet: 'Destination'));
     markers.add(currMarker);
     markers.add(destMarker);
-
     Circle currCircle = Circle(
       circleId: CircleId('current'),
       strokeColor: Colors.green,
@@ -158,15 +168,18 @@ class _PassMapState extends State<PassMap> {
     );
     Circle destCircle = Circle(
       circleId: CircleId('current'),
-      strokeColor: Colors.green,
-      strokeWidth: 3,
-      radius: 40,
+      strokeColor: Colors.black,
+      strokeWidth: 1,
+      radius: 80,
       center: destltlg,
-      fillColor: Colors.green,
+      fillColor: apcolor,
     );
     circles.add(currCircle);
     circles.add(destCircle);
-    //*************************************//
+  }
+
+  _bounds() {
+    LatLngBounds bounds;
     if (_originLatitude > _destLatitude && _originLongitude > _destLongitude) {
       bounds = LatLngBounds(southwest: destltlg, northeast: currltlg);
     } else if (_originLongitude > _destLongitude) {
@@ -229,6 +242,8 @@ class _PassMapState extends State<PassMap> {
                                     new CameraPosition(target: posd, zoom: 14);
                                 newGoogleMapController.animateCamera(
                                     CameraUpdate.newCameraPosition(cpd));
+                                _getPolyline();
+                                butMarker();
                               });
                             },
                             limit: 30,
@@ -240,7 +255,17 @@ class _PassMapState extends State<PassMap> {
                     },
                     enabled: true,
                   ),
-                )
+                ),
+                new Expanded(
+                  child: new TextField(
+                    controller: distance,
+                    readOnly: true,
+                    minLines: 1,
+                    maxLines: null,
+                    autofocus: false,
+                    decoration: new InputDecoration(labelText: 'Distance'),
+                  ),
+                ),
               ],
             )),
         actions: <Widget>[
@@ -253,8 +278,7 @@ class _PassMapState extends State<PassMap> {
               child: const Text('CHOOSE'),
               onPressed: () {
                 setState(() {
-                  _getPolyline();
-                  butMarker();
+                  _bounds();
                 });
                 Navigator.pop(context);
               })
@@ -269,6 +293,17 @@ class _PassMapState extends State<PassMap> {
   Widget build(BuildContext context) {
     profileConnection();
     final Size size = MediaQuery.of(context).size;
+
+    @override
+    void initState() {
+      BitmapDescriptor.fromAssetImage(
+              ImageConfiguration(size: Size(1, 1)), 'lib/Images/icon2.png')
+          .then((onValue) {
+        myIcon = onValue;
+      });
+    }
+
+    initState();
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -354,12 +389,14 @@ class _PassMapState extends State<PassMap> {
                   onPressed: () {
                     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                     markers.isNotEmpty ? markers.clear() : null;
+                    circles.isNotEmpty ? markers.clear() : null;
                     polylines.isNotEmpty ? polylines.clear() : null;
                     homeispress = false;
                     msgispress = false;
                     notispress = false;
                     proispress = false;
                     _destName = "";
+                    _startPointController.text = "";
                     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                     FlutterSession().set('token', '');
                     Navigator.push(context,
@@ -417,6 +454,9 @@ class _PassMapState extends State<PassMap> {
                         child: FloatingActionButton(
                           onPressed: () {
                             //markers.remove(destltlg);
+                            totalDistance = 0.0;
+                            llat = _originLatitude;
+                            llng = _originLongitude;
                             _searchDialog();
                           },
                           backgroundColor: mypink,
@@ -527,6 +567,7 @@ class _PassMapState extends State<PassMap> {
         ));
   }
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   _addPolyLine(List<LatLng> polylineCoordinates) {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
@@ -537,6 +578,16 @@ class _PassMapState extends State<PassMap> {
     );
     polylines[id] = polyline;
     setState(() {});
+  }
+
+  void shared() {}
+  double calcDistance(double plat, double plng, double llat, double llng) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 -
+        c((llat - plat) * p) / 2 +
+        c(plat * p) * c(llat * p) * (1 - c((llng - plng) * p)) / 2;
+    return 12742 * asin(sqrt(a));
   }
 
   void _getPolyline() async {
@@ -551,10 +602,18 @@ class _PassMapState extends State<PassMap> {
     if (result.points.isNotEmpty) {
       result.points.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+        totalDistance +=
+            calcDistance(point.latitude, point.longitude, llat, llng);
+        llat = point.latitude;
+        llng = point.longitude;
       });
     } else {
       print(result.errorMessage);
     }
+    setState(() {
+      distance.text = totalDistance.toStringAsFixed(2) +
+          " km"; //المشكلة انه ما بصفر القيمة/ 80.0) * 100)
+    });
     _addPolyLine(polylineCoordinates);
   }
 }
