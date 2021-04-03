@@ -10,6 +10,7 @@ import 'SignupPage.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'PassMap.dart';
+import 'package:OtoBus/configMaps.dart';
 
 int id = 1;
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -70,6 +71,9 @@ class _LoginPageState extends State<LoginPage> {
           logFire();
           if (id == 2) {
             //String ph = phone.toString();
+             thisUser.email = email;
+            thisUser.name =jsondata["name"];
+            thisUser.phone = jsondata["phonenum"];
             await FlutterSession().set('token', email); //
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => PassengerPage()));

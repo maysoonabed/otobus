@@ -55,45 +55,15 @@ class _PassengerPageState extends State<PassengerPage> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  profileConnection() async {
-    String apiurl =
-        "http://10.0.0.10/otobus/phpfiles/profile.php"; //10.0.0.13//192.168.1.107:8089
-
-    var response = await http.post(apiurl, body: {
-      'email': email,
-    });
-    //print(response.body);
-    if (response.statusCode == 200) {
-      var jsondata = jsonDecode(response.body); //json.decode
-      if (jsondata["error"] == 1) {
-        setState(() {
-          error = true;
-          errormsg = jsondata["message"];
-        });
-      } else {
-        if (this.mounted) {
-          setState(() {
-            thisUser.email = email = email;
-            thisUser.name = name = jsondata["name"];
-            thisUser.phone = phone = jsondata["phonenum"];
-            //jsondata["image"];
-          });
-        }
-      }
-    } else {
-      setState(() {
-        error = true;
-        errormsg = "هناك مشكلة في الاتصال بالسيرفر";
-      });
-    }
-  }
+  
 
   void initState() {
-    name = "";
-    phone = "";
-    email = "";
+    name =thisUser.name!=null?thisUser.name: "";
+    phone = thisUser.phone!=null?thisUser.phone: "";
+    email =thisUser.email!=null?thisUser.email: "";
     errormsg = "";
     error = false;
+
     super.initState();
   }
 
@@ -220,8 +190,8 @@ class _PassengerPageState extends State<PassengerPage> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Widget build(BuildContext context) {
-    profileConnection();
     final Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       //key: _scaffoldKey,
       backgroundColor: ba1color,
@@ -266,7 +236,7 @@ class _PassengerPageState extends State<PassengerPage> {
             ),
             ListTile(
                 title: Center(
-                    child: Text(name,
+                    child: Text(name != null ? name : "",
                         style: TextStyle(
                           fontSize: 20,
                           fontFamily: "Lemonada",
@@ -289,7 +259,7 @@ class _PassengerPageState extends State<PassengerPage> {
             ),
             ListTile(
               title: Center(
-                  child: Text(phone,
+                  child: Text(phone != null ? phone : "",
                       style: TextStyle(
                         fontSize: 20,
                         fontFamily: "Lemonada",

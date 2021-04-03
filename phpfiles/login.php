@@ -28,7 +28,8 @@
              //echo $active;
              //echo $q;
              if($res->num_rows>0){
-                $json['value'] = 1;
+               $json['value'] = 1;
+
              }else{
                $json['value'] = 2;
                $json['error'] =1;
@@ -36,7 +37,15 @@
              }
         }else{
          $json['value'] = 1;
-        }
+            while(($row = mysqli_fetch_assoc($result) )){
+              $Name =$row['name'];
+              $Phone=$row['phonenum'];
+              }
+              $json['name']=$Name;
+              $json['phonenum'] =$Phone;
+              $json['error'] =0;
+            }
+            
      }else{
          $json['value'] = 2;
          $json['error'] =1;

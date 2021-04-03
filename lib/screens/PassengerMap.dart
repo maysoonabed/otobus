@@ -51,18 +51,18 @@ class _PassengerMapState extends State<PassengerMap> {
   var geoLocator = Geolocator();
   Position currentPosition;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void createRequest() {
-    rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
-    var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
-    var destination =
-        Provider.of<AppData>(context, listen: false).destinationAddress;
+  void createRequest()  {
+    rideReq =  FirebaseDatabase.instance.reference().child('rideRequest').push();
+
+    var pickUp =  Provider.of<AppData>(context, listen: false).pickUpAdd;
+    var destination =  Provider.of<AppData>(context, listen: false).destinationAddress;
 
     Map pickUpMap = {
-      'longitude': pickUp.long.toString(),
+      'longitude':pickUp.long.toString(),
       'latitude': pickUp.lat.toString(),
     };
     Map destinationMap = {
-      'longitude': destination.long.toString(),
+      'longitude':destination.long.toString(),
       'latitude': destination.lat.toString(),
     };
     Map rideMap = {
@@ -90,8 +90,9 @@ class _PassengerMapState extends State<PassengerMap> {
         Adress pickUp = new Adress();
         pickUp.placeName = jsonDecode(data)['data'][0]['label'];
         //   pickUp.placeName = jsonDecode(data)['data'][0]['county'];
-        pickUp.long = long;
         pickUp.lat = lat;
+        pickUp.long = long;
+
         src_loc.text = pickUp.placeName;
         setState(() {
           currLatLng = latLng.LatLng(lat, long);
@@ -164,7 +165,7 @@ class _PassengerMapState extends State<PassengerMap> {
                         isExtended = !isExtended;
                       },
                     );
-                    createRequest();
+                    isExtended ? null : createRequest();
                   },
                   label: isExtended
                       ? Row(

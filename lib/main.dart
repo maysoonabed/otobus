@@ -91,14 +91,13 @@ void main() {
   //
 
   //
-  runApp(ChangeNotifierProvider<AppData>(
+  runApp(ChangeNotifierProvider(
       create: (context) => AppData(),
-      child: Consumer<AppData>(
-        builder: (context, model, _) => MaterialApp(
+      child:  MaterialApp(
           debugShowCheckedModeBanner: false, //لإخفاء شريط depug
           home: MyApp(), //token != '' ? PassMap() : MyApp(), //
         ),
-      )));
+      ));
 }
 
 class MyApp extends StatefulWidget {

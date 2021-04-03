@@ -8,8 +8,9 @@ class AppData extends ChangeNotifier {
     pickUpAdd = pickUp;
     notifyListeners();
   }
-   void updateDestAddress(Adress destination) {
-    pickUpAdd = destination;
+
+  void updateDestAddress(Adress destination) {
+    destinationAddress = destination;
     notifyListeners();
   }
 }
