@@ -198,7 +198,7 @@ class _PassengerMapState extends State<PassengerMap> {
       ),
       markers.length > 1
           ? Padding(
-              padding: const EdgeInsets.only(bottom: 100, right: 10),
+              padding: const EdgeInsets.only(bottom: 90, right: 10),
               child: Align(
                 alignment: Alignment.bottomRight,
                 child: FloatingActionButton.extended(
