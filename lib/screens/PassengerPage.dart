@@ -264,8 +264,8 @@ class _PassengerPageState extends State<PassengerPage> {
             FutureBuilder(
                 future: FlutterSession().get('phone'),
                 builder: (context, snapshot) {
-                  phone = snapshot.hasData ? snapshot.data : '';
-                  return Text(snapshot.hasData ? snapshot.data : 'Loading...',
+                  phone = snapshot.hasData ? snapshot.data.toString() : '';
+                  return Text(snapshot.hasData ? snapshot.data.toString() : 'Loading...',
                       style: TextStyle(
                         fontSize: 20,
                         fontFamily: "Lemonada",
