@@ -24,7 +24,7 @@
     file_put_contents('cardlic/'.$licensename, $licenseImage);
     //echo "Image Uploaded Successfully.";
     /**************************************************/
-    $query = "SELECT * FROM driver WHERE phonenum='$Mobile' or email='$Email' ";
+    $query ="SELECT * FROM passenger p, driver d WHERE p.phonenum='$Mobile' or d.phonenum='$Mobile' or p.email='$Email' or d.email='$Email'";
     $result = mysqli_query($connect, $query);
     if(mysqli_num_rows($result)>0){
         $json['value'] = 2;

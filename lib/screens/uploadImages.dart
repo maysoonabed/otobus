@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:io' as Io;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'LoginPage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_database/firebase_database.dart';
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class UploadImages extends StatefulWidget {
   UploadImages(this.name, this.phone, this.email, this.pass);
@@ -37,6 +41,24 @@ class _UploadImagesState extends State<UploadImages> {
   String errormsg = "";
   bool error = false;
   bool showprogress = false;
+
+  void regFire() async {
+    final User user = (await _auth.createUserWithEmailAndPassword(
+      email: widget.email,
+      password: widget.pass,
+    ))
+        .user;
+    if (user != null) {
+      DatabaseReference newUser =
+          FirebaseDatabase.instance.reference().child('Drivers/${user.uid}');
+      Map userMap = {
+        'phone': widget.phone,
+      };
+      newUser.set(userMap);
+      print('registFFFire');
+    } else
+      print('regFFFFAAAAAAIIIILLL');
+  }
 
   Future<void> _showMyDialog() async {
     return showDialog<void>(
@@ -126,7 +148,7 @@ class _UploadImagesState extends State<UploadImages> {
     base64idcard = base64Encode(byt1);
     base64license = base64Encode(byt2);
     String url =
-        "http://10.0.0.5/otobus/phpfiles/regdriver.php"; //10.0.0.8//192.168.1.107:8089
+        "http://10.0.0.15/otobus/phpfiles/regdriver.php"; //10.0.0.8//192.168.1.107:8089
     var response = await http.post(url, body: {
       'busId': busId,
       'numpass': numpass,
@@ -151,6 +173,7 @@ class _UploadImagesState extends State<UploadImages> {
         });
       } else {
         if (jsondata["value"] == 1) {
+          regFire();
           setState(() {
             error = false;
             showprogress = false;
