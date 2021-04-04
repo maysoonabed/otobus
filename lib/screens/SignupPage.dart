@@ -51,7 +51,7 @@ class _SignupPageState extends State<SignupPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://10.0.0.12/otobus/phpfiles/regpass.php"; //10.0.0.8//192.168.1.107:8089
+        "http://192.168.1.107:8089/otobus/phpfiles/regpass.php"; //10.0.0.8//192.168.1.107:8089
     var response = await http.post(apiurl, body: {
       'name': name, //get the username text
       'email': email,
@@ -74,7 +74,7 @@ class _SignupPageState extends State<SignupPage> {
             showprogress = false;
           });
 
-         regFire();
+          regFire();
 
           await FlutterSession().set('token', email);
           FlutterToast(context).showToast(

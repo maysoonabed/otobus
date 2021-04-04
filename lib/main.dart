@@ -88,16 +88,13 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   dynamic token = FlutterSession().get('token');
   //*******************************
-  //
-
-  //
   runApp(ChangeNotifierProvider(
-      create: (context) => AppData(),
-      child:  MaterialApp(
-          debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-          home: MyApp(), //token != '' ? PassMap() : MyApp(), //
-        ),
-      ));
+    create: (context) => AppData(),
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+      home: token != '' ? PassMap() : MyApp(), //MyApp(), //
+    ),
+  ));
 }
 
 class MyApp extends StatefulWidget {

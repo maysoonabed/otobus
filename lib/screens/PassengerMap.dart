@@ -194,7 +194,7 @@ class _PassengerMapState extends State<PassengerMap> {
   Widget build(BuildContext context) {
     /*   if(currLatLng.latitude!=null){
     _mapct.move(currLatLng,10);} */
-
+    putvalues();
     final Size size = MediaQuery.of(context).size;
     return Stack(children: [
       FlutterMap(

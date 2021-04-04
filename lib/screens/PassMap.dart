@@ -69,9 +69,9 @@ class _PassMapState extends State<PassMap> {
   );
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void initState() {
-    name = thisUser.name != null ? thisUser.name : "";
-    phone = thisUser.phone != null ? thisUser.phone : "";
-    email = thisUser.email != null ? thisUser.email : "";
+    name = ""; //thisUser.name != null ? thisUser.name :
+    phone = ""; //thisUser.phone != null ? thisUser.phone :
+    email = ""; //thisUser.email != null ? thisUser.email :
     errormsg = "";
     error = false;
     super.initState();
@@ -114,7 +114,7 @@ class _PassMapState extends State<PassMap> {
     _originLongitude = currentPosition.longitude;
   }
 
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void putvalues() async {
     thisUser.email = await FlutterSession().get('email');
     thisUser.name = await FlutterSession().get('name');
@@ -141,7 +141,7 @@ class _PassMapState extends State<PassMap> {
     Map rideMap = {
       'createdAt': DateTime.now().toString(),
       'passengerName': thisUser.name,
-      'passengerPhone': thisUser.phone.toString(),
+      'passengerPhone': thisUser.phone,
       'pickUpAddress': pickUp.placeName,
       'destinationAddress': destination.placeName,
       'location': pickUpMap,
@@ -387,18 +387,16 @@ class _PassMapState extends State<PassMap> {
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                  child: FutureBuilder(
-                      future: FlutterSession().get('token'),
-                      builder: (context, snapshot) {
-                        return Text(
-                            snapshot.hasData ? snapshot.data : 'Loading...',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: "Lemonada",
-                            ));
-                      }),
-                ),
+                FutureBuilder(
+                    future: FlutterSession().get('token'),
+                    builder: (context, snapshot) {
+                      return Text(
+                          snapshot.hasData ? snapshot.data : 'Loading...',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontFamily: "Lemonada",
+                          ));
+                    }),
                 SizedBox(
                   height: 20,
                 ),
@@ -406,7 +404,9 @@ class _PassMapState extends State<PassMap> {
                     future: FlutterSession().get('phone'),
                     builder: (context, snapshot) {
                       return Text(
-                          snapshot.hasData ? snapshot.data : 'Loading...',
+                          snapshot.hasData
+                              ? snapshot.data.toString()
+                              : 'Loading...',
                           style: TextStyle(
                             fontSize: 20,
                             fontFamily: "Lemonada",
@@ -432,7 +432,6 @@ class _PassMapState extends State<PassMap> {
                     proispress = false;
                     _destName = "";
                     _startPointController.text = "";
-                    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                     FlutterSession().set('token', '');
                     FlutterSession().set('name', '');
                     FlutterSession().set('phone', '');
