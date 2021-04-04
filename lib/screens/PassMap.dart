@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -11,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
+import '../configMaps.dart';
 import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
 
@@ -56,48 +58,20 @@ class _PassMapState extends State<PassMap> {
   GoogleMapController newGoogleMapController;
   double totalDistance = 0.0;
   double llat, llng;
+  DatabaseReference rideReq;
+  bool reqbook = true;
+  bool unbook = false;
+  Adress destprv = new Adress();
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 9.4746,
   );
-
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  profileConnection() async {
-    String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/profile.php"; //10.0.0.13//
-
-    var response = await http.post(apiurl, body: {
-      'email': email,
-    });
-    if (response.statusCode == 200) {
-      var jsondata = jsonDecode(response.body);
-      if (jsondata["error"] == 1) {
-        setState(() {
-          error = true;
-          errormsg = jsondata["message"];
-        });
-      } else {
-        if (this.mounted) {
-          setState(() {
-            email = email;
-            name = jsondata["name"];
-            phone = jsondata["phonenum"];
-            //jsondata["image"];
-          });
-        }
-      }
-    } else {
-      setState(() {
-        error = true;
-        errormsg = "هناك مشكلة في الاتصال بالسيرفر";
-      });
-    }
-  }
-
   void initState() {
-    name = "";
-    phone = "";
-    email = "";
+    name = thisUser.name != null ? thisUser.name : "";
+    phone = thisUser.phone != null ? thisUser.phone : "";
+    email = thisUser.email != null ? thisUser.email : "";
     errormsg = "";
     error = false;
     super.initState();
@@ -114,6 +88,8 @@ class _PassMapState extends State<PassMap> {
         Adress pickUp = new Adress();
         pickUp.placeName = jsonDecode(data)['data'][0]['label'];
         //pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+        pickUp.lat = lat;
+        pickUp.long = long;
         _currName = pickUp.placeName;
         src_loc.text = _currName;
         llat = lat;
@@ -139,6 +115,54 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void putvalues() async {
+    thisUser.email = await FlutterSession().get('email');
+    thisUser.name = await FlutterSession().get('name');
+    thisUser.phone = await FlutterSession().get('phone');
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void createRequest() {
+    //print(email);print(name);print(phone);
+    rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
+    var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
+    var destination =
+        Provider.of<AppData>(context, listen: false).destinationAddress;
+    //print(pickUp);
+    //print(destination);
+    Map pickUpMap = {
+      'longitude': pickUp.long.toString(),
+      'latitude': pickUp.lat.toString(),
+    };
+    Map destinationMap = {
+      'longitude': destination.long.toString(),
+      'latitude': destination.lat.toString(),
+    };
+    Map rideMap = {
+      'createdAt': DateTime.now().toString(),
+      'passengerName': thisUser.name,
+      'passengerPhone': thisUser.phone.toString(),
+      'pickUpAddress': pickUp.placeName,
+      'destinationAddress': destination.placeName,
+      'location': pickUpMap,
+      'destination': destinationMap,
+      'driver_id': 'waiting',
+    };
+    rideReq.set(rideMap);
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void cancelReq() {
+    rideReq.remove();
+    setState(() {
+      markers.clear();
+      circles.clear();
+      polylines.clear();
+    });
+    LatLng pos = LatLng(_originLatitude, _originLongitude);
+    CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
+    newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+  }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void butMarker() {
@@ -236,14 +260,17 @@ class _PassMapState extends State<PassMap> {
                                 _destLatitude = place.center[1];
                                 _destLongitude = place.center[0];
                                 _destName = place.placeName;
+                                destprv.placeName = _destName;
+                                destprv.lat = _destLatitude;
+                                destprv.long = _destLongitude;
+                                Provider.of<AppData>(context, listen: false)
+                                    .updateDestAddress(destprv);
                                 LatLng posd =
                                     LatLng(_destLatitude, _destLongitude);
                                 CameraPosition cpd =
                                     new CameraPosition(target: posd, zoom: 14);
                                 newGoogleMapController.animateCamera(
                                     CameraUpdate.newCameraPosition(cpd));
-                                _getPolyline();
-                                butMarker();
                               });
                             },
                             limit: 30,
@@ -278,6 +305,8 @@ class _PassMapState extends State<PassMap> {
               child: const Text('CHOOSE'),
               onPressed: () {
                 setState(() {
+                  _getPolyline();
+                  butMarker();
                   _bounds();
                 });
                 Navigator.pop(context);
@@ -291,7 +320,6 @@ class _PassMapState extends State<PassMap> {
 
   @override
   Widget build(BuildContext context) {
-    profileConnection();
     final Size size = MediaQuery.of(context).size;
 
     @override
@@ -304,6 +332,7 @@ class _PassMapState extends State<PassMap> {
     }
 
     initState();
+    putvalues();
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -345,20 +374,9 @@ class _PassMapState extends State<PassMap> {
                 SizedBox(
                   height: 50,
                 ),
-                ListTile(
-                    title: Center(
-                        child: Text(name,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: "Lemonada",
-                            )))),
-                SizedBox(
-                  height: 20,
-                ),
                 FutureBuilder(
-                    future: FlutterSession().get('token'),
+                    future: FlutterSession().get('name'),
                     builder: (context, snapshot) {
-                      email = snapshot.hasData ? snapshot.data : '';
                       return Text(
                           snapshot.hasData ? snapshot.data : 'Loading...',
                           style: TextStyle(
@@ -369,14 +387,31 @@ class _PassMapState extends State<PassMap> {
                 SizedBox(
                   height: 20,
                 ),
-                ListTile(
-                  title: Center(
-                      child: Text(phone,
+                Container(
+                  child: FutureBuilder(
+                      future: FlutterSession().get('token'),
+                      builder: (context, snapshot) {
+                        return Text(
+                            snapshot.hasData ? snapshot.data : 'Loading...',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: "Lemonada",
+                            ));
+                      }),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                FutureBuilder(
+                    future: FlutterSession().get('phone'),
+                    builder: (context, snapshot) {
+                      return Text(
+                          snapshot.hasData ? snapshot.data : 'Loading...',
                           style: TextStyle(
                             fontSize: 20,
                             fontFamily: "Lemonada",
-                          ))),
-                ),
+                          ));
+                    }),
                 SizedBox(
                   height: 100,
                 ),
@@ -399,6 +434,8 @@ class _PassMapState extends State<PassMap> {
                     _startPointController.text = "";
                     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                     FlutterSession().set('token', '');
+                    FlutterSession().set('name', '');
+                    FlutterSession().set('phone', '');
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => MyApp()));
                   },
@@ -436,6 +473,75 @@ class _PassMapState extends State<PassMap> {
                   setupPositionLocator();
                 },
               ),
+              markers.length > 1
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 170, right: 60),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: FloatingActionButton.extended(
+                          backgroundColor: apBcolor,
+                          isExtended: reqbook,
+                          onPressed: () {
+                            setState(
+                              () {
+                                reqbook = !reqbook;
+                              },
+                            );
+                            createRequest();
+                          },
+                          label: reqbook
+                              ? Row(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 8.0),
+                                      child: Icon(Icons.directions_bus),
+                                    ),
+                                    Text("اظهار الباصات"),
+                                  ],
+                                )
+                              : Icon(Icons.directions_bus),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      height: 0.1,
+                      width: 0.1,
+                    ),
+              markers.length > 1
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 120, right: 60),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: FloatingActionButton.extended(
+                          backgroundColor: Colors.red,
+                          isExtended: unbook,
+                          onPressed: () {
+                            setState(
+                              () {
+                                unbook = !unbook;
+                              },
+                            );
+                            cancelReq();
+                          },
+                          label: unbook
+                              ? Row(
+                                  children: <Widget>[
+                                    Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: Icon(Icons.remove)),
+                                    Text("إخفاء الباصات"),
+                                  ],
+                                )
+                              : Icon(Icons.bus_alert),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      height: 0.1,
+                      width: 0.1,
+                    ),
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -457,6 +563,8 @@ class _PassMapState extends State<PassMap> {
                             totalDistance = 0.0;
                             llat = _originLatitude;
                             llng = _originLongitude;
+                            reqbook = true;
+                            unbook = false;
                             _searchDialog();
                           },
                           backgroundColor: mypink,

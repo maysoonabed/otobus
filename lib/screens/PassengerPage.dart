@@ -55,12 +55,11 @@ class _PassengerPageState extends State<PassengerPage> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  
 
   void initState() {
-    name =thisUser.name!=null?thisUser.name: "";
-    phone = thisUser.phone!=null?thisUser.phone: "";
-    email =thisUser.email!=null?thisUser.email: "";
+    name = thisUser.name != null ? thisUser.name : "";
+    phone = thisUser.phone != null ? thisUser.phone : "";
+    email = thisUser.email != null ? thisUser.email : "";
     errormsg = "";
     error = false;
 
@@ -234,7 +233,45 @@ class _PassengerPageState extends State<PassengerPage> {
             SizedBox(
               height: 50,
             ),
-            ListTile(
+            FutureBuilder(
+                future: FlutterSession().get('name'),
+                builder: (context, snapshot) {
+                  name = snapshot.hasData ? snapshot.data : '';
+                  return Text(snapshot.hasData ? snapshot.data : 'Loading...',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: "Lemonada",
+                      ));
+                }),
+            SizedBox(
+              height: 20,
+            ),
+            Container(
+              child: FutureBuilder(
+                  future: FlutterSession().get('token'),
+                  builder: (context, snapshot) {
+                    //email = snapshot.hasData ? snapshot.data : '';
+                    return Text(snapshot.hasData ? snapshot.data : 'Loading...',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: "Lemonada",
+                        ));
+                  }),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            FutureBuilder(
+                future: FlutterSession().get('phone'),
+                builder: (context, snapshot) {
+                  phone = snapshot.hasData ? snapshot.data : '';
+                  return Text(snapshot.hasData ? snapshot.data : 'Loading...',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: "Lemonada",
+                      ));
+                }),
+            /*  ListTile(
                 title: Center(
                     child: Text(name != null ? name : "",
                         style: TextStyle(
@@ -264,7 +301,7 @@ class _PassengerPageState extends State<PassengerPage> {
                         fontSize: 20,
                         fontFamily: "Lemonada",
                       ))),
-            ),
+            ), */
             SizedBox(
               height: 100,
             ),
@@ -280,6 +317,8 @@ class _PassengerPageState extends State<PassengerPage> {
                 polyLines.isNotEmpty ? polyLines.clear() : null;
 
                 FlutterSession().set('token', '');
+                FlutterSession().set('name', '');
+                FlutterSession().set('phone', '');
                 Navigator.push(
                     context, MaterialPageRoute(builder: (context) => MyApp()));
               },
