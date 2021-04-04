@@ -196,6 +196,7 @@ class _PassengerMapState extends State<PassengerMap> {
     _mapct.move(currLatLng,10);} */
     putvalues();
     final Size size = MediaQuery.of(context).size;
+    putvalues();
     return Stack(children: [
       FlutterMap(
         options: MapOptions(
