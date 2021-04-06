@@ -17,12 +17,14 @@ Color iconBack = const Color(0xFF0e6655);
 
 Color bacolor = const Color(0xFFBDBDBD);
 Color ba1color = const Color(0xFFf2f1e3);
+Color myG = const Color(0xFFebe9e2);
 
 Color mypink = const Color(0xFFbc1a3a);
 Color myOrange = const Color(0xFFbc4b1a);
 Color myPink = const Color(0xFFbc1a8b);
 Color myblue = const Color(0xFF1a8bbc);
 Color mygreen = const Color(0xFF1abc4b);
+
 
 const List<Color> myGradients1 = [
   Color(0xFF02100d),
@@ -88,7 +90,6 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   dynamic token = FlutterSession().get('token');
   //*******************************
-  WidgetsFlutterBinding.ensureInitialized();
 
   runApp(ChangeNotifierProvider(
     create: (context) => AppData(),

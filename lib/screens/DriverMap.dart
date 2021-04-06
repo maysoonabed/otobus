@@ -54,7 +54,7 @@ class _DriverMapState extends State<DriverMap> {
       setState(() {
         Adress pickUp = new Adress();
         pickUp.placeName = jsonDecode(data)['data'][0]['label'];
-      //  pickUp.placeName = jsonDecode(data)['data'][0]['county'];
+        //  pickUp.placeName = jsonDecode(data)['data'][0]['county'];
         _currName = pickUp.placeName;
         //src_loc.text = _currName;
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
@@ -252,7 +252,7 @@ class _DriverMapState extends State<DriverMap> {
           ]),
           bottomNavigationBar: CurvedNavigationBar(
             color: apcolor,
-            backgroundColor: ba1color,
+            backgroundColor: myG,
             items: <Widget>[
               IconButton(
                 icon: Icon(
