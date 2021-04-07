@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,6 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
+import 'package:custom_switch/custom_switch.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:OtoBus/configMaps.dart';
 
 class DriverMap extends StatefulWidget {
   @override
@@ -26,7 +30,6 @@ String _currName;
 String _destName;
 var currltlg;
 var destltlg;
-
 Set<Marker> markers = {};
 Set<Circle> circles = {};
 PolylinePoints polylinePoints = PolylinePoints();
@@ -212,6 +215,9 @@ class _DriverMapState extends State<DriverMap> {
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  bool status = false;
+  bool backOn = false;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -234,6 +240,7 @@ class _DriverMapState extends State<DriverMap> {
             GoogleMap(
               mapType: MapType.normal,
               initialCameraPosition: _kGooglePlex,
+              zoomControlsEnabled: false,
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
               tiltGesturesEnabled: true,
@@ -249,6 +256,110 @@ class _DriverMapState extends State<DriverMap> {
                 setupPositionLocator();
               },
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10, left: 5),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Column(
+                  /*        mainAxisAlignment: MainAxisAlignment
+                      .center, */
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    status
+                        ? Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Container(
+                              child: Container(
+                                  height: 35,
+                                  padding: EdgeInsets.all(3.5),
+                                  width: 90,
+                                  decoration: BoxDecoration(
+                                    color: iconBack,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(15)),
+                                  ),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                          child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  backOn = false;
+                                                });
+                                              },
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    color: backOn
+                                                        ? Colors.white
+                                                        : iconBack,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            bottomLeft: Radius
+                                                                .circular(12),
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    12))),
+                                                child: Text("ذهاب",
+                                                    style: TextStyle(
+                                                      color: backOn
+                                                          ? iconBack
+                                                          : Colors.white,
+                                                      fontSize: 12,
+                                                    )),
+                                              ))),
+                                      Expanded(
+                                          child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  backOn = true;
+                                                });
+                                              },
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    color: backOn
+                                                        ? iconBack
+                                                        : Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            bottomRight: Radius
+                                                                .circular(12),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    12))),
+                                                child: Text("عودة",
+                                                    style: TextStyle(
+                                                      color: backOn
+                                                          ? Colors.white
+                                                          : iconBack,
+                                                      fontSize: 12,
+                                                    )),
+                                              ))),
+                                    ],
+                                  )),
+                            ),
+                          )
+                        : Container(
+                            height: 0.1,
+                            width: 0.1,
+                          ),
+                    CustomSwitch(
+                      activeColor: Color(0xFF094338),
+                      value: status,
+                      onChanged: (value) {
+                        value ? GoOnline() : GoOffline();
+                        value ? updateLocation() : null;
+                        print("VALUE : $value");
+                        setState(() {
+                          status = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
           ]),
           bottomNavigationBar: CurvedNavigationBar(
             color: apcolor,
@@ -314,5 +425,38 @@ class _DriverMapState extends State<DriverMap> {
       print(result.errorMessage);
     }
     _addPolyLine(polylineCoordinates);
+  }
+
+  void GoOnline() {
+    Geofire.initialize('availableDrivers');
+    Geofire.setLocation(
+        currUser.uid, currentPosition.latitude, currentPosition.longitude);
+    tripReq = FirebaseDatabase.instance
+        .reference()
+        .child('drivers/${currUser.uid}/newTrip');
+    tripReq.set('waiting');
+    tripReq.onValue.listen((event) {});
+  }
+
+  void GoOffline() {
+    Geofire.removeLocation(currUser.uid);
+    tripReq.onDisconnect();
+    tripReq.remove();
+    tripReq = null;
+  }
+
+  void updateLocation() {
+    posStream = Geolocator.getPositionStream(
+            desiredAccuracy: LocationAccuracy.bestForNavigation,
+            distanceFilter: 4)
+        .listen((Position position) {
+      currentPosition = position;
+      if (status) {
+        Geofire.setLocation(
+            currUser.uid, position.latitude, position.longitude);
+      }
+      LatLng pos = LatLng(position.latitude, position.longitude);
+      newGoogleMapController.animateCamera(CameraUpdate.newLatLng(pos));
+    });
   }
 }

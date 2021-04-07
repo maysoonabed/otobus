@@ -35,9 +35,11 @@ class _LoginPageState extends State<LoginPage> {
       password: password,
     ))
         .user;
-    if (user != null)
+    if (user != null){
+         currUser = await FirebaseAuth.instance.currentUser;
+
       print('logFFFire');
-    else
+    }else
       print('logFFFFAAAAAAIIIILLL');
   }
 

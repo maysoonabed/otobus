@@ -3,7 +3,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:OtoBus/configMaps.dart';
 
 class Fire extends StatefulWidget {
   @override
@@ -32,6 +33,7 @@ class _FireState extends State<Fire> {
               databaseURL: 'https://otobus-11914-default-rtdb.firebaseio.com',
             ),
     );
+
   }
 
   @override
