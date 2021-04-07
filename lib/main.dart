@@ -1,5 +1,7 @@
+import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/screens/PassengerPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -17,6 +19,7 @@ Color iconBack = const Color(0xFF0e6655);
 
 Color bacolor = const Color(0xFFBDBDBD);
 Color ba1color = const Color(0xFFf2f1e3);
+Color myG = const Color(0xFFebe9e2);
 
 Color mypink = const Color(0xFFbc1a3a);
 Color myOrange = const Color(0xFFbc4b1a);
@@ -79,7 +82,7 @@ const List<Color> myGradients4 = [
   Color(0xFF01d5ab),
 ];
 bool spin = true;
-void main() {
+void main()  {
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -88,11 +91,12 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   dynamic token = FlutterSession().get('token');
   //*******************************
+
   runApp(ChangeNotifierProvider(
     create: (context) => AppData(),
     child: MaterialApp(
       debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-      home: token != '' ? PassMap() : MyApp(), //MyApp(), //
+      home: currUser!=null?DriverMap(): MyApp(), // token != null ? PassengerPage() : MyApp(), //MyApp(), //
     ),
   ));
 }
@@ -364,6 +368,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsFlutterBinding.ensureInitialized();
     Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});

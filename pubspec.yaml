@@ -43,6 +43,8 @@ dependencies:
   flutter_map: ^0.9.0
   flutter_polyline_points: ^0.2.0
   connectivity: ^0.4.9+5
+  custom_switch: ^0.0.1
+  flutter_geofire: ^1.0.3
 
 dev_dependencies:
   flutter_test:

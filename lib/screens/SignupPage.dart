@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:OtoBus/screens/uploadImages.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -37,21 +38,27 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void regFire() async {
-    final FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
+    final User user = (await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     ))
         .user;
-    if (user != null)
+    if (user != null) {
+      DatabaseReference newUser =
+          FirebaseDatabase.instance.reference().child('Passengers/${user.uid}');
+      Map userMap = {
+        'phone': phone,
+      };
+      newUser.set(userMap);
       print('registFFFire');
-    else
+    } else
       print('regFFFFAAAAAAIIIILLL');
   }
 
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/regpass.php"; //10.0.0.8//192.168.1.107:8089
+        "http://10.0.0.15/otobus/phpfiles/regpass.php"; //10.0.0.8//192.168.1.107:8089
     var response = await http.post(apiurl, body: {
       'name': name, //get the username text
       'email': email,
