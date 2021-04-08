@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:OtoBus/dataProvider/appData.dart';
+import 'package:OtoBus/screens/DriverMap.dart';
 import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,6 +40,7 @@ class PassengerPage extends StatefulWidget {
 
 class _PassengerPageState extends State<PassengerPage> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 
 
   setPolyLines() {
     setState(() {
@@ -265,7 +267,10 @@ class _PassengerPageState extends State<PassengerPage> {
                 future: FlutterSession().get('phone'),
                 builder: (context, snapshot) {
                   phone = snapshot.hasData ? snapshot.data.toString() : '';
-                  return Text(snapshot.hasData ? snapshot.data.toString() : 'Loading...',
+                  return Text(
+                      snapshot.hasData
+                          ? snapshot.data.toString()
+                          : 'Loading...',
                       style: TextStyle(
                         fontSize: 20,
                         fontFamily: "Lemonada",

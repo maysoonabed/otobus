@@ -16,13 +16,14 @@ import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong/latlong.dart" as latLng;
 import 'PassengerPage.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:OtoBus/dataProvider/nearDriver.dart';
+import 'package:OtoBus/dataProvider/fireDrivers.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 const keyOpS = 'e29278e269d34185897708d17cb83bc4';
 const keyGeo = 'AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4';
-const tokenkey =
-    'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 final List<latLng.LatLng> points = [
@@ -36,6 +37,7 @@ final List<Marker> markers = [];
 var data;
 latLng.LatLng currLatLng;
 DatabaseReference rideReq;
+bool nearLoaded = false;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -55,7 +57,7 @@ class _PassengerMapState extends State<PassengerMap> {
   void putvalues() async {
     thisUser.email = await FlutterSession().get('email');
     thisUser.name = await FlutterSession().get('name');
-    thisUser.phone = await FlutterSession().get('phone');
+    thisUser.phone = await FlutterSession().get('phone').toString();
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -116,6 +118,7 @@ class _PassengerMapState extends State<PassengerMap> {
         setState(() {
           currLatLng = latLng.LatLng(lat, long);
         });
+
         markers.add(
           Marker(
             width: 80.0,
@@ -141,9 +144,86 @@ class _PassengerMapState extends State<PassengerMap> {
   void setupPositionLocator() async {
     Position currentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
+
     getData(currentPosition.latitude, currentPosition.longitude);
   }
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void startGeoListen() {
+    Geofire.initialize('availableDrivers');
+    Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
+        .listen((map) {
+      print(map);
+      if (map != null) {
+        var callBack = map['callBack'];
+
+        //latitude will be retrieved from map['latitude']
+        //longitude will be retrieved from map['longitude']
+
+        switch (callBack) {
+          case Geofire.onKeyEntered:
+            NearDrivers nDriver = NearDrivers();
+            nDriver.key = map['key'];
+            nDriver.lat = map['latitude'];
+            nDriver.long = map['longitude'];
+            FireDrivers.nDrivers.add(nDriver);
+            if (nearLoaded) {
+              driversMarkers();
+            }
+            break;
+
+          case Geofire.onKeyExited:
+            FireDrivers.removeDriver(map['key']);
+            driversMarkers();
+
+            break;
+
+          case Geofire.onKeyMoved:
+            // Update your key's location
+            NearDrivers nDriver = NearDrivers();
+            nDriver.key = map['key'];
+            nDriver.lat = map['latitude'];
+            nDriver.long = map['longitude'];
+
+            FireDrivers.updateDriver(nDriver);
+            driversMarkers();
+
+            break;
+
+          case Geofire.onGeoQueryReady:
+            // All Intial Data is loaded
+            nearLoaded = true;
+            driversMarkers();
+            //  print(map['result']);
+
+            break;
+        }
+      }
+    });
+  }
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void driversMarkers() {
+    for (NearDrivers driver in FireDrivers.nDrivers) {
+      setState(() {
+        latLng.LatLng driverPos = latLng.LatLng(driver.lat, driver.long);
+        markers.add(
+          Marker(
+            width: 80.0,
+            height: 80.0,
+            point: driverPos,
+            builder: (ctx) => Container(
+                child: Icon(
+              Icons.directions_bus,
+              color: Colors.black,
+              size: 40,
+            )),
+          ),
+        );
+      });
+    }
+  }
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Widget getWidget() {
     switch (isExtended) {
@@ -226,8 +306,14 @@ class _PassengerMapState extends State<PassengerMap> {
                   onPressed: () {
                     if (isExtended == 1) {
                       createRequest();
+                      startGeoListen();
                     } else if (isExtended == 2) {
                       cancelReq();
+                      setState(() {
+                        markers.length > 1
+                            ? markers.removeRange(2, markers.length - 1)
+                            : null;
+                      });
                     }
                     setState(
                       () {
