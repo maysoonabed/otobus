@@ -32,9 +32,9 @@
         $json['message'] = '  رقم الهاتف أو البريد الإلكتروني مستخدم  ' ;
         
     }else{
-        $query1="INSERT INTO bus(busid ,type,idcard,numofpass)VALUES('$busid','$type','$idcardname','$numpass')";
+        $query1="INSERT INTO bus(busid ,type,idcard,cardencoded,numofpass)VALUES('$busid','$type','$idcardname','$idcardimg','$numpass')";
         $inserted1 = mysqli_query($connect, $query1);
-        $query2= "INSERT INTO driver(name, email, phonenum,busid,license,password) VALUES ('$Name','$Email','$Mobile','$busid','$licensename','$Password')";
+        $query2= "INSERT INTO driver(name, email, phonenum,busid,license,licencoded,password) VALUES ('$Name','$Email','$Mobile','$busid','$licensename','$licenseimg','$Password')";
         $inserted2 = mysqli_query($connect, $query2);
         	
 
