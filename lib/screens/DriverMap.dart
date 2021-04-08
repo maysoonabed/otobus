@@ -30,13 +30,11 @@ String _currName;
 String _destName;
 var currltlg;
 var destltlg;
-Set<Marker> markers = {};
+Set<Marker> gMarkers = {};
 Set<Circle> circles = {};
 PolylinePoints polylinePoints = PolylinePoints();
 Map<PolylineId, Polyline> polylines = {};
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
-const tokenkey =
-    'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 final _startPointController = TextEditingController();
 
 class _DriverMapState extends State<DriverMap> {
@@ -95,8 +93,8 @@ class _DriverMapState extends State<DriverMap> {
         position: destltlg,
         icon: BitmapDescriptor.defaultMarkerWithHue(90),
         infoWindow: InfoWindow(title: _destName, snippet: 'Destination'));
-    markers.add(currMarker);
-    markers.add(destMarker);
+    gMarkers.add(currMarker);
+    gMarkers.add(destMarker);
 
     Circle currCircle = Circle(
       circleId: CircleId('current'),
@@ -248,7 +246,7 @@ class _DriverMapState extends State<DriverMap> {
               scrollGesturesEnabled: true,
               zoomGesturesEnabled: true,
               polylines: Set<Polyline>.of(polylines.values),
-              markers: markers,
+              markers: gMarkers,
               circles: circles,
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
