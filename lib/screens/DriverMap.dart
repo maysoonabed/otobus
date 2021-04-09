@@ -363,6 +363,11 @@ class _DriverMapState extends State<DriverMap> {
             color: apcolor,
             backgroundColor: myG,
             items: <Widget>[
+              Icon(
+                Icons.notifications,
+                size: 25,
+                color: Colors.white,
+              ),
               IconButton(
                 icon: Icon(
                   Icons.messenger,
@@ -372,11 +377,6 @@ class _DriverMapState extends State<DriverMap> {
                 onPressed: () {
                   _searchDialog();
                 },
-              ),
-              Icon(
-                Icons.notifications,
-                size: 25,
-                color: Colors.white,
               ),
               Icon(
                 Icons.person,
