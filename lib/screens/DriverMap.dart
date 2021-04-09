@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -15,6 +16,7 @@ import '../main.dart';
 import 'package:custom_switch/custom_switch.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/configMaps.dart';
+import 'package:OtoBus/dataProvider/pushNoteficationsFire.dart';
 
 class DriverMap extends StatefulWidget {
   @override
@@ -211,6 +213,22 @@ class _DriverMapState extends State<DriverMap> {
       context: context,
     );
   }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void driverInfo() async {
+    currUser = await FirebaseAuth.instance.currentUser;
+    PushNotifications pushNot = PushNotifications();
+    pushNot.initialize();
+    pushNot.getToken();
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  @override
+  void initState() {
+    super.initState();
+    driverInfo();
+  }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   bool status = false;

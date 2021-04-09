@@ -62,3 +62,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 apply plugin: 'com.google.gms.google-services'
+dependencies {
+  // ...20.2.0
+
+  implementation 'com.google.firebase:firebase-messaging:21.0.1'
+}
