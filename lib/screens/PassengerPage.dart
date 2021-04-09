@@ -40,7 +40,6 @@ class PassengerPage extends StatefulWidget {
 
 class _PassengerPageState extends State<PassengerPage> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- 
 
   setPolyLines() {
     setState(() {
@@ -324,6 +323,7 @@ class _PassengerPageState extends State<PassengerPage> {
                 FlutterSession().set('token', '');
                 FlutterSession().set('name', '');
                 FlutterSession().set('phone', '');
+                FirebaseAuth.instance.signOut();
                 Navigator.push(
                     context, MaterialPageRoute(builder: (context) => MyApp()));
               },
