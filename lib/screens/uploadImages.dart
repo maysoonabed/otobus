@@ -10,6 +10,9 @@ import 'LoginPage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
+import 'package:OtoBus/configMaps.dart';
+import 'package:OtoBus/dataProvider/address.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -27,12 +30,17 @@ class UploadImages extends StatefulWidget {
 
 class _UploadImagesState extends State<UploadImages> {
   final _formKey = GlobalKey<FormState>();
-
-  String busId, numpass, type, insdate;
+  DateTime _insT;
+  String busId, numpass, type, insdate, end, start;
   var _busId = TextEditingController();
   var _numpass = TextEditingController();
   var _type = TextEditingController();
   var _insdate = TextEditingController();
+  var _end = TextEditingController();
+  var _start = TextEditingController();
+  Adress from = new Adress();
+  Adress to = new Adress();
+
   var items = [
     'كارافيل',
     'شتل كرافيل',
@@ -74,25 +82,6 @@ class _UploadImagesState extends State<UploadImages> {
       print('registFFFire');
     } else
       print('regFFFFAAAAAAIIIILLL');
-  }
-
-  Future<Null> _selectDate(BuildContext context) async {
-    /* DateFormat formatter =
-        DateFormat('dd/MM/yyyy'); //specifies day/month/year format
-
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(1901, 1),
-        lastDate: DateTime(2100));
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-        _date.value = TextEditingValue(
-            text: formatter.format(
-                picked)); //Use formatter to format selected date and assign to text field
-      });
-    }*/
   }
 
   Future<void> _showMyDialog() async {
@@ -311,6 +300,88 @@ class _UploadImagesState extends State<UploadImages> {
                           onChanged: (value) {
                             //set username  text on change
                             busId = value;
+                          },
+                        ),
+                      ),
+
+                      /*************************************************************/
+                      Container(
+                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        margin: EdgeInsets.only(top: 10),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          controller: _start, //set username controller
+                          style:
+                              TextStyle(color: Colors.green[100], fontSize: 20),
+                          readOnly: true,
+
+                          decoration: myInputDecoration(
+                            label: "بداية الخط",
+                            icon: Icons.location_on,
+                          ),
+                          onTap: () {
+                            //set username  text on change
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MapBoxAutoCompleteWidget(
+                                  apiKey: tokenkey,
+                                  hint: "اختيار منطقة",
+                                  onSelect: (place) {
+                                    _start.text = place.placeName;
+                                    setState(() {
+                                      from.lat = place.center[1];
+                                      from.long = place.center[0];
+                                      from.placeName = place.placeName;
+                                    });
+                                  },
+                                  limit: 30,
+                                  country: 'Ps',
+                                  //language: 'ar',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      /*************************************************************/ Container(
+                        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        margin: EdgeInsets.only(top: 10),
+                        child: TextField(
+                          textAlign: TextAlign.center,
+                          readOnly: true,
+
+                          controller: _end, //set username controller
+                          style:
+                              TextStyle(color: Colors.green[100], fontSize: 20),
+                          decoration: myInputDecoration(
+                            label: "نهاية الخط",
+                            icon: Icons.location_on_outlined,
+                          ),
+                          onTap: () {
+                            //set username  text on change
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MapBoxAutoCompleteWidget(
+                                  apiKey: tokenkey,
+                                  hint: "اختيار منطقة",
+                                  onSelect: (place) {
+                                    _end.text = place.placeName;
+                                    setState(() {
+                                      to.lat = place.center[1];
+                                      to.long = place.center[0];
+                                      to.placeName = place.placeName;
+                                    });
+                                  },
+                                  limit: 30,
+                                  country: 'Ps',
+                                  //language: 'ar',
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),
@@ -582,22 +653,32 @@ class _UploadImagesState extends State<UploadImages> {
                       Container(
                           padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                           margin: EdgeInsets.only(top: 10),
-                          child: GestureDetector(
-                            onTap: () => _selectDate(context),
-                            child: TextField(
-                                textAlign: TextAlign.center,
-                                maxLength: 10,
-                                keyboardType: TextInputType.datetime,
-                                controller: _insdate, //set username controller
-                                style: TextStyle(
-                                    color: Colors.green[100], fontSize: 15),
-                                decoration: myInputDecoration(
-                                    label: "تاريخ انتهاء التأمين",
-                                    icon: Icons.date_range_rounded),
-                                onChanged: (value) {
-                                  //set username  text on change
-                                  insdate = value;
-                                }),
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.datetime,
+                            controller: _insdate, //set username controller
+                            style: TextStyle(
+                                color: Colors.green[100], fontSize: 20),
+                            decoration: myInputDecoration(
+                                label: "تاريخ انتهاء التأمين",
+                                icon: Icons.date_range_rounded),
+                            onTap: () {
+                              showDatePicker(
+                                      context: context,
+                                      initialDate: _insT == null
+                                          ? DateTime.now()
+                                          : _insT,
+                                      firstDate: DateTime(2021, 4),
+                                      lastDate: DateTime(2100))
+                                  .then((value) {
+                                setState(() {
+                                  _insT = value;
+                                  _insdate.text =
+                                      DateFormat.yMMMd().format(value);
+                                  ;
+                                });
+                              });
+                            },
                           )),
                       /*************************************************************/
                       Container(
