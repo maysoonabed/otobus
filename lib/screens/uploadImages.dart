@@ -664,6 +664,22 @@ class _UploadImagesState extends State<UploadImages> {
                                 icon: Icons.date_range_rounded),
                             onTap: () {
                               showDatePicker(
+                                      builder:
+                                          (BuildContext context, Widget child) {
+                                        return Theme(
+                                          data: ThemeData.dark().copyWith(
+                                            colorScheme: ColorScheme.dark(
+                                              primary: apcolor,
+                                              onPrimary:  Color(0xFF64726f),
+                                              surface: apBcolor,
+                                              onSurface:Colors.white,
+                                            ),
+                                            dialogBackgroundColor:
+                                               iconBack,
+                                          ),
+                                          child: child,
+                                        );
+                                      },
                                       context: context,
                                       initialDate: _insT == null
                                           ? DateTime.now()
@@ -675,7 +691,6 @@ class _UploadImagesState extends State<UploadImages> {
                                   _insT = value;
                                   _insdate.text =
                                       DateFormat.yMMMd().format(value);
-                                  ;
                                 });
                               });
                             },
