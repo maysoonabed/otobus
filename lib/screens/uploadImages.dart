@@ -654,6 +654,7 @@ class _UploadImagesState extends State<UploadImages> {
                           padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                           margin: EdgeInsets.only(top: 10),
                           child: TextField(
+                            readOnly: true,
                             textAlign: TextAlign.center,
                             keyboardType: TextInputType.datetime,
                             controller: _insdate, //set username controller
