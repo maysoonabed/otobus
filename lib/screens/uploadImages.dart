@@ -673,10 +673,10 @@ class _UploadImagesState extends State<UploadImages> {
                                               primary: apcolor,
                                               onPrimary:  Color(0xFF64726f),
                                               surface: apBcolor,
-                                              onSurface:Colors.white,
+                                              onSurface:Colors.black
                                             ),
                                             dialogBackgroundColor:
-                                               iconBack,
+                                              Colors.white,
                                           ),
                                           child: child,
                                         );
