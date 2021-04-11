@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.107:8089/otobus/phpfiles/login.php"; //10.0.0.8//192.168.1.107:8089
+        "http://192.168.1.106:8089/otobus/phpfiles/login.php"; //10.0.0.8//
 
     var response = await http.post(apiurl, body: {
       'email': email,

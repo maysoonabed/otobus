@@ -25,8 +25,8 @@ class PushNotifications {
         .reference()
         .child('drivers/${currUser.uid}/token');
     tokenRef.set(token);
-    fireMess.subscribeToTopic('toAllDrivers'); //عشان نبعت نوتيفيكيشين لكل الدرايفرز
-        fireMess.subscribeToTopic('toAllUsers'); 
-
+    fireMess
+        .subscribeToTopic('toAllDrivers'); //عشان نبعت نوتيفيكيشين لكل الدرايفرز
+    fireMess.subscribeToTopic('toAllUsers');
   }
 }

@@ -9,6 +9,7 @@ import '../main.dart';
 import 'LoginPage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -27,17 +28,32 @@ class UploadImages extends StatefulWidget {
 class _UploadImagesState extends State<UploadImages> {
   final _formKey = GlobalKey<FormState>();
 
-  String busId, numpass, type;
+  String busId, numpass, type, insdate;
   var _busId = TextEditingController();
   var _numpass = TextEditingController();
   var _type = TextEditingController();
-  var items = ['باص أبيض', 'باص أصفر'];
+  var _insdate = TextEditingController();
+  var items = [
+    'كارافيل',
+    'شتل كرافيل',
+    'مرسيدس',
+    'مرسيدس فيتو',
+    'v class مرسيدس',
+    'H100 هونداي',
+    'شتل ترانسبورتر',
+    'فورد ترانزيت',
+    'فورد مونديو',
+    'فورد فوكس',
+    'فورد فيستا',
+    'فورد كونكت',
+    'أفيكو باص'
+  ];
 
-  File _idcard, _license;
-  String _idcardname, _licensename;
+  File _idcard, _license, _insurance;
+  String _idcardname, _licensename, _insurancename;
   final picker = ImagePicker();
-  var byt1, byt2;
-  String base64idcard, base64license = "";
+  var byt1, byt2, byt3;
+  String base64idcard, base64license, base64insuranc = "";
   String errormsg = "";
   bool error = false;
   bool showprogress = false;
@@ -58,6 +74,25 @@ class _UploadImagesState extends State<UploadImages> {
       print('registFFFire');
     } else
       print('regFFFFAAAAAAIIIILLL');
+  }
+
+  Future<Null> _selectDate(BuildContext context) async {
+    /* DateFormat formatter =
+        DateFormat('dd/MM/yyyy'); //specifies day/month/year format
+
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(1901, 1),
+        lastDate: DateTime(2100));
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        _date.value = TextEditingValue(
+            text: formatter.format(
+                picked)); //Use formatter to format selected date and assign to text field
+      });
+    }*/
   }
 
   Future<void> _showMyDialog() async {
@@ -142,13 +177,23 @@ class _UploadImagesState extends State<UploadImages> {
     });
   }
 
-  Future upload(File im1, String fname1, File im2, String fname2) async {
+  Future upIm3() async {
+    var picked = await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      _insurance = File(picked.path);
+    });
+  }
+
+  Future upload(File im1, String fname1, File im2, String fname2, File im3,
+      String fname3) async {
     byt1 = Io.File(im1.path).readAsBytesSync();
     byt2 = Io.File(im2.path).readAsBytesSync();
+    byt3 = Io.File(im3.path).readAsBytesSync();
     base64idcard = base64Encode(byt1);
     base64license = base64Encode(byt2);
+    base64insuranc = base64Encode(byt3);
     String url =
-        "http://192.168.1.107:8089/otobus/phpfiles/regdriver.php"; //10.0.0.8//192.168.1.107:8089
+        "http://192.168.1.106:8089/otobus/phpfiles/regdriver.php"; //10.0.0.8//
     var response = await http.post(url, body: {
       'busId': busId,
       'numpass': numpass,
@@ -157,6 +202,9 @@ class _UploadImagesState extends State<UploadImages> {
       'idcardname': fname1,
       'licenseimg': base64license,
       'licensename': fname2,
+      'insurancimg': base64insuranc,
+      'insurancname': fname3,
+
       'name': widget.name, //get the username text
       'email': widget.email,
       'phone': widget.phone,
@@ -219,7 +267,7 @@ class _UploadImagesState extends State<UploadImages> {
                 ),
               ), //show linear gradient background of page
 
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(10),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -231,12 +279,12 @@ class _UploadImagesState extends State<UploadImages> {
                     children: <Widget>[
                       /*************************************************************/
                       Container(
-                        margin: EdgeInsets.only(top: 50),
+                        margin: EdgeInsets.only(top: 30),
                         child: Text(
                           "استكمال التسجيل",
                           style: TextStyle(
                               color: Colors.white,
-                              fontSize: 30,
+                              fontSize: 20,
                               fontFamily: 'Lemonada', //'ArefRuqaaR',
                               fontWeight: FontWeight.bold),
                         ), //title text
@@ -348,6 +396,70 @@ class _UploadImagesState extends State<UploadImages> {
                           IconButton(
                               icon: Icon(Icons.camera),
                               onPressed: () {
+                                upIm2();
+                              }),
+                          Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              //  margin: EdgeInsets.only(top: 10),
+                              child: Text(
+                                "نسخة عن رخصة القيادة ",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontFamily: 'Lemonada',
+                                ),
+                              )),
+                        ],
+                      ),
+                      /*************************************************************/
+
+                      const Divider(
+                        height: 10,
+                        thickness: 2,
+                        indent: 20,
+                        color: Color(0xFF1ABC9C),
+                        endIndent: 20,
+                      ),
+                      /*************************************************************/
+
+                      Container(
+                        child: _license == null
+                            ? Text(
+                                'لم يتم رفع الصورة',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.4),
+                                  fontSize: 10,
+                                  fontFamily: 'Lemonada',
+                                ),
+                              )
+                            :
+                            //Image.file(_license),
+                            InkResponse(
+                                onTap: () async {
+                                  await showDialog(
+                                      context: context,
+                                      builder: (_) => ImageDialog(_license));
+                                },
+                                child: Text(
+                                  "معاينة الصورة؟",
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 10,
+                                    fontFamily: 'Lemonada',
+                                  ), //
+                                ),
+                              ),
+                      ),
+                      /*************************************************************/
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, //Center Row contents horizontally,
+                        crossAxisAlignment: CrossAxisAlignment
+                            .center, //Center Row contents vertically,
+                        children: [
+                          IconButton(
+                              icon: Icon(Icons.camera),
+                              onPressed: () {
                                 upIm1();
                               }),
                           Container(
@@ -411,13 +523,13 @@ class _UploadImagesState extends State<UploadImages> {
                           IconButton(
                               icon: Icon(Icons.camera),
                               onPressed: () {
-                                upIm2();
+                                upIm3();
                               }),
                           Container(
                               padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                               //  margin: EdgeInsets.only(top: 10),
                               child: Text(
-                                "نسخة عن رخصة القيادة ",
+                                "نسخة عن تأمين المركبة ",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
@@ -438,7 +550,7 @@ class _UploadImagesState extends State<UploadImages> {
                       /*************************************************************/
 
                       Container(
-                        child: _license == null
+                        child: _insurance == null
                             ? Text(
                                 'لم يتم رفع الصورة',
                                 style: TextStyle(
@@ -453,7 +565,7 @@ class _UploadImagesState extends State<UploadImages> {
                                 onTap: () async {
                                   await showDialog(
                                       context: context,
-                                      builder: (_) => ImageDialog(_license));
+                                      builder: (_) => ImageDialog(_insurance));
                                 },
                                 child: Text(
                                   "معاينة الصورة؟",
@@ -465,11 +577,32 @@ class _UploadImagesState extends State<UploadImages> {
                                 ),
                               ),
                       ),
-                      /*************************************************************/
 
+                      /*************************************************************/
+                      Container(
+                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          margin: EdgeInsets.only(top: 10),
+                          child: GestureDetector(
+                            onTap: () => _selectDate(context),
+                            child: TextField(
+                                textAlign: TextAlign.center,
+                                maxLength: 10,
+                                keyboardType: TextInputType.datetime,
+                                controller: _insdate, //set username controller
+                                style: TextStyle(
+                                    color: Colors.green[100], fontSize: 15),
+                                decoration: myInputDecoration(
+                                    label: "تاريخ انتهاء التأمين",
+                                    icon: Icons.date_range_rounded),
+                                onChanged: (value) {
+                                  //set username  text on change
+                                  insdate = value;
+                                }),
+                          )),
+                      /*************************************************************/
                       Container(
                         padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.only(top: 20),
+                        margin: EdgeInsets.only(top: 10),
                         child: SizedBox(
                           height: 60,
                           width: double.infinity,
@@ -479,7 +612,8 @@ class _UploadImagesState extends State<UploadImages> {
                                   busId == "" ||
                                   type == "" ||
                                   _idcard == null ||
-                                  _license == null) {
+                                  _license == null ||
+                                  _insurance == null) {
                                 setState(() {
                                   showprogress = false;
                                   error = true;
@@ -491,14 +625,16 @@ class _UploadImagesState extends State<UploadImages> {
                                 });
                                 _idcardname = _idcard.path.split('/').last;
                                 _licensename = _license.path.split('/').last;
+                                _insurancename =
+                                    _insurance.path.split('/').last;
                                 upload(_idcard, _idcardname, _license,
-                                    _licensename);
+                                    _licensename, _insurance, _insurancename);
                               }
                             },
                             child: Text(
                               "إنشاء حساب",
                               style: TextStyle(
-                                  fontSize: 20, fontFamily: 'Lemonada'),
+                                  fontSize: 15, fontFamily: 'Lemonada'),
                             ),
                             // if showprogress == true then show progress indicator
                             // else show "LOGIN NOW" text

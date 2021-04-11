@@ -17,11 +17,16 @@
     $idcardname= $_POST['idcardname'];
     $licenseimg = $_POST['licenseimg'];
     $licensename = $_POST['licensename'];
-    
+    $insurancimg=$_POST['insurancimg'];
+    $insurancname=$_POST['insurancname'];
+
+
     $idcardImage = base64_decode($idcardimg);
     $licenseImage= base64_decode($licenseimg);
+    $insurancImage=base64_decode($insurancimg);
     file_put_contents('cardlic/'.$idcardname, $idcardImage);
     file_put_contents('cardlic/'.$licensename, $licenseImage);
+    file_put_contents('cardlic/'.$insurancname, $insurancImage);
     //echo "Image Uploaded Successfully.";
     /**************************************************/
     $query ="SELECT * FROM passenger p, driver d WHERE p.phonenum='$Mobile' or d.phonenum='$Mobile' or p.email='$Email' or d.email='$Email'";
@@ -32,7 +37,7 @@
         $json['message'] = '  رقم الهاتف أو البريد الإلكتروني مستخدم  ' ;
         
     }else{
-        $query1="INSERT INTO bus(busid ,type,idcard,cardencoded,numofpass)VALUES('$busid','$type','$idcardname','$idcardimg','$numpass')";
+        $query1="INSERT INTO bus(busid ,type,idcard,cardencoded,numofpass,insurname,insurencoded)VALUES('$busid','$type','$idcardname','$idcardimg','$numpass','$insurancname','$insurancimg')";
         $inserted1 = mysqli_query($connect, $query1);
         $query2= "INSERT INTO driver(name, email, phonenum,busid,license,licencoded,password) VALUES ('$Name','$Email','$Mobile','$busid','$licensename','$licenseimg','$Password')";
         $inserted2 = mysqli_query($connect, $query2);

@@ -46,6 +46,7 @@ dependencies:
   custom_switch: ^0.0.1
   flutter_geofire: ^1.0.3
   firebase_messaging: ^6.0.16
+  intl: ^0.16.1
 
 dev_dependencies:
   flutter_test:
