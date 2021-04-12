@@ -19,7 +19,15 @@
     $licensename = $_POST['licensename'];
     $insurancimg=$_POST['insurancimg'];
     $insurancname=$_POST['insurancname'];
-
+    $enddateStr=$_POST['enddate'];
+    $time = strtotime($enddateStr);
+    $enddate = date('Y-m-d',$time);
+    $begname=$_POST['begname'];
+    $beglat=(double)$_POST['beglat'];
+    $beglng=(double)$_POST['beglng'];
+    $endname=$_POST['endname'];
+    $endlat=(double)$_POST['endlat'];
+    $endlng=(double)$_POST['endlng'];
 
     $idcardImage = base64_decode($idcardimg);
     $licenseImage= base64_decode($licenseimg);
@@ -37,9 +45,9 @@
         $json['message'] = '  رقم الهاتف أو البريد الإلكتروني مستخدم  ' ;
         
     }else{
-        $query1="INSERT INTO bus(busid ,type,idcard,cardencoded,numofpass,insurname,insurencoded)VALUES('$busid','$type','$idcardname','$idcardimg','$numpass','$insurancname','$insurancimg')";
+        $query1="INSERT INTO bus(busid ,type,idcard,cardencoded,numofpass,insurend,insurname,insurencoded)VALUES('$busid','$type','$idcardname','$idcardimg','$numpass','$enddate','$insurancname','$insurancimg')";
         $inserted1 = mysqli_query($connect, $query1);
-        $query2= "INSERT INTO driver(name, email, phonenum,busid,license,licencoded,password) VALUES ('$Name','$Email','$Mobile','$busid','$licensename','$licenseimg','$Password')";
+        $query2= "INSERT INTO driver(name, email, phonenum,busid,license,licencoded,password,begname,beglat,beglng,endname,endlat,endlng) VALUES ('$Name','$Email','$Mobile','$busid','$licensename','$licenseimg','$Password','$begname','$beglat','$beglng','$endname','$endlat','$endlng')";
         $inserted2 = mysqli_query($connect, $query2);
         	
 

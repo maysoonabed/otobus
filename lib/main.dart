@@ -82,7 +82,7 @@ const List<Color> myGradients4 = [
   Color(0xFF01d5ab),
 ];
 bool spin = true;
-Future<void> main() async {
+Future<void> fire() async {
   WidgetsFlutterBinding.ensureInitialized();
   final FirebaseApp app = await Firebase.initializeApp(
     name: 'db2',
@@ -103,6 +103,9 @@ Future<void> main() async {
             databaseURL: 'https://otobus-11914-default-rtdb.firebaseio.com',
           ),
   );
+}
+
+void main() {
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

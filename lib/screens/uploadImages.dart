@@ -31,6 +31,11 @@ class UploadImages extends StatefulWidget {
 class _UploadImagesState extends State<UploadImages> {
   final _formKey = GlobalKey<FormState>();
   DateTime _insT;
+  String date;
+  final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+  final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
+  DateTime displayDate;
+  String formatted;
   String busId, numpass, type, insdate, end, start;
   var _busId = TextEditingController();
   var _numpass = TextEditingController();
@@ -40,7 +45,6 @@ class _UploadImagesState extends State<UploadImages> {
   var _start = TextEditingController();
   Adress from = new Adress();
   Adress to = new Adress();
-
   var items = [
     'كارافيل',
     'شتل كرافيل',
@@ -193,6 +197,13 @@ class _UploadImagesState extends State<UploadImages> {
       'licensename': fname2,
       'insurancimg': base64insuranc,
       'insurancname': fname3,
+      'enddate': formatted,
+      'begname': from.placeName,
+      'beglat': from.lat.toString(),
+      'beglng': from.long.toString(),
+      'endname': to.placeName,
+      'endlat': to.lat.toString(),
+      'endlng': to.long.toString(),
 
       'name': widget.name, //get the username text
       'email': widget.email,
@@ -670,13 +681,11 @@ class _UploadImagesState extends State<UploadImages> {
                                         return Theme(
                                           data: ThemeData.dark().copyWith(
                                             colorScheme: ColorScheme.dark(
-                                              primary: apcolor,
-                                              onPrimary:  Color(0xFF64726f),
-                                              surface: apBcolor,
-                                              onSurface:Colors.black
-                                            ),
-                                            dialogBackgroundColor:
-                                              Colors.white,
+                                                primary: apcolor,
+                                                onPrimary: Color(0xFF64726f),
+                                                surface: apBcolor,
+                                                onSurface: Colors.black),
+                                            dialogBackgroundColor: Colors.white,
                                           ),
                                           child: child,
                                         );
@@ -690,9 +699,14 @@ class _UploadImagesState extends State<UploadImages> {
                                   .then((value) {
                                 setState(() {
                                   _insT = value;
+                                  date = _insT.toString();
                                   _insdate.text =
                                       DateFormat.yMMMd().format(value);
+                                  displayDate = displayFormater.parse(date);
+                                  formatted =
+                                      serverFormater.format(displayDate);
                                 });
+                                //print(formatted);
                               });
                             },
                           )),
@@ -710,7 +724,10 @@ class _UploadImagesState extends State<UploadImages> {
                                   type == "" ||
                                   _idcard == null ||
                                   _license == null ||
-                                  _insurance == null) {
+                                  _insurance == null ||
+                                  _insdate == null ||
+                                  _end == null ||
+                                  _start == null) {
                                 setState(() {
                                   showprogress = false;
                                   error = true;
