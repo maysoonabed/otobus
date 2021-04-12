@@ -118,7 +118,8 @@ class _PassMapState extends State<PassMap> {
   void putvalues() async {
     thisUser.email = await FlutterSession().get('email');
     thisUser.name = await FlutterSession().get('name');
-    thisUser.phone = await FlutterSession().get('phone');
+    var r = await FlutterSession().get('phone');
+    thisUser.phone = r.toString();
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -244,6 +245,7 @@ class _PassMapState extends State<PassMap> {
                 ),
                 new Expanded(
                   child: CustomTextField(
+                    readOnly: true,
                     hintText: "Select Destinaton Point",
                     textController: _startPointController,
                     onTap: () {
@@ -423,18 +425,20 @@ class _PassMapState extends State<PassMap> {
                       borderRadius: BorderRadius.circular(8)),
                   onPressed: () {
                     //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                    markers.isNotEmpty ? markers.clear() : null;
-                    circles.isNotEmpty ? markers.clear() : null;
-                    polylines.isNotEmpty ? polylines.clear() : null;
-                    homeispress = false;
-                    msgispress = false;
-                    notispress = false;
-                    proispress = false;
-                    _destName = "";
-                    _startPointController.text = "";
-                    FlutterSession().set('token', '');
-                    FlutterSession().set('name', '');
-                    FlutterSession().set('phone', '');
+                    setState(() {
+                      markers.clear();
+                      markers.clear();
+                      polylines.clear();
+                      homeispress = false;
+                      msgispress = false;
+                      notispress = false;
+                      proispress = false;
+                      _destName = "";
+                      _startPointController.text = "";
+                      FlutterSession().set('token', '');
+                      FlutterSession().set('name', '');
+                      FlutterSession().set('phone', '');
+                    });
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => MyApp()));
                   },

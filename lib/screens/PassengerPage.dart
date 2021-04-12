@@ -39,8 +39,8 @@ class PassengerPage extends StatefulWidget {
 }
 
 class _PassengerPageState extends State<PassengerPage> {
+  final GlobalKey<ScaffoldState> _scafkey = GlobalKey<ScaffoldState>();
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
   setPolyLines() {
     setState(() {
       polyLines.isNotEmpty ? polyLines.clear() : null;
@@ -120,6 +120,7 @@ class _PassengerPageState extends State<PassengerPage> {
                 ),
                 new Expanded(
                   child: CustomTextField(
+                    readOnly: true,
                     hintText: "Select starting point",
                     textController: _startPointController,
                     onTap: () {
@@ -193,7 +194,7 @@ class _PassengerPageState extends State<PassengerPage> {
     final Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      //key: _scaffoldKey,
+      key: _scafkey,
       backgroundColor: ba1color,
       //#######################################
       appBar: AppBar(
@@ -316,14 +317,16 @@ class _PassengerPageState extends State<PassengerPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
               onPressed: () {
-                points.isNotEmpty ? points.clear() : null;
-                markers.isNotEmpty ? markers.clear() : null;
-                polyLines.isNotEmpty ? polyLines.clear() : null;
+                setState(() {
+                  points.isNotEmpty ? points.clear() : null;
+                  markers.isNotEmpty ? markers.clear() : null;
+                  polyLines.isNotEmpty ? polyLines.clear() : null;
 
-                FlutterSession().set('token', '');
-                FlutterSession().set('name', '');
-                FlutterSession().set('phone', '');
-                FirebaseAuth.instance.signOut();
+                  FlutterSession().set('token', '');
+                  FlutterSession().set('name', '');
+                  FlutterSession().set('phone', '');
+                  FirebaseAuth.instance.signOut();
+                });
                 Navigator.push(
                     context, MaterialPageRoute(builder: (context) => MyApp()));
               },
@@ -441,16 +444,13 @@ class _PassengerPageState extends State<PassengerPage> {
                                     : Icon(Icons.person_outline_rounded),
                                 color: (proispress) ? mypink : Colors.white,
                                 onPressed: () {
+                                  _scafkey.currentState.openEndDrawer();
                                   setState(() {
                                     homeispress = false;
                                     msgispress = false;
                                     notispress = false;
                                     proispress = true;
                                   });
-
-                                  //_scaffoldKey.currentState.openEndDrawer();
-                                  //Scaffold.of(context).openEndDrawer();
-                                  //Navigator.of(context).pop();  //For close the drawer
                                 }),
                           ),
                         ],
