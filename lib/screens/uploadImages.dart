@@ -679,10 +679,11 @@ class _UploadImagesState extends State<UploadImages> {
                                       builder:
                                           (BuildContext context, Widget child) {
                                         return Theme(
-                                          data: ThemeData.dark().copyWith(
-                                            colorScheme: ColorScheme.dark(
-                                                primary: apcolor,
-                                                onPrimary: Color(0xFF64726f),
+                                          data: ThemeData.light().copyWith(
+                                            
+                                            colorScheme: ColorScheme.light(
+                                                                                              primary: apcolor,
+                                                onPrimary: Colors.white,
                                                 surface: apBcolor,
                                                 onSurface: Colors.black),
                                             dialogBackgroundColor: Colors.white,
