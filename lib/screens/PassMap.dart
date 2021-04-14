@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
+import 'package:OtoBus/dataProvider/fireDrivers.dart';
+import 'package:OtoBus/dataProvider/nearDriver.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -32,6 +35,8 @@ String _destName;
 var currltlg;
 var destltlg;
 var disltlg;
+var driverltlg;
+bool nearLoaded = false;
 var src_loc = TextEditingController();
 var distance = TextEditingController();
 Set<Marker> markers = {};
@@ -220,6 +225,74 @@ class _PassMapState extends State<PassMap> {
     }
     newGoogleMapController
         .animateCamera(CameraUpdate.newLatLngBounds(bounds, 30));
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void driversMarkers() {
+    for (NearDrivers driver in FireDrivers.nDrivers) {
+      setState(() {
+        driverltlg = LatLng(driver.lat, driver.long);
+
+        Marker driversmark = Marker(
+          markerId: MarkerId("drivmk"),
+          position: driverltlg,
+          icon: BitmapDescriptor.defaultMarkerWithHue(30),
+        );
+        markers.add(driversmark);
+      });
+    }
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void startGeoListen() {
+    Geofire.initialize('availableDrivers');
+    Geofire.queryAtLocation(
+            _originLatitude, _originLongitude, 5) //بدنا نغير ال5 كيلو
+        .listen((map) {
+      // print(map);
+      if (map != null) {
+        var callBack = map['callBack'];
+        //latitude will be retrieved from map['latitude']
+        //longitude will be retrieved from map['longitude']
+        switch (callBack) {
+          case Geofire.onKeyEntered:
+            NearDrivers nDriver = NearDrivers();
+            nDriver.key = map['key'];
+            nDriver.lat = map['latitude'];
+            nDriver.long = map['longitude'];
+            FireDrivers.nDrivers.add(nDriver);
+            if (nearLoaded) {
+              driversMarkers();
+            }
+            break;
+
+          case Geofire.onKeyExited:
+            FireDrivers.removeDriver(map['key']);
+            driversMarkers();
+            break;
+
+          case Geofire.onKeyMoved:
+            // Update your key's location
+            NearDrivers nDriver = NearDrivers();
+            nDriver.key = map['key'];
+            nDriver.lat = map['latitude'];
+            nDriver.long = map['longitude'];
+
+            FireDrivers.updateDriver(nDriver);
+            driversMarkers();
+
+            break;
+
+          case Geofire.onGeoQueryReady:
+            // All Intial Data is loaded
+            nearLoaded = true;
+            driversMarkers();
+            //  print(map['result']);
+
+            break;
+        }
+      }
+    });
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -491,6 +564,7 @@ class _PassMapState extends State<PassMap> {
                               },
                             );
                             createRequest();
+                            startGeoListen();
                           },
                           label: reqbook
                               ? Row(

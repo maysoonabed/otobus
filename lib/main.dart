@@ -106,15 +106,15 @@ Future<void> fire() async {
 }
 
 void main() {
-  SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-  ));
   //***********Session*************
   WidgetsFlutterBinding.ensureInitialized();
   dynamic token = FlutterSession().get('token');
   //*******************************
-
+  SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+  ));
+  //*******************************
   runApp(ChangeNotifierProvider(
     create: (context) => AppData(),
     child: MaterialApp(
