@@ -679,10 +679,10 @@ class _UploadImagesState extends State<UploadImages> {
                                       builder:
                                           (BuildContext context, Widget child) {
                                         return Theme(
-                                          data: ThemeData.dark().copyWith(
-                                            colorScheme: ColorScheme.dark(
+                                          data: ThemeData.light().copyWith(
+                                            colorScheme: ColorScheme.light(
                                                 primary: apcolor,
-                                                onPrimary: Color(0xFF64726f),
+                                                onPrimary: Colors.white,
                                                 surface: apBcolor,
                                                 onSurface: Colors.black),
                                             dialogBackgroundColor: Colors.white,
@@ -694,7 +694,10 @@ class _UploadImagesState extends State<UploadImages> {
                                       initialDate: _insT == null
                                           ? DateTime.now()
                                           : _insT,
-                                      firstDate: DateTime(2021, 4),
+                                      firstDate: DateTime(
+                                          DateTime.now().year,
+                                          DateTime.now().month,
+                                          DateTime.now().day),
                                       lastDate: DateTime(2100))
                                   .then((value) {
                                 setState(() {
