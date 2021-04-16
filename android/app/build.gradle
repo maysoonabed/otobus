@@ -65,5 +65,5 @@ apply plugin: 'com.google.gms.google-services'
 dependencies {
   // ...20.2.0
 
-  implementation 'com.google.firebase:firebase-messaging:21.0.1'
+  implementation 'com.google.firebase:firebase-messaging:21.1.0'
 }
