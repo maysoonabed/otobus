@@ -134,86 +134,6 @@ class _DriverMapState extends State<DriverMap> {
         .animateCamera(CameraUpdate.newLatLngBounds(bounds, 70));
   }
 
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Future<void> _searchDialog() async {
-    return showDialog<void>(
-      builder: (context) => new AlertDialog(
-        contentPadding: EdgeInsets.all(20.0),
-        content: Container(
-            width: 300.0,
-            height: 200.0,
-            child: Column(
-              children: <Widget>[
-                new Expanded(
-                  child: new TextField(
-                    //controller: src_loc,
-                    readOnly: true,
-                    minLines: 1,
-                    maxLines: null,
-                    autofocus: false,
-                    decoration:
-                        new InputDecoration(labelText: 'Source Location'),
-                  ),
-                ),
-                new Expanded(
-                  child: CustomTextField(
-                    hintText: "Select starting point",
-                    textController: _startPointController,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MapBoxAutoCompleteWidget(
-                            apiKey: tokenkey,
-                            hint: "Select starting point",
-                            closeOnSelect: true,
-                            onSelect: (place) {
-                              _startPointController.text = place.placeName;
-                              setState(() {
-                                _destLatitude = place.center[1];
-                                _destLongitude = place.center[0];
-                                _destName = place.placeName;
-                                LatLng posd =
-                                    LatLng(_destLatitude, _destLongitude);
-                                CameraPosition cpd =
-                                    new CameraPosition(target: posd, zoom: 14);
-                                newGoogleMapController.animateCamera(
-                                    CameraUpdate.newCameraPosition(cpd));
-                              });
-                            },
-                            limit: 30,
-                            country: 'Ps',
-                            //language: 'ar',
-                          ),
-                        ),
-                      );
-                    },
-                    enabled: true,
-                  ),
-                )
-              ],
-            )),
-        actions: <Widget>[
-          new FlatButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          new FlatButton(
-              child: const Text('CHOOSE'),
-              onPressed: () {
-                setState(() {
-                  _getPolyline();
-                  butMarker();
-                });
-                Navigator.pop(context);
-              })
-        ],
-      ),
-      context: context,
-    );
-  }
-
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void driverInfo() async {
     currUser = await FirebaseAuth.instance.currentUser;
@@ -386,15 +306,10 @@ class _DriverMapState extends State<DriverMap> {
                 size: 25,
                 color: Colors.white,
               ),
-              IconButton(
-                icon: Icon(
-                  Icons.messenger,
-                  size: 25,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  _searchDialog();
-                },
+              Icon(
+                Icons.messenger,
+                size: 25,
+                color: Colors.white,
               ),
               Icon(
                 Icons.person,

@@ -1,11 +1,11 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:OtoBus/configMaps.dart';
-  final FirebaseMessaging fireMess = FirebaseMessaging();
+
+final FirebaseMessaging fireMess = FirebaseMessaging();
 
 class PushNotifications {
   Future initialize() async {
-   
     fireMess.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
