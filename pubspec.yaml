@@ -67,12 +67,7 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
-    - lib/Images/Defultprof.jpg
-    - lib/Images/passengercover.jpg
-    - lib/Images/icon1.png
-    - lib/Images/icon2.png
-    - lib/Images/icon2_t.png
-    - lib/Images/bus.jpg
+    - lib/Images/
     - lib/sounds/
 
   fonts:
