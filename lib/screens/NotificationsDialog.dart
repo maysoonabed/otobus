@@ -3,6 +3,7 @@ import 'package:OtoBus/dataProvider/tripInfo.dart';
 import 'package:OtoBus/main.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class NotificationsDialog extends StatelessWidget {
   final TripInfo trip;
@@ -76,6 +77,10 @@ class NotificationsDialog extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 8),
+                  Divider(
+                    height: 20,
+                    thickness: 2,
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Row(
@@ -176,15 +181,28 @@ class NotificationsDialog extends StatelessWidget {
       String thisRideId;
       if (snapshot.value != null) {
         thisRideId = snapshot.value.toString();
-      } 
+      }
       if (thisRideId == trip.ridrReqId) {
         nRideRef.set('accepted');
       } else if (thisRideId == 'cancelled') {
-        print("ride has been cancelled");
+        Fluttertoast.showToast(
+          context,
+          msg: "تم الغاء الطلب",
+        );
       } else if (thisRideId == 'timeout') {
-        print("ride has timed out");
+        Fluttertoast.showToast(
+          context,
+          msg: "انتهى الوقت",
+        );
       } else {
-        print('ride not fount');
+        Fluttertoast.showToast(
+          context,
+          msg: "لم يتم ايجاد الطلب",
+          // backgroundColor: Colors.grey,
+          // fontSize: 25
+          // gravity: ToastGravity.TOP,
+          // textColor: Colors.pink
+        );
       }
     });
   }
