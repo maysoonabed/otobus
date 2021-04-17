@@ -364,7 +364,7 @@ class _DriverMapState extends State<DriverMap> {
         currUser.uid, currentPosition.latitude, currentPosition.longitude);
     tripReq = FirebaseDatabase.instance
         .reference()
-        .child('drivers/${currUser.uid}/newTrip');
+        .child('Drivers/${currUser.uid}/newTrip');
     tripReq.set('waiting');
     tripReq.onValue.listen((event) {});
   }
@@ -390,4 +390,5 @@ class _DriverMapState extends State<DriverMap> {
       newGoogleMapController.animateCamera(CameraUpdate.newLatLng(pos));
     });
   }
+  
 }

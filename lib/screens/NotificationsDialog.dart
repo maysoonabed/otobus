@@ -1,5 +1,7 @@
+import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/tripInfo.dart';
 import 'package:OtoBus/main.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 class NotificationsDialog extends StatelessWidget {
@@ -113,7 +115,9 @@ class NotificationsDialog extends StatelessWidget {
                                 child: Text('قبول',
                                     style: TextStyle(
                                         fontFamily: 'Lemonada', fontSize: 14)),
-                                onPressed: () {},
+                                onPressed: () {
+                                  checkAvailability(context);
+                                },
                                 style: ButtonStyle(
                                     foregroundColor:
                                         MaterialStateProperty.all<Color>(
@@ -142,5 +146,48 @@ class NotificationsDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void checkAvailability(context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          SizedBox(
+            width: 100,
+            height: 100,
+            child: CircularProgressIndicator(
+              backgroundColor: Color(0xFF138871),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1fdeb9)),
+            ),
+          ),
+        ],
+      ),
+    );
+    DatabaseReference nRideRef = FirebaseDatabase.instance
+        .reference()
+        .child('Drivers/${currUser.uid}/newTrip');
+    nRideRef.once().then((DataSnapshot snapshot) {
+      Navigator.pop(context);
+      Navigator.pop(context);
+
+      String thisRideId;
+      if (snapshot.value != null) {
+        thisRideId = snapshot.value.toString();
+      } else {
+        print('ride not fount');
+      }
+      if (thisRideId == trip.ridrReqId) {
+        nRideRef.set('accepted');
+      } else if (thisRideId == 'cancelled') {
+        print("ride has been cancelled");
+      } else if (thisRideId == 'timeout') {
+        print("ride has timed out");
+      } else {
+        print('ride not fount');
+      }
+    });
   }
 }

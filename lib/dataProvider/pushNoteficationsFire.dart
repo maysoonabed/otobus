@@ -34,7 +34,7 @@ class PushNotifications {
     print('token:$token');
     DatabaseReference tokenRef = FirebaseDatabase.instance
         .reference()
-        .child('drivers/${currUser.uid}/token');
+        .child('Drivers/${currUser.uid}/token');
     tokenRef.set(token);
     fireMess
         .subscribeToTopic('toAllDrivers'); //عشان نبعت نوتيفيكيشين لكل الدرايفرز
