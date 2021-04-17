@@ -4,6 +4,7 @@ import 'package:OtoBus/main.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:OtoBus/configMaps.dart';
 
 class NotificationsDialog extends StatelessWidget {
   final TripInfo trip;
@@ -93,6 +94,7 @@ class NotificationsDialog extends StatelessWidget {
                                     style: TextStyle(
                                         fontFamily: 'Lemonada', fontSize: 14)),
                                 onPressed: () {
+                                  notifPlayer.stop();
                                   Navigator.pop(context);
                                 },
                                 style: ButtonStyle(
@@ -121,6 +123,7 @@ class NotificationsDialog extends StatelessWidget {
                                     style: TextStyle(
                                         fontFamily: 'Lemonada', fontSize: 14)),
                                 onPressed: () {
+                                  notifPlayer.stop();
                                   checkAvailability(context);
                                 },
                                 style: ButtonStyle(

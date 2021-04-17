@@ -1,3 +1,5 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
+
 import 'screens/CurrUserInfo.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,3 +13,4 @@ CurrUserInfo thisUser = new CurrUserInfo();
 DatabaseReference tripReq;
 var currUser;
 StreamSubscription<Position> posStream;
+        final notifPlayer = AssetsAudioPlayer();

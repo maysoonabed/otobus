@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:OtoBus/dataProvider/tripInfo.dart';
 import 'package:OtoBus/screens/NotificationsDialog.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:OtoBus/configMaps.dart';
@@ -73,6 +74,8 @@ class PushNotifications {
     rideRef.once().then((DataSnapshot snapshot) {
       Navigator.pop(context);
       if (snapshot.value != null) {
+        notifPlayer.open(Audio('lib/sounds/notification.mp3'));
+        notifPlayer.play();
         double pickUpLat =
             double.parse(snapshot.value['location']['latitude'].toString());
         double pickUpLong =
