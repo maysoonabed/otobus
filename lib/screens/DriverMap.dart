@@ -138,7 +138,7 @@ class _DriverMapState extends State<DriverMap> {
   void driverInfo() async {
     currUser = await FirebaseAuth.instance.currentUser;
     PushNotifications pushNot = PushNotifications();
-    pushNot.initialize();
+    pushNot.initialize(context);
     pushNot.getToken();
   }
 
@@ -284,7 +284,7 @@ class _DriverMapState extends State<DriverMap> {
                       activeColor: Color(0xFF094338),
                       value: status,
                       onChanged: (value) {
-                        value ? GoOnline() : GoOffline();
+                     value ? GoOnline() : GoOffline();
                         value ? updateLocation() : null;
                         print("VALUE : $value");
                         setState(() {
