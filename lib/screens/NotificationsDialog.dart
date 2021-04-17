@@ -176,9 +176,7 @@ class NotificationsDialog extends StatelessWidget {
       String thisRideId;
       if (snapshot.value != null) {
         thisRideId = snapshot.value.toString();
-      } else {
-        print('ride not fount');
-      }
+      } 
       if (thisRideId == trip.ridrReqId) {
         nRideRef.set('accepted');
       } else if (thisRideId == 'cancelled') {
