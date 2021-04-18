@@ -1,5 +1,5 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'screens/CurrUserInfo.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,4 +13,7 @@ CurrUserInfo thisUser = new CurrUserInfo();
 DatabaseReference tripReq;
 var currUser;
 StreamSubscription<Position> posStream;
-        final notifPlayer = AssetsAudioPlayer();
+final notifPlayer = AssetsAudioPlayer();
+
+LatLng driverF = LatLng(32.2934, 35.3458);
+LatLng driverT = LatLng(32.2227, 35.2621);
