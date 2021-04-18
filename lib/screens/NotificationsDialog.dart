@@ -41,7 +41,7 @@ class NotificationsDialog extends StatelessWidget {
               'طلب توصيلة',
               style: TextStyle(fontFamily: 'Lemonada', fontSize: 18),
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 15),
             Padding(
               padding: EdgeInsets.all(16),
               child: Column(
@@ -94,7 +94,7 @@ class NotificationsDialog extends StatelessWidget {
                                     style: TextStyle(
                                         fontFamily: 'Lemonada', fontSize: 14)),
                                 onPressed: () {
-                                  notifPlayer.stop();
+                                 // notifPlayer.stop();
                                   Navigator.pop(context);
                                 },
                                 style: ButtonStyle(
@@ -123,7 +123,7 @@ class NotificationsDialog extends StatelessWidget {
                                     style: TextStyle(
                                         fontFamily: 'Lemonada', fontSize: 14)),
                                 onPressed: () {
-                                  notifPlayer.stop();
+
                                   checkAvailability(context);
                                 },
                                 style: ButtonStyle(
