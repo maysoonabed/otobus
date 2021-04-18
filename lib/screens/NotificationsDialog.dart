@@ -94,7 +94,7 @@ class NotificationsDialog extends StatelessWidget {
                                     style: TextStyle(
                                         fontFamily: 'Lemonada', fontSize: 14)),
                                 onPressed: () {
-                                  notifPlayer.stop();
+                                 notifPlayer.stop();
                                   Navigator.pop(context);
                                 },
                                 style: ButtonStyle(
@@ -123,7 +123,7 @@ class NotificationsDialog extends StatelessWidget {
                                     style: TextStyle(
                                         fontFamily: 'Lemonada', fontSize: 14)),
                                 onPressed: () {
-                                  notifPlayer.stop();
+                                 notifPlayer.stop();
                                   checkAvailability(context);
                                 },
                                 style: ButtonStyle(

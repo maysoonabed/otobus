@@ -6,7 +6,6 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:OtoBus/configMaps.dart';
-import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
@@ -74,7 +73,7 @@ class PushNotifications {
     rideRef.once().then((DataSnapshot snapshot) {
       Navigator.pop(context);
       if (snapshot.value != null) {
-        notifPlayer.open(Audio('lib/sounds/notification.mp3'));
+        notifPlayer.open(Audio('lib/sounds/request_notifi.mp3'));
         notifPlayer.play();
         double pickUpLat =
             double.parse(snapshot.value['location']['latitude'].toString());
