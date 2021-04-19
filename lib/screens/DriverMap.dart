@@ -26,22 +26,23 @@ class DriverMap extends StatefulWidget {
 Position currentPosition;
 double _originLatitude;
 double _originLongitude;
-double _destLatitude;
-double _destLongitude;
-String _currName;
-String _destName;
+double destLatitude;
+double destLongitude;
+String currName;
+String destName;
 var currltlg;
 var destltlg;
+var pickUpLatLng;
 Set<Marker> gMarkers = {};
 Set<Circle> circles = {};
 PolylinePoints polylinePoints = PolylinePoints();
 Map<PolylineId, Polyline> polylines = {};
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 final _startPointController = TextEditingController();
+GoogleMapController newGoogleMapController;
 
 class _DriverMapState extends State<DriverMap> {
   Completer<GoogleMapController> _controller = Completer();
-  GoogleMapController newGoogleMapController;
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 9.4746,
@@ -58,7 +59,7 @@ class _DriverMapState extends State<DriverMap> {
         Adress pickUp = new Adress();
         pickUp.placeName = jsonDecode(data)['data'][0]['label'];
         //  pickUp.placeName = jsonDecode(data)['data'][0]['county'];
-        _currName = pickUp.placeName;
+        currName = pickUp.placeName;
         //src_loc.text = _currName;
         Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
       });
@@ -81,20 +82,19 @@ class _DriverMapState extends State<DriverMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void butMarker() {
+  void putMarker() {
     LatLngBounds bounds;
-    currltlg = LatLng(_originLatitude, _originLongitude);
-    destltlg = LatLng(_destLatitude, _destLongitude);
+    destltlg = LatLng(destLatitude, destLongitude);
     Marker currMarker = Marker(
         markerId: MarkerId("current"),
         position: currltlg,
         icon: BitmapDescriptor.defaultMarker,
-        infoWindow: InfoWindow(title: _currName, snippet: 'My Location'));
+        infoWindow: InfoWindow(title: currName, snippet: 'My Location'));
     Marker destMarker = Marker(
         markerId: MarkerId("destination"),
-        position: destltlg,
+        position: pickUpLatLng,
         icon: BitmapDescriptor.defaultMarkerWithHue(90),
-        infoWindow: InfoWindow(title: _destName, snippet: 'Destination'));
+        infoWindow: InfoWindow(title: destName, snippet: 'Destination'));
     gMarkers.add(currMarker);
     gMarkers.add(destMarker);
 
@@ -117,16 +117,17 @@ class _DriverMapState extends State<DriverMap> {
     circles.add(currCircle);
     circles.add(destCircle);
     //*************************************//
-    if (_originLatitude > _destLatitude && _originLongitude > _destLongitude) {
+    if (currltlg.latitude > destltlg.latitude &&
+        currltlg.longitude > destltlg.longitude) {
       bounds = LatLngBounds(southwest: destltlg, northeast: currltlg);
-    } else if (_originLongitude > _destLongitude) {
+    } else if (currltlg.longitude > destltlg.longitude) {
       bounds = LatLngBounds(
-          southwest: LatLng(_originLatitude, _destLongitude),
-          northeast: LatLng(_destLatitude, _originLongitude));
-    } else if (_originLatitude > _destLatitude) {
+          southwest: LatLng(currltlg.latitude, destLongitude),
+          northeast: LatLng(destLatitude, destltlg.longitude));
+    } else if (currltlg.longitude > destltlg.latitude) {
       bounds = LatLngBounds(
-          southwest: LatLng(_destLatitude, _originLongitude),
-          northeast: LatLng(_originLatitude, _destLongitude));
+          southwest: LatLng(destltlg.latitude, currltlg.latitude),
+          northeast: LatLng(currltlg.longitude, destltlg.longitude));
     } else {
       bounds = LatLngBounds(southwest: currltlg, northeast: destltlg);
     }
@@ -190,6 +191,9 @@ class _DriverMapState extends State<DriverMap> {
                 _controller.complete(controller);
                 newGoogleMapController = controller;
                 setupPositionLocator();
+                currltlg =
+                    LatLng(currentPosition.latitude, currentPosition.longitude);
+                pickUpLatLng = tripInfo.pickUp;
               },
             ),
             Padding(
@@ -220,6 +224,10 @@ class _DriverMapState extends State<DriverMap> {
                                           child: InkWell(
                                               onTap: () {
                                                 setState(() {
+                                                  destLatitude =
+                                                      driverT.latitude;
+                                                  destLongitude =
+                                                      driverT.longitude;
                                                   backOn = false;
                                                 });
                                               },
@@ -248,6 +256,10 @@ class _DriverMapState extends State<DriverMap> {
                                           child: InkWell(
                                               onTap: () {
                                                 setState(() {
+                                                  destLatitude =
+                                                      driverF.latitude;
+                                                  destLongitude =
+                                                      driverF.longitude;
                                                   backOn = true;
                                                 });
                                               },
@@ -284,7 +296,7 @@ class _DriverMapState extends State<DriverMap> {
                       activeColor: Color(0xFF094338),
                       value: status,
                       onChanged: (value) {
-                     value ? GoOnline() : GoOffline();
+                        value ? GoOnline() : GoOffline();
                         value ? updateLocation() : null;
                         print("VALUE : $value");
                         setState(() {
@@ -345,7 +357,7 @@ class _DriverMapState extends State<DriverMap> {
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4",
       PointLatLng(_originLatitude, _originLongitude),
-      PointLatLng(_destLatitude, _destLongitude),
+      PointLatLng(destLatitude, destLongitude),
       travelMode: TravelMode.driving,
     );
     if (result.points.isNotEmpty) {
@@ -390,5 +402,4 @@ class _DriverMapState extends State<DriverMap> {
       newGoogleMapController.animateCamera(CameraUpdate.newLatLng(pos));
     });
   }
-  
 }
