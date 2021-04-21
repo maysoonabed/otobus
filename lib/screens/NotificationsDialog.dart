@@ -188,7 +188,10 @@ class NotificationsDialog extends StatelessWidget {
       }
       if (thisRideId == trip.ridrReqId) {
         nRideRef.set('accepted');
-        putMarker();
+        globalState.setState(() {
+          globalState.putMarker();
+          globalState.getPolyline();
+        });
       } else if (thisRideId == 'cancelled') {
         Fluttertoast.showToast(
           context,
@@ -213,57 +216,4 @@ class NotificationsDialog extends StatelessWidget {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  void putMarker() {
-    LatLngBounds bounds;
-    destltlg = LatLng(destLatitude, destLongitude);
-    Marker currMarker = Marker(
-        markerId: MarkerId("current"),
-        position: currltlg,
-        icon: BitmapDescriptor.defaultMarker,
-        infoWindow: InfoWindow(title: currName, snippet: 'My Location'));
-    Marker destMarker = Marker(
-        markerId: MarkerId("destination"),
-        position: pickUpLatLng,
-        icon: BitmapDescriptor.defaultMarkerWithHue(90),
-        infoWindow: InfoWindow(title: destName, snippet: 'Destination'));
-    gMarkers.add(currMarker);
-    gMarkers.add(destMarker);
-
-    Circle currCircle = Circle(
-      circleId: CircleId('current'),
-      strokeColor: Colors.green,
-      strokeWidth: 3,
-      radius: 40,
-      center: currltlg,
-      fillColor: Colors.green,
-    );
-    Circle destCircle = Circle(
-      circleId: CircleId('current'),
-      strokeColor: Colors.green,
-      strokeWidth: 3,
-      radius: 40,
-      center: destltlg,
-      fillColor: Colors.green,
-    );
-    circles.add(currCircle);
-    circles.add(destCircle);
-    //*************************************//
-    if (currltlg.latitude > destltlg.latitude &&
-        currltlg.longitude > destltlg.longitude) {
-      bounds = LatLngBounds(southwest: destltlg, northeast: currltlg);
-    } else if (currltlg.longitude > destltlg.longitude) {
-      bounds = LatLngBounds(
-          southwest: LatLng(currltlg.latitude, destLongitude),
-          northeast: LatLng(destLatitude, destltlg.longitude));
-    } else if (currltlg.longitude > destltlg.latitude) {
-      bounds = LatLngBounds(
-          southwest: LatLng(destltlg.latitude, currltlg.latitude),
-          northeast: LatLng(currltlg.longitude, destltlg.longitude));
-    } else {
-      bounds = LatLngBounds(southwest: currltlg, northeast: destltlg);
-    }
-    newGoogleMapController
-        .animateCamera(CameraUpdate.newLatLngBounds(bounds, 70));
-  }
 }

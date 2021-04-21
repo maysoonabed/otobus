@@ -18,9 +18,11 @@ import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/pushNoteficationsFire.dart';
 
+_DriverMapState globalState = new _DriverMapState();
+
 class DriverMap extends StatefulWidget {
   @override
-  _DriverMapState createState() => _DriverMapState();
+  _DriverMapState createState() => globalState;
 }
 
 Position currentPosition;
@@ -49,6 +51,7 @@ class _DriverMapState extends State<DriverMap> {
   );
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
   void getData(double lat, double long) async {
     Response response = await get(
         'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
@@ -77,13 +80,13 @@ class _DriverMapState extends State<DriverMap> {
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
     getData(currentPosition.latitude, currentPosition.longitude);
-    _originLatitude = currentPosition.latitude;
-    _originLongitude = currentPosition.longitude;
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void putMarker() {
     LatLngBounds bounds;
+    destLatitude = 32.2227;
+    destLongitude = 35.2621;
     destltlg = LatLng(destLatitude, destLongitude);
     Marker currMarker = Marker(
         markerId: MarkerId("current"),
@@ -92,7 +95,7 @@ class _DriverMapState extends State<DriverMap> {
         infoWindow: InfoWindow(title: currName, snippet: 'My Location'));
     Marker destMarker = Marker(
         markerId: MarkerId("destination"),
-        position: pickUpLatLng,
+        position: destltlg,
         icon: BitmapDescriptor.defaultMarkerWithHue(90),
         infoWindow: InfoWindow(title: destName, snippet: 'Destination'));
     gMarkers.add(currMarker);
@@ -187,10 +190,10 @@ class _DriverMapState extends State<DriverMap> {
               polylines: Set<Polyline>.of(polylines.values),
               markers: gMarkers,
               circles: circles,
-              onMapCreated: (GoogleMapController controller) {
+              onMapCreated: (GoogleMapController controller) async {
                 _controller.complete(controller);
                 newGoogleMapController = controller;
-                setupPositionLocator();
+                await setupPositionLocator();
                 currltlg =
                     LatLng(currentPosition.latitude, currentPosition.longitude);
                 pickUpLatLng = tripInfo.pickUp;
@@ -351,12 +354,12 @@ class _DriverMapState extends State<DriverMap> {
     setState(() {});
   }
 
-  void _getPolyline() async {
+  void getPolyline() async {
     List<LatLng> polylineCoordinates = [];
 
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4",
-      PointLatLng(_originLatitude, _originLongitude),
+      PointLatLng(currltlg.latitude, currltlg.longitude),
       PointLatLng(destLatitude, destLongitude),
       travelMode: TravelMode.driving,
     );
