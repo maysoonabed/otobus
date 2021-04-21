@@ -85,6 +85,7 @@ class _PassengerMapState extends State<PassengerMap> {
       'location': pickUpMap,
       'destination': destinationMap,
       'driver_id': 'waiting',
+      'status': 'waiting',
     };
     rideReq.set(rideMap);
   }

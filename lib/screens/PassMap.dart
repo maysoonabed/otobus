@@ -153,6 +153,7 @@ class _PassMapState extends State<PassMap> {
       'location': pickUpMap,
       'destination': destinationMap,
       'driver_id': 'waiting',
+      'status': 'waiting',
     };
     rideReq.set(rideMap);
   }

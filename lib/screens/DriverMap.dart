@@ -85,9 +85,9 @@ class _DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void putMarker() {
     LatLngBounds bounds;
-    destLatitude = 32.2227;
-    destLongitude = 35.2621;
-    destltlg = LatLng(destLatitude, destLongitude);
+    destLatitude = tripInfo.pickUp.latitude;
+    destLongitude = tripInfo.pickUp.longitude;
+    destltlg = tripInfo.pickUp;
     Marker currMarker = Marker(
         markerId: MarkerId("current"),
         position: currltlg,
@@ -129,8 +129,8 @@ class _DriverMapState extends State<DriverMap> {
           northeast: LatLng(destLatitude, destltlg.longitude));
     } else if (currltlg.longitude > destltlg.latitude) {
       bounds = LatLngBounds(
-          southwest: LatLng(destltlg.latitude, currltlg.latitude),
-          northeast: LatLng(currltlg.longitude, destltlg.longitude));
+          southwest: LatLng(destltlg.latitude, currltlg.longitude),
+          northeast: LatLng(currltlg.latitude, destltlg.longitude));
     } else {
       bounds = LatLngBounds(southwest: currltlg, northeast: destltlg);
     }
@@ -404,5 +404,17 @@ class _DriverMapState extends State<DriverMap> {
       LatLng pos = LatLng(position.latitude, position.longitude);
       newGoogleMapController.animateCamera(CameraUpdate.newLatLng(pos));
     });
+  }
+
+  void acceptTrip() {
+    String rideId = tripInfo.ridrReqId;
+    ridRef = FirebaseDatabase.instance.reference().child('rideRequest/$rideId');
+    ridRef.child('status').set('accepted');
+    Map locationMap = {
+      'latitude': currentPosition.latitude.toString(),
+      'longitude': currentPosition.longitude.toString(),
+    };
+    ridRef.child('driver_location').set(locationMap);
+    ridRef.child('driver_id').set(currUser.uid);
   }
 }
