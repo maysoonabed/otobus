@@ -65,7 +65,7 @@ class _PassMapState extends State<PassMap> {
   double llat, llng;
   DatabaseReference rideReq;
   bool reqbook = true;
-  bool unbook = false;
+  bool unbook = true;
   Adress destprv = new Adress();
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   static final CameraPosition _kGooglePlex = CameraPosition(
@@ -642,7 +642,7 @@ class _PassMapState extends State<PassMap> {
                             llat = _originLatitude;
                             llng = _originLongitude;
                             reqbook = true;
-                            unbook = false;
+                            unbook = true;
                             _searchDialog();
                           },
                           backgroundColor: mypink,
