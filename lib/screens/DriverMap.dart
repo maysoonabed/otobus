@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -15,7 +15,6 @@ import 'package:provider/provider.dart';
 import '../main.dart';
 import 'package:custom_switch/custom_switch.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
-import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/pushNoteficationsFire.dart';
 import 'package:OtoBus/dataProvider/mapKit.dart';
 
@@ -472,9 +471,8 @@ class _DriverMapState extends State<DriverMap> {
     }
     var direcDetails;
   }
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void acceptTrip() {
     String rideId = tripInfo.ridrReqId;
     ridRef = FirebaseDatabase.instance.reference().child('rideRequest/$rideId');
@@ -486,4 +484,10 @@ class _DriverMapState extends State<DriverMap> {
     ridRef.child('driver_location').set(locationMap);
     ridRef.child('driver_id').set(currUser.uid);
   }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void startTimer() {}
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void endTrip() async {}
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 }
