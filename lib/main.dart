@@ -393,6 +393,12 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
+    if (Platform.isIOS) {
+      if (cache.fixedPlayer != null) {
+        cache.fixedPlayer.startHeadlessService();
+      }
+    }
     WidgetsFlutterBinding.ensureInitialized();
     Firebase.initializeApp().whenComplete(() {
       print("completed");

@@ -11,6 +11,7 @@ const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 String mapKey = "AIzaSyCU1zRGJNhBvwMisg1zsPg3oOW6Yymq2Sk";
 String googlekey = "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4";
+
 CurrUserInfo thisUser = new CurrUserInfo();
 DatabaseReference tripReq;
 DatabaseReference ridRef;
@@ -19,8 +20,10 @@ var currUser;
 StreamSubscription<Position> posStream;
 StreamSubscription<Position> ridePosStream;
 
+
+AudioCache cache = AudioCache();
 AudioPlayer notifPlayer = AudioPlayer();
-AudioCache cache;
+
 LatLng driverF = LatLng(32.2934, 35.3458);
 LatLng driverT = LatLng(32.2227, 35.2621);
 TripInfo tripInfo = TripInfo();
