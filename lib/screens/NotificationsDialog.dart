@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:OtoBus/screens/DriverMap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:OtoBus/dataProvider/fUNCS.dart';
 
 class NotificationsDialog extends StatelessWidget {
   final TripInfo trip;
@@ -189,9 +190,12 @@ class NotificationsDialog extends StatelessWidget {
       if (thisRideId == trip.ridrReqId) {
         nRideRef.set('accepted');
         globalState.setState(() {
+          Funcs.disbleLocUpdate();
           globalState.putMarker();
           globalState.getPolyline();
           globalState.acceptTrip();
+          globalState.creatMarker();
+          globalState.updateRideLocation();
         });
       } else if (thisRideId == 'cancelled') {
         Fluttertoast.showToast(

@@ -17,6 +17,7 @@ import 'package:custom_switch/custom_switch.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/pushNoteficationsFire.dart';
+import 'package:OtoBus/dataProvider/mapKit.dart';
 
 _DriverMapState globalState = new _DriverMapState();
 
@@ -35,6 +36,8 @@ String destName;
 var currltlg;
 var destltlg;
 var pickUpLatLng;
+String state = 'accepted';
+bool acc;
 Set<Marker> gMarkers = {};
 Set<Circle> circles = {};
 PolylinePoints polylinePoints = PolylinePoints();
@@ -42,14 +45,26 @@ Map<PolylineId, Polyline> polylines = {};
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 final _startPointController = TextEditingController();
 GoogleMapController newGoogleMapController;
+BitmapDescriptor movingMarkerIcon;
+Position myPos;
 
 class _DriverMapState extends State<DriverMap> {
   Completer<GoogleMapController> _controller = Completer();
+
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 9.4746,
   );
-
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void creatMarker() {
+    if (movingMarkerIcon == null) {
+      BitmapDescriptor.fromAssetImage(
+              ImageConfiguration(size: Size(1, 1)), 'lib/Images/icon2.png')
+          .then((onValue) {
+        movingMarkerIcon = onValue;
+      });
+    }
+  }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void getData(double lat, double long) async {
@@ -149,6 +164,7 @@ class _DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   void initState() {
+    acc = false;
     super.initState();
     driverInfo();
   }
@@ -372,6 +388,7 @@ class _DriverMapState extends State<DriverMap> {
     }
     _addPolyLine(polylineCoordinates);
   }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void GoOnline() {
     Geofire.initialize('availableDrivers');
@@ -383,6 +400,7 @@ class _DriverMapState extends State<DriverMap> {
     tripReq.set('waiting');
     tripReq.onValue.listen((event) {});
   }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void GoOffline() {
     Geofire.removeLocation(currUser.uid);
@@ -390,6 +408,7 @@ class _DriverMapState extends State<DriverMap> {
     tripReq.remove();
     tripReq = null;
   }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void updateLocation() {
     posStream = Geolocator.getPositionStream(
@@ -405,6 +424,56 @@ class _DriverMapState extends State<DriverMap> {
       newGoogleMapController.animateCamera(CameraUpdate.newLatLng(pos));
     });
   }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void updateRideLocation() {
+    LatLng oldP = LatLng(0, 0);
+    ridePosStream = Geolocator.getPositionStream(
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
+    ).listen((Position position) {
+      myPos = position;
+      currentPosition = position;
+      LatLng pos = LatLng(position.latitude, position.longitude);
+      var rotate = MapKit.getMarkerRotation(
+          oldP.latitude, oldP.longitude, pos.latitude, pos.longitude);
+      Marker movingMarker = Marker(
+        markerId: MarkerId('moving'),
+        position: pos,
+        icon: movingMarkerIcon,
+        rotation: rotate,
+        infoWindow: InfoWindow(title: 'الموقع الحالي'),
+      );
+      setState(() {
+        CameraPosition cp = new CameraPosition(target: pos, zoom: 17);
+        newGoogleMapController
+            .animateCamera(CameraUpdate.newCameraPosition(cp));
+        gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
+        gMarkers.add(movingMarker);
+      });
+      oldP = pos;
+      Map locationMap = {
+        'latitude': myPos.latitude,
+        'longitude': myPos.longitude,
+      };
+      ridRef.child('driver_location').set(locationMap);
+    });
+  }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void updateTripDetails() async {
+    if (myPos == null) return;
+    var positionLt = LatLng(myPos.latitude, myPos.longitude);
+    LatLng destLt;
+    if (state == 'accepted') {
+      destLt = tripInfo.pickUp;
+    } else {
+      destLt = tripInfo.dest;
+    }
+    var direcDetails;
+  }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void acceptTrip() {
     String rideId = tripInfo.ridrReqId;

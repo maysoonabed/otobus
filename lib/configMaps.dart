@@ -16,6 +16,8 @@ DatabaseReference ridRef;
 
 var currUser;
 StreamSubscription<Position> posStream;
+StreamSubscription<Position> ridePosStream;
+
 final notifPlayer = AssetsAudioPlayer();
 
 LatLng driverF = LatLng(32.2934, 35.3458);

@@ -48,6 +48,7 @@ dependencies:
   firebase_messaging: ^6.0.16
   intl: ^0.16.1
   assets_audio_player: ^2.0.1+7
+  maps_toolkit: ^1.1.0+1
 
 dev_dependencies:
   flutter_test:
