@@ -186,7 +186,7 @@ class _UploadImagesState extends State<UploadImages> {
     base64license = base64Encode(byt2);
     base64insuranc = base64Encode(byt3);
     String url =
-        "http://192.168.1.106:8089/otobus/phpfiles/regdriver.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/regdriver.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'busId': busId,
       'numpass': numpass,
@@ -210,7 +210,7 @@ class _UploadImagesState extends State<UploadImages> {
       'phone': widget.phone,
       'password': widget.pass, //get password text
     });
-    print(response.body);
+    //print(response.body);
     if (response.statusCode == 200) {
       var jsondata = jsonDecode(response.body); //json.decode
       if (jsondata["error"] == 1) {
@@ -340,16 +340,18 @@ class _UploadImagesState extends State<UploadImages> {
                                   apiKey: tokenkey,
                                   hint: "اختيار منطقة",
                                   onSelect: (place) {
-                                    _start.text = place.placeName;
+                                    var str = place.placeName.toString();
+                                    var ss = str.split(',');
+                                    _start.text = ss[0];
                                     setState(() {
                                       from.lat = place.center[1];
                                       from.long = place.center[0];
-                                      from.placeName = place.placeName;
+                                      from.placeName = ss[0];
                                     });
                                   },
                                   limit: 30,
                                   country: 'Ps',
-                                  //language: 'ar',
+                                  language: 'ar',
                                 ),
                               ),
                             );
@@ -380,16 +382,18 @@ class _UploadImagesState extends State<UploadImages> {
                                   apiKey: tokenkey,
                                   hint: "اختيار منطقة",
                                   onSelect: (place) {
-                                    _end.text = place.placeName;
+                                    var str1 = place.placeName.toString();
+                                    var ss1 = str1.split(',');
+                                    _end.text = ss1[0];
                                     setState(() {
                                       to.lat = place.center[1];
                                       to.long = place.center[0];
-                                      to.placeName = place.placeName;
+                                      to.placeName = ss1[0];
                                     });
                                   },
                                   limit: 30,
                                   country: 'Ps',
-                                  //language: 'ar',
+                                  language: 'ar',
                                 ),
                               ),
                             );

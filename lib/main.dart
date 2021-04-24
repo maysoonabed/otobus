@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
+import 'package:get_storage/get_storage.dart';
 import 'screens/DriverMap.dart';
 import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
@@ -105,10 +106,12 @@ Future<void> fire() async {
   );
 }
 
+GetStorage box;
 void main() {
   //***********Session*************
   WidgetsFlutterBinding.ensureInitialized();
-  dynamic token = FlutterSession().get('token');
+  dynamic token = FlutterSession().get('email');
+
   //*******************************
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -116,14 +119,15 @@ void main() {
   ));
   //*******************************
   runApp(ChangeNotifierProvider(
-    create: (context) => AppData(),
-    child: MaterialApp(
-      debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-      home: currUser != null
-          ? DriverMap()
-          : MyApp(), // token != null ? PassengerPage() : MyApp(), //MyApp(), //
-    ),
-  ));
+      create: (context) => AppData(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+        home: token != null ? PassMap() : MyApp(),
+        /*(box.read('Email') != '' || box.read('Email') != null)
+                  ? PassMap()
+                  : MyApp()*/
+        // currUser != null? DriverMap(): MyApp(),
+      )));
 }
 
 class MyApp extends StatefulWidget {

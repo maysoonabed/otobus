@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'DriverMap.dart';
@@ -70,14 +71,21 @@ class _LoginPageState extends State<LoginPage> {
             showprogress = false;
           });
           logFire();
+
+          thisUser.email = email;
+          thisUser.name = jsondata["name"];
+          thisUser.phone = jsondata["phonenum"];
+          String pic = jsondata["profpic"];
           if (id == 2) {
             //String ph = phone.toString();
-            thisUser.email = email;
-            thisUser.name = jsondata["name"];
-            thisUser.phone = jsondata["phonenum"];
-            await FlutterSession().set('token', email);
+            /* box = GetStorage();
+            box.write('Email', email); */
+            await FlutterSession().set('email', email);
             await FlutterSession().set('name', thisUser.name);
             await FlutterSession().set('phone', thisUser.phone);
+            if (pic != null) {
+              await FlutterSession().set('profpic', pic);
+            }
             Navigator.push(
                 context,
                 MaterialPageRoute(

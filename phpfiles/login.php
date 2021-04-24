@@ -29,20 +29,22 @@
              //echo $q;
              if($res->num_rows>0){
                $json['value'] = 1;
-
+               $row = mysqli_fetch_assoc($result);
+               $json['name']=$row['name'];
+               $json['phonenum'] =$row['phonenum'];
+               //$json['insdate']=$row[''];
+               $json['error'] =0;
              }else{
                $json['value'] = 2;
                $json['error'] =1;
                $json['message'] ='لم يتم تأكيد تسجيلك الرجاء الانتظار';
              }
         }else{
-         $json['value'] = 1;
-            while(($row = mysqli_fetch_assoc($result) )){
-              $Name =$row['name'];
-              $Phone=$row['phonenum'];
-              }
-              $json['name']=$Name;
-              $json['phonenum'] =$Phone;
+              $json['value'] = 1;
+              $row = mysqli_fetch_assoc($result);
+              $json['name']=$row['name'];
+              $json['phonenum'] =$row['phonenum'];
+              $json['profpic'] =$row['pict'];
               $json['error'] =0;
             }
             

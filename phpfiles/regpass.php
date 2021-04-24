@@ -17,7 +17,12 @@
     			$query = "INSERT INTO passenger (name, email, phonenum, password) VALUES ('$Name','$Email','$Mobile','$Password')";
     			$inserted = mysqli_query($connect, $query);
     			
-    			if($inserted == 1 ){    			
+    			if($inserted == 1 ){  
+					$to_email = $Email;
+                    $subject = "مستخدم جديد";
+                    $body ="أهلاً بك $Name كراكب جديد لدى أوتوباس ";
+                    $headers = "From: otobus@gmail.com";
+					mail($to_email, $subject, $body, $headers)&&$result;//if ( ){echo "Passenger added succ";} else {echo "Email sending failed...";}  			
 					$json['success'] = 1;
     				$json['value'] = 1;
 					$json['error'] =0;

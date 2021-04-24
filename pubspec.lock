@@ -28,8 +28,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
-    version: "2.5.0"
+    version: "2.5.0-nullsafety.1"
   audioplayers:
     dependency: "direct main"
     description:
@@ -37,9 +36,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.16.2"
-=======
-    version: "2.5.0-nullsafety.1"
->>>>>>> 60aa74362e47a29ef1ca3e6148744dff2f2f5a56
   boolean_selector:
     dependency: transitive
     description:
@@ -370,6 +366,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"
+  get:
+    dependency: transitive
+    description:
+      name: get
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.26.0"
+  get_storage:
+    dependency: "direct main"
+    description:
+      name: get_storage
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.0"
   google_maps_flutter:
     dependency: "direct main"
     description:

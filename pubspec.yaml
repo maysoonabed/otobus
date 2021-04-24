@@ -49,6 +49,7 @@ dependencies:
   intl: ^0.16.1
   maps_toolkit: ^1.1.0+1
   audioplayers: ^0.16.2
+  get_storage: ^1.3.0
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,7 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
+    - phpfiles/cardlic/
     - lib/Images/
     - request_notifi.mp3
 

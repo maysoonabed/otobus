@@ -1,5 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:io' as Io;
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/dataProvider/fireDrivers.dart';
@@ -11,9 +15,8 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../configMaps.dart';
 import '../main.dart';
@@ -55,10 +58,23 @@ bool notispress = false;
 bool proispress = false;
 double mapBottomPadding = 0;
 BitmapDescriptor myIcon;
+final picker = ImagePicker();
+File _prof;
+String _profname;
+String st1, st2, st3;
+AssetImage img;
+bool showprogress = false;
+var profile;
+String base64prof = "";
+var fileImg;
+var _namecon = TextEditingController();
+var _emailcon = TextEditingController();
+var _phonecon = TextEditingController();
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
   final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
+  final GlobalKey _photopickey = GlobalKey();
   Completer<GoogleMapController> _controller = Completer();
   GoogleMapController newGoogleMapController;
   double totalDistance = 0.0;
@@ -82,9 +98,25 @@ class _PassMapState extends State<PassMap> {
     super.initState();
   }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future upload(File img, String imgname) async {
+    profile = Io.File(img.path).readAsBytesSync();
+    base64prof = base64Encode(profile);
+    String url =
+        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
+    var response = await http.post(url, body: {
+      'profimg': base64prof,
+      'profname': imgname,
+      'email': email,
+    });
+    if (response.statusCode == 200) {
+      // print(jsonDecode(response.body));
+    }
+  }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void getData(double lat, double long) async {
-    Response response = await get(
+    http.Response response = await http.get(
         'http://api.positionstack.com/v1/reverse?access_key=$keyPoStack&query=$lat,$long');
 
     if (response.statusCode == 200) {
@@ -125,6 +157,15 @@ class _PassMapState extends State<PassMap> {
     thisUser.name = await FlutterSession().get('name');
     var r = await FlutterSession().get('phone');
     thisUser.phone = r.toString();
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void pic() async {
+    var pic = await FlutterSession().get('profpic');
+    if (pic != "") {
+      _profname = pic;
+    } else
+      _profname = null;
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -278,12 +319,9 @@ class _PassMapState extends State<PassMap> {
             nDriver.key = map['key'];
             nDriver.lat = map['latitude'];
             nDriver.long = map['longitude'];
-
             FireDrivers.updateDriver(nDriver);
             driversMarkers();
-
             break;
-
           case Geofire.onGeoQueryReady:
             // All Intial Data is loaded
             nearLoaded = true;
@@ -296,7 +334,7 @@ class _PassMapState extends State<PassMap> {
     });
   }
 
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future<void> _searchDialog() async {
     return showDialog<void>(
       builder: (context) => new AlertDialog(
@@ -313,14 +351,13 @@ class _PassMapState extends State<PassMap> {
                     minLines: 1,
                     maxLines: null,
                     autofocus: false,
-                    decoration:
-                        new InputDecoration(labelText: 'Source Location'),
+                    decoration: new InputDecoration(labelText: 'مكانك الحالي'),
                   ),
                 ),
                 new Expanded(
                   child: CustomTextField(
                     readOnly: true,
-                    hintText: "Select Destinaton Point",
+                    hintText: "اختر المكان الذي ترغب بالذهاب إليه",
                     textController: _startPointController,
                     onTap: () {
                       Navigator.push(
@@ -328,10 +365,12 @@ class _PassMapState extends State<PassMap> {
                         MaterialPageRoute(
                           builder: (context) => MapBoxAutoCompleteWidget(
                             apiKey: tokenkey,
-                            hint: "Select Destinaton Point",
+                            hint: "ادخل اسم المدينة أو القرية",
                             closeOnSelect: true,
                             onSelect: (place) {
-                              _startPointController.text = place.placeName;
+                              var str = place.placeName.toString();
+                              var ss = str.split(',');
+                              _startPointController.text = ss[0];
                               setState(() {
                                 _destLatitude = place.center[1];
                                 _destLongitude = place.center[0];
@@ -351,7 +390,7 @@ class _PassMapState extends State<PassMap> {
                             },
                             limit: 30,
                             country: 'Ps',
-                            //language: 'ar',
+                            language: 'ar',
                           ),
                         ),
                       );
@@ -373,12 +412,12 @@ class _PassMapState extends State<PassMap> {
             )),
         actions: <Widget>[
           new FlatButton(
-              child: const Text('CANCEL'),
+              child: const Text('إنهاء'),
               onPressed: () {
                 Navigator.pop(context);
               }),
           new FlatButton(
-              child: const Text('CHOOSE'),
+              child: const Text('اختيار'),
               onPressed: () {
                 setState(() {
                   _getPolyline();
@@ -392,8 +431,8 @@ class _PassMapState extends State<PassMap> {
       context: context,
     );
   }
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -405,10 +444,13 @@ class _PassMapState extends State<PassMap> {
           .then((onValue) {
         myIcon = onValue;
       });
+      img = AssetImage('phpfiles/cardlic/$_profname');
     }
 
+    pic();
     initState();
     putvalues();
+
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -429,67 +471,127 @@ class _PassMapState extends State<PassMap> {
             ),
             backgroundColor: apcolor,
           ),
-          //#######################################
+          //######################################
           endDrawer: Drawer(
             child: Column(
               children: <Widget>[
+                FutureBuilder(
+                    future: FlutterSession().get('name'),
+                    builder: (context, snapshot) {
+                      _namecon.text = snapshot.data;
+                      return Container();
+                    }),
+                FutureBuilder(
+                    future: FlutterSession().get('email'),
+                    builder: (context, snapshot) {
+                      email = _emailcon.text = snapshot.data;
+                      return Container();
+                    }),
+                FutureBuilder(
+                    future: FlutterSession().get('phone'),
+                    builder: (context, snapshot) {
+                      _phonecon.text = snapshot.data.toString();
+                      return Container();
+                    }),
                 Stack(
                   overflow: Overflow.visible,
                   alignment: Alignment.center,
                   children: <Widget>[
                     Image(image: AssetImage('lib/Images/passengercover.jpg')),
                     Positioned(
+                        key: _photopickey,
                         bottom: -50.0,
                         child: CircleAvatar(
-                            radius: 80,
-                            backgroundColor: Colors.white,
-                            backgroundImage:
-                                (AssetImage('lib/Images/Defultprof.jpg')))),
+                          radius: 80,
+                          backgroundColor: Colors.white,
+                          backgroundImage: (_prof != null)
+                              ? FileImage(_prof)
+                              : (_profname != null
+                                  ? img
+                                  : AssetImage('lib/Images/Defultprof.jpg')),
+                        )),
                   ],
                 ),
                 SizedBox(
                   height: 50,
                 ),
-                FutureBuilder(
-                    future: FlutterSession().get('name'),
-                    builder: (context, snapshot) {
-                      return Text(
-                          snapshot.hasData ? snapshot.data : 'Loading...',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: "Lemonada",
-                          ));
-                    }),
+                MaterialButton(
+                  color: apBcolor,
+                  height: 15,
+                  minWidth: 120.0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  onPressed: () async {
+                    var picked =
+                        await picker.getImage(source: ImageSource.gallery);
+                    _prof = File(picked.path);
+                    _profname = _prof.path.split('/').last;
+                    upload(_prof, _profname);
+                    setState(() {
+                      img = AssetImage('phpfiles/cardlic/$_profname');
+                    });
+                  },
+                  child: Text('تغيير الصورة الشخصية',
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontFamily: "Lemonada",
+                          color: Colors.white)),
+                ),
+                Container(
+                    child: TextField(
+                  controller: _namecon,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: "Lemonada",
+                  ),
+                  readOnly: true,
+                  autofocus: false,
+                  decoration: myInputDecoration(
+                    label: " ",
+                    icon: Icons.person,
+                  ),
+                )),
                 SizedBox(
                   height: 20,
                 ),
-                FutureBuilder(
-                    future: FlutterSession().get('token'),
-                    builder: (context, snapshot) {
-                      return Text(
-                          snapshot.hasData ? snapshot.data : 'Loading...',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: "Lemonada",
-                          ));
-                    }),
+                Container(
+                  child: TextField(
+                    controller: _emailcon,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: "Lemonada",
+                    ),
+                    readOnly: true,
+                    autofocus: false,
+                    decoration: myInputDecoration(
+                      label: " ",
+                      icon: Icons.email,
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
-                FutureBuilder(
-                    future: FlutterSession().get('phone'),
-                    builder: (context, snapshot) {
-                      return Text(
-                          snapshot.hasData
-                              ? snapshot.data.toString()
-                              : 'Loading...',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: "Lemonada",
-                          ));
-                    }),
+                Container(
+                  child: TextField(
+                    controller: _phonecon,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: "Lemonada",
+                    ),
+                    readOnly: true,
+                    autofocus: false,
+                    decoration: myInputDecoration(
+                      label: " ",
+                      icon: Icons.phone_android,
+                    ),
+                  ),
+                ),
                 SizedBox(
-                  height: 100,
+                  height: 40,
                 ),
                 MaterialButton(
                   color: apBcolor,
@@ -509,9 +611,11 @@ class _PassMapState extends State<PassMap> {
                       proispress = false;
                       _destName = "";
                       _startPointController.text = "";
-                      FlutterSession().set('token', '');
+                      //box.remove('Email');
+                      FlutterSession().set('email', '');
                       FlutterSession().set('name', '');
                       FlutterSession().set('phone', '');
+                      FlutterSession().set('profpic', '');
                     });
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => MyApp()));
@@ -544,9 +648,9 @@ class _PassMapState extends State<PassMap> {
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
                   newGoogleMapController = controller;
-                  setState(() {
-                    mapBottomPadding = 65;
-                  });
+                  //setState(() {});
+                  mapBottomPadding = 65;
+
                   setupPositionLocator();
                 },
               ),
@@ -754,6 +858,30 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  InputDecoration myInputDecoration({String label, IconData icon}) {
+    return InputDecoration(
+      hintText: label, //show label as placeholder
+      alignLabelWithHint: true,
+      suffixIcon: Padding(
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Icon(
+            icon,
+            color: Colors.black,
+          )),
+      contentPadding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide:
+              BorderSide(color: apcolor, width: 1)), //default border of input
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(40),
+          borderSide: BorderSide(color: apBcolor, width: 1)),
+      fillColor: apcolor,
+      filled: false, //set true if you want to show input background
+    );
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   _addPolyLine(List<LatLng> polylineCoordinates) {
     PolylineId id = PolylineId("poly");
     Polyline polyline = Polyline(
@@ -763,7 +891,6 @@ class _PassMapState extends State<PassMap> {
       color: myblue,
     );
     polylines[id] = polyline;
-    setState(() {});
   }
 
   void shared() {}
