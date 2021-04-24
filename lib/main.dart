@@ -123,9 +123,6 @@ void main() {
       child: MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: token != null ? PassMap() : MyApp(),
-        /*(box.read('Email') != '' || box.read('Email') != null)
-                  ? PassMap()
-                  : MyApp()*/
         // currUser != null? DriverMap(): MyApp(),
       )));
 }
