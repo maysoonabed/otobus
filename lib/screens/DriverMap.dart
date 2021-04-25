@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
+import 'package:OtoBus/dataProvider/fUNCS.dart';
+import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -97,21 +99,47 @@ class _DriverMapState extends State<DriverMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void updMark() {
+    gMarkers.removeWhere((marker) => marker.markerId.value == 'destination');
+    Marker destMarker = Marker(
+      markerId: MarkerId("destination"),
+      position: destltlg,
+      icon: BitmapDescriptor.defaultMarkerWithHue(90),
+      infoWindow: InfoWindow(title: destName, snippet: 'Destination'),
+    );
+    gMarkers.add(destMarker);
+  }
+
+  //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void endTrip() {
+    state = 'ended';
+    ridRef.child('status').set('ended');
+    ridePosStream.cancel();
+    gMarkers.removeWhere((marker) => marker.markerId.value == 'destination');
+    gMarkers.removeWhere((marker) => marker.markerId.value == 'current');
+    gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
+    polylines.clear();
+    setState(() {});
+  }
+  //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
   void putMarker() {
     LatLngBounds bounds;
     destLatitude = tripInfo.pickUp.latitude;
     destLongitude = tripInfo.pickUp.longitude;
     destltlg = tripInfo.pickUp;
     Marker currMarker = Marker(
-        markerId: MarkerId("current"),
-        position: currltlg,
-        icon: BitmapDescriptor.defaultMarker,
-        infoWindow: InfoWindow(title: currName, snippet: 'My Location'));
+      markerId: MarkerId("current"),
+      position: currltlg,
+      icon: BitmapDescriptor.defaultMarker,
+      infoWindow: InfoWindow(title: currName, snippet: 'My Location'),
+    );
     Marker destMarker = Marker(
-        markerId: MarkerId("destination"),
-        position: destltlg,
-        icon: BitmapDescriptor.defaultMarkerWithHue(90),
-        infoWindow: InfoWindow(title: destName, snippet: 'Destination'));
+      markerId: MarkerId("destination"),
+      position: destltlg,
+      icon: BitmapDescriptor.defaultMarkerWithHue(90),
+      infoWindow: InfoWindow(title: destName, snippet: 'Destination'),
+    );
     gMarkers.add(currMarker);
     gMarkers.add(destMarker);
 
@@ -441,6 +469,26 @@ class _DriverMapState extends State<DriverMap> {
         icon: movingMarkerIcon,
         rotation: rotate,
         infoWindow: InfoWindow(title: 'الموقع الحالي'),
+        onTap: () {
+          if (state == 'accepted') {
+            state = 'arrived';
+            ridRef.child('status').set('arrived');
+            setState(() {
+              destLatitude = driverT.latitude;
+              destLongitude = driverT.longitude;
+              destltlg = LatLng(destLatitude, destLongitude);
+              getPolyline();
+              updMark();
+            });
+          } else if (state == 'arrived') {
+            state = 'onTrip';
+            ridRef.child('status').set('onTrip');
+          } else if (state == 'onTrip') {
+            endTrip();
+
+            Funcs.enableLocUpdate();
+          }
+        },
       );
       setState(() {
         CameraPosition cp = new CameraPosition(target: pos, zoom: 17);
@@ -485,9 +533,5 @@ class _DriverMapState extends State<DriverMap> {
     ridRef.child('driver_id').set(currUser.uid);
   }
 
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void startTimer() {}
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void endTrip() async {}
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 }
