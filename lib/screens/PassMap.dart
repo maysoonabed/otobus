@@ -23,6 +23,8 @@ import '../configMaps.dart';
 import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
 
+import 'passchat.dart';
+
 class PassMap extends StatefulWidget {
   @override
   _PassMapState createState() => _PassMapState();
@@ -168,6 +170,11 @@ class _PassMapState extends State<PassMap> {
     thisUser.name = await FlutterSession().get('name');
     var r = await FlutterSession().get('phone');
     thisUser.phone = r.toString();
+    setState(() {
+      _namecon.text = thisUser.name;
+      _emailcon.text = thisUser.email;
+      _phonecon.text = thisUser.phone;
+    });
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -461,7 +468,12 @@ class _PassMapState extends State<PassMap> {
     pic();
     initState();
     putvalues();
-
+    /*  setState(() {
+      homeispress = true;
+      msgispress = false;
+      notispress = false;
+      proispress = false;
+    }); */
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -485,7 +497,7 @@ class _PassMapState extends State<PassMap> {
             backgroundColor: apcolor,
           ),
           //######################################
-          drawer: Drawer(
+          endDrawer: Drawer(
             child: Column(
               children: <Widget>[
                 Stack(
@@ -526,74 +538,59 @@ class _PassMapState extends State<PassMap> {
                 SizedBox(
                   height: 70,
                 ),
-                FutureBuilder(
-                    future: FlutterSession().get('name'),
-                    builder: (context, snapshot) {
-                      _namecon.text = snapshot.data;
-                      return Container(
-                          child: TextField(
-                        controller: _namecon,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontFamily: "Lemonada",
-                        ),
-                        readOnly: true,
-                        autofocus: false,
-                        decoration: myInputDecoration(
-                          label: " ",
-                          icon: Icons.person,
-                        ),
-                      ));
-                    }),
+                Container(
+                    child: TextField(
+                  controller: _namecon,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: "Lemonada",
+                  ),
+                  readOnly: true,
+                  autofocus: false,
+                  decoration: myInputDecoration(
+                    label: " ",
+                    icon: Icons.person,
+                  ),
+                )),
                 SizedBox(
                   height: 20,
                 ),
-                FutureBuilder(
-                    future: FlutterSession().get('email'),
-                    builder: (context, snapshot) {
-                      email = _emailcon.text = snapshot.data;
-                      return Container(
-                        child: TextField(
-                          controller: _emailcon,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontFamily: "Lemonada",
-                          ),
-                          readOnly: true,
-                          autofocus: false,
-                          decoration: myInputDecoration(
-                            label: " ",
-                            icon: Icons.email,
-                          ),
-                        ),
-                      );
-                    }),
+                Container(
+                  child: TextField(
+                    controller: _emailcon,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: "Lemonada",
+                    ),
+                    readOnly: true,
+                    autofocus: false,
+                    decoration: myInputDecoration(
+                      label: " ",
+                      icon: Icons.email,
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
-                FutureBuilder(
-                    future: FlutterSession().get('phone'),
-                    builder: (context, snapshot) {
-                      _phonecon.text = snapshot.data.toString();
-                      return Container(
-                        child: TextField(
-                          controller: _phonecon,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontFamily: "Lemonada",
-                          ),
-                          readOnly: true,
-                          autofocus: false,
-                          decoration: myInputDecoration(
-                            label: " ",
-                            icon: Icons.phone_android,
-                          ),
-                        ),
-                      );
-                    }),
+                Container(
+                  child: TextField(
+                    controller: _phonecon,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: "Lemonada",
+                    ),
+                    readOnly: true,
+                    autofocus: false,
+                    decoration: myInputDecoration(
+                      label: " ",
+                      icon: Icons.phone_android,
+                    ),
+                  ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -645,155 +642,6 @@ class _PassMapState extends State<PassMap> {
                 )),
                 SizedBox(
                   height: 20,
-                ),
-                MaterialButton(
-                  color: apBcolor,
-                  height: 30,
-                  minWidth: 150.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  onPressed: () {
-                    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                    setState(() {
-                      markers.clear();
-                      markers.clear();
-                      polylines.clear();
-                      homeispress = false;
-                      msgispress = false;
-                      notispress = false;
-                      proispress = false;
-                      _destName = "";
-                      _startPointController.text = "";
-                      //box.remove('Email');
-                      FlutterSession().set('email', '');
-                      FlutterSession().set('name', '');
-                      FlutterSession().set('phone', '');
-                      FlutterSession().set('profpic', '');
-                    });
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MyApp()));
-                  },
-                  child: Text('تسجيل الخروج',
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontFamily: "Lemonada",
-                          color: Colors.white)),
-                ),
-              ],
-            ),
-          ),
-          //######################################
-          endDrawer: Drawer(
-            child: Column(
-              children: <Widget>[
-                Stack(
-                  overflow: Overflow.visible,
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    Image(image: AssetImage('lib/Images/passengercover.jpg')),
-                    Positioned(
-                        key: _photopickey,
-                        bottom: -50.0,
-                        child: CircleAvatar(
-                          radius: 80,
-                          backgroundColor: Colors.white,
-                          backgroundImage: (_prof != null)
-                              ? FileImage(_prof)
-                              : (_profname != null
-                                  ? img
-                                  : AssetImage('lib/Images/Defultprof.jpg')),
-                          child: MaterialButton(
-                            height: 170,
-                            minWidth: 170.0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(80)),
-                            onPressed: () async {
-                              var picked = await picker.getImage(
-                                  source: ImageSource.gallery);
-                              _prof = File(picked.path);
-                              _profname = _prof.path.split('/').last;
-                              upload(_prof, _profname);
-                              setState(() {
-                                img = AssetImage('phpfiles/cardlic/$_profname');
-                              });
-                            },
-                          ),
-                        )),
-                  ],
-                ),
-                SizedBox(
-                  height: 70,
-                ),
-                FutureBuilder(
-                    future: FlutterSession().get('name'),
-                    builder: (context, snapshot) {
-                      _namecon.text = snapshot.data;
-                      return Container(
-                          child: TextField(
-                        controller: _namecon,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontFamily: "Lemonada",
-                        ),
-                        readOnly: true,
-                        autofocus: false,
-                        decoration: myInputDecoration(
-                          label: " ",
-                          icon: Icons.person,
-                        ),
-                      ));
-                    }),
-                SizedBox(
-                  height: 20,
-                ),
-                FutureBuilder(
-                    future: FlutterSession().get('email'),
-                    builder: (context, snapshot) {
-                      email = _emailcon.text = snapshot.data;
-                      return Container(
-                        child: TextField(
-                          controller: _emailcon,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontFamily: "Lemonada",
-                          ),
-                          readOnly: true,
-                          autofocus: false,
-                          decoration: myInputDecoration(
-                            label: " ",
-                            icon: Icons.email,
-                          ),
-                        ),
-                      );
-                    }),
-                SizedBox(
-                  height: 20,
-                ),
-                FutureBuilder(
-                    future: FlutterSession().get('phone'),
-                    builder: (context, snapshot) {
-                      _phonecon.text = snapshot.data.toString();
-                      return Container(
-                        child: TextField(
-                          controller: _phonecon,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontFamily: "Lemonada",
-                          ),
-                          readOnly: true,
-                          autofocus: false,
-                          decoration: myInputDecoration(
-                            label: " ",
-                            icon: Icons.phone_android,
-                          ),
-                        ),
-                      );
-                    }),
-                SizedBox(
-                  height: 40,
                 ),
                 MaterialButton(
                   color: apBcolor,
@@ -1005,7 +853,14 @@ class _PassMapState extends State<PassMap> {
                                         notispress = false;
                                         proispress = false;
                                       });
-                                      _scaffoldkey.currentState.openDrawer();
+
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PassChat()));
+
+                                      //_scaffoldkey.currentState.openDrawer();
                                     }),
                               ),
                               Container(
