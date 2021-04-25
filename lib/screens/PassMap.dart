@@ -456,9 +456,6 @@ class _PassMapState extends State<PassMap> {
         home: Scaffold(
           key: _scaffoldkey,
           appBar: AppBar(
-            actions: <Widget>[
-              new Container(),
-            ],
             title: Center(
               child: Text(
                 "OtoBüs",
@@ -470,7 +467,52 @@ class _PassMapState extends State<PassMap> {
               ),
             ),
             backgroundColor: apcolor,
+            actions: <Widget>[
+              new Container(),
+            ],
           ),
+          //######################################
+          drawer: Drawer(
+              child: Column(children: <Widget>[
+            Stack(
+              overflow: Overflow.visible,
+              alignment: Alignment.center,
+              children: <Widget>[
+                Image(image: AssetImage('lib/Images/passengercover.jpg')),
+                Positioned(
+                    key: _photopickey,
+                    bottom: -50.0,
+                    child: CircleAvatar(
+                      radius: 80,
+                      backgroundColor: Colors.white,
+                      backgroundImage: (_prof != null)
+                          ? FileImage(_prof)
+                          : (_profname != null
+                              ? img
+                              : AssetImage('lib/Images/Defultprof.jpg')),
+                    )),
+              ],
+            ),
+            SizedBox(
+              height: 50,
+            ),
+            MaterialButton(
+              color: apBcolor,
+              height: 15,
+              minWidth: 120.0,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              onPressed: () async {
+                var picked = await picker.getImage(source: ImageSource.gallery);
+                _prof = File(picked.path);
+                _profname = _prof.path.split('/').last;
+                upload(_prof, _profname);
+                setState(() {
+                  img = AssetImage('phpfiles/cardlic/$_profname');
+                });
+              },
+            ),
+          ])),
           //######################################
           endDrawer: Drawer(
             child: Column(
@@ -801,6 +843,7 @@ class _PassMapState extends State<PassMap> {
                                         notispress = false;
                                         proispress = false;
                                       });
+                                      _scaffoldkey.currentState.openDrawer();
                                     }),
                               ),
                               Container(
