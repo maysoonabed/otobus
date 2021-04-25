@@ -72,6 +72,7 @@ class PushNotifications {
         FirebaseDatabase.instance.reference().child('rideRequest/$rideId');
     rideRef.once().then((DataSnapshot snapshot) {
       Navigator.pop(context);
+
       if (snapshot.value != null) {
         playFile();
         double pickUpLat =
@@ -98,7 +99,7 @@ class PushNotifications {
     });
   }
 
-  void playFile() async{
-  notifPlayer = await cache.play('request_notifi.mp3'); // assign player here
-}
+  void playFile() async {
+    notifPlayer = await cache.play('request_notifi.mp3'); // assign player here
+  }
 }
