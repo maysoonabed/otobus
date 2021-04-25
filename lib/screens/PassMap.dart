@@ -17,6 +17,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../configMaps.dart';
 import '../main.dart';
@@ -70,6 +71,16 @@ var fileImg;
 var _namecon = TextEditingController();
 var _emailcon = TextEditingController();
 var _phonecon = TextEditingController();
+//////////////////////////insurance Date/////////////////////////
+var _insdate = TextEditingController();
+DateTime _insT;
+String date;
+final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
+DateTime displayDate;
+String formatted;
+
+//////////////////////////insurance Date/////////////////////////
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
@@ -405,7 +416,7 @@ class _PassMapState extends State<PassMap> {
                     minLines: 1,
                     maxLines: null,
                     autofocus: false,
-                    decoration: new InputDecoration(labelText: 'Distance'),
+                    decoration: new InputDecoration(labelText: 'المسافة'),
                   ),
                 ),
               ],
@@ -456,6 +467,11 @@ class _PassMapState extends State<PassMap> {
         home: Scaffold(
           key: _scaffoldkey,
           appBar: AppBar(
+            automaticallyImplyLeading: false,
+            //leading: new Container(),
+            actions: <Widget>[
+              new Container(),
+            ],
             title: Center(
               child: Text(
                 "OtoBüs",
@@ -467,74 +483,11 @@ class _PassMapState extends State<PassMap> {
               ),
             ),
             backgroundColor: apcolor,
-            actions: <Widget>[
-              new Container(),
-            ],
           ),
           //######################################
           drawer: Drawer(
-              child: Column(children: <Widget>[
-            Stack(
-              overflow: Overflow.visible,
-              alignment: Alignment.center,
-              children: <Widget>[
-                Image(image: AssetImage('lib/Images/passengercover.jpg')),
-                Positioned(
-                    key: _photopickey,
-                    bottom: -50.0,
-                    child: CircleAvatar(
-                      radius: 80,
-                      backgroundColor: Colors.white,
-                      backgroundImage: (_prof != null)
-                          ? FileImage(_prof)
-                          : (_profname != null
-                              ? img
-                              : AssetImage('lib/Images/Defultprof.jpg')),
-                    )),
-              ],
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            MaterialButton(
-              color: apBcolor,
-              height: 15,
-              minWidth: 120.0,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              onPressed: () async {
-                var picked = await picker.getImage(source: ImageSource.gallery);
-                _prof = File(picked.path);
-                _profname = _prof.path.split('/').last;
-                upload(_prof, _profname);
-                setState(() {
-                  img = AssetImage('phpfiles/cardlic/$_profname');
-                });
-              },
-            ),
-          ])),
-          //######################################
-          endDrawer: Drawer(
             child: Column(
               children: <Widget>[
-                FutureBuilder(
-                    future: FlutterSession().get('name'),
-                    builder: (context, snapshot) {
-                      _namecon.text = snapshot.data;
-                      return Container();
-                    }),
-                FutureBuilder(
-                    future: FlutterSession().get('email'),
-                    builder: (context, snapshot) {
-                      email = _emailcon.text = snapshot.data;
-                      return Container();
-                    }),
-                FutureBuilder(
-                    future: FlutterSession().get('phone'),
-                    builder: (context, snapshot) {
-                      _phonecon.text = snapshot.data.toString();
-                      return Container();
-                    }),
                 Stack(
                   overflow: Overflow.visible,
                   alignment: Alignment.center,
@@ -551,87 +504,294 @@ class _PassMapState extends State<PassMap> {
                               : (_profname != null
                                   ? img
                                   : AssetImage('lib/Images/Defultprof.jpg')),
+                          child: MaterialButton(
+                            height: 170,
+                            minWidth: 170.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(80)),
+                            onPressed: () async {
+                              var picked = await picker.getImage(
+                                  source: ImageSource.gallery);
+                              _prof = File(picked.path);
+                              _profname = _prof.path.split('/').last;
+                              upload(_prof, _profname);
+                              setState(() {
+                                img = AssetImage('phpfiles/cardlic/$_profname');
+                              });
+                            },
+                          ),
                         )),
                   ],
                 ),
                 SizedBox(
-                  height: 50,
+                  height: 70,
                 ),
-                MaterialButton(
-                  color: apBcolor,
-                  height: 15,
-                  minWidth: 120.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  onPressed: () async {
-                    var picked =
-                        await picker.getImage(source: ImageSource.gallery);
-                    _prof = File(picked.path);
-                    _profname = _prof.path.split('/').last;
-                    upload(_prof, _profname);
-                    setState(() {
-                      img = AssetImage('phpfiles/cardlic/$_profname');
-                    });
-                  },
-                  child: Text('تغيير الصورة الشخصية',
-                      style: TextStyle(
-                          fontSize: 10,
+                FutureBuilder(
+                    future: FlutterSession().get('name'),
+                    builder: (context, snapshot) {
+                      _namecon.text = snapshot.data;
+                      return Container(
+                          child: TextField(
+                        controller: _namecon,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
                           fontFamily: "Lemonada",
-                          color: Colors.white)),
+                        ),
+                        readOnly: true,
+                        autofocus: false,
+                        decoration: myInputDecoration(
+                          label: " ",
+                          icon: Icons.person,
+                        ),
+                      ));
+                    }),
+                SizedBox(
+                  height: 20,
+                ),
+                FutureBuilder(
+                    future: FlutterSession().get('email'),
+                    builder: (context, snapshot) {
+                      email = _emailcon.text = snapshot.data;
+                      return Container(
+                        child: TextField(
+                          controller: _emailcon,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontFamily: "Lemonada",
+                          ),
+                          readOnly: true,
+                          autofocus: false,
+                          decoration: myInputDecoration(
+                            label: " ",
+                            icon: Icons.email,
+                          ),
+                        ),
+                      );
+                    }),
+                SizedBox(
+                  height: 20,
+                ),
+                FutureBuilder(
+                    future: FlutterSession().get('phone'),
+                    builder: (context, snapshot) {
+                      _phonecon.text = snapshot.data.toString();
+                      return Container(
+                        child: TextField(
+                          controller: _phonecon,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontFamily: "Lemonada",
+                          ),
+                          readOnly: true,
+                          autofocus: false,
+                          decoration: myInputDecoration(
+                            label: " ",
+                            icon: Icons.phone_android,
+                          ),
+                        ),
+                      );
+                    }),
+                SizedBox(
+                  height: 20,
                 ),
                 Container(
                     child: TextField(
-                  controller: _namecon,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontFamily: "Lemonada",
-                  ),
                   readOnly: true,
-                  autofocus: false,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.datetime,
+                  controller: _insdate, //set username controller
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontFamily: "Lemonada"),
                   decoration: myInputDecoration(
-                    label: " ",
-                    icon: Icons.person,
-                  ),
+                      label: "تحديث تاريخ انتهاء التأمين",
+                      icon: Icons.date_range_rounded),
+                  onTap: () {
+                    showDatePicker(
+                            builder: (BuildContext context, Widget child) {
+                              return Theme(
+                                data: ThemeData.light().copyWith(
+                                  colorScheme: ColorScheme.light(
+                                      primary: apcolor,
+                                      onPrimary: Colors.white,
+                                      surface: apBcolor,
+                                      onSurface: Colors.black),
+                                  dialogBackgroundColor: Colors.white,
+                                ),
+                                child: child,
+                              );
+                            },
+                            context: context,
+                            initialDate: _insT == null ? DateTime.now() : _insT,
+                            firstDate: DateTime(DateTime.now().year,
+                                DateTime.now().month, DateTime.now().day),
+                            lastDate: DateTime(2100))
+                        .then((value) {
+                      setState(() {
+                        _insT = value;
+                        date = _insT.toString();
+                        _insdate.text = DateFormat.yMMMd().format(value);
+                        displayDate = displayFormater.parse(date);
+                        formatted = serverFormater.format(displayDate);
+                        //updateDate();
+                      });
+                      //print(formatted);
+                    });
+                  },
                 )),
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                  child: TextField(
-                    controller: _emailcon,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontFamily: "Lemonada",
-                    ),
-                    readOnly: true,
-                    autofocus: false,
-                    decoration: myInputDecoration(
-                      label: " ",
-                      icon: Icons.email,
-                    ),
-                  ),
+                MaterialButton(
+                  color: apBcolor,
+                  height: 30,
+                  minWidth: 150.0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  onPressed: () {
+                    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                    setState(() {
+                      markers.clear();
+                      markers.clear();
+                      polylines.clear();
+                      homeispress = false;
+                      msgispress = false;
+                      notispress = false;
+                      proispress = false;
+                      _destName = "";
+                      _startPointController.text = "";
+                      //box.remove('Email');
+                      FlutterSession().set('email', '');
+                      FlutterSession().set('name', '');
+                      FlutterSession().set('phone', '');
+                      FlutterSession().set('profpic', '');
+                    });
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => MyApp()));
+                  },
+                  child: Text('تسجيل الخروج',
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontFamily: "Lemonada",
+                          color: Colors.white)),
                 ),
+              ],
+            ),
+          ),
+          //######################################
+          endDrawer: Drawer(
+            child: Column(
+              children: <Widget>[
+                Stack(
+                  overflow: Overflow.visible,
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    Image(image: AssetImage('lib/Images/passengercover.jpg')),
+                    Positioned(
+                        key: _photopickey,
+                        bottom: -50.0,
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundColor: Colors.white,
+                          backgroundImage: (_prof != null)
+                              ? FileImage(_prof)
+                              : (_profname != null
+                                  ? img
+                                  : AssetImage('lib/Images/Defultprof.jpg')),
+                          child: MaterialButton(
+                            height: 170,
+                            minWidth: 170.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(80)),
+                            onPressed: () async {
+                              var picked = await picker.getImage(
+                                  source: ImageSource.gallery);
+                              _prof = File(picked.path);
+                              _profname = _prof.path.split('/').last;
+                              upload(_prof, _profname);
+                              setState(() {
+                                img = AssetImage('phpfiles/cardlic/$_profname');
+                              });
+                            },
+                          ),
+                        )),
+                  ],
+                ),
+                SizedBox(
+                  height: 70,
+                ),
+                FutureBuilder(
+                    future: FlutterSession().get('name'),
+                    builder: (context, snapshot) {
+                      _namecon.text = snapshot.data;
+                      return Container(
+                          child: TextField(
+                        controller: _namecon,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontFamily: "Lemonada",
+                        ),
+                        readOnly: true,
+                        autofocus: false,
+                        decoration: myInputDecoration(
+                          label: " ",
+                          icon: Icons.person,
+                        ),
+                      ));
+                    }),
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                  child: TextField(
-                    controller: _phonecon,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontFamily: "Lemonada",
-                    ),
-                    readOnly: true,
-                    autofocus: false,
-                    decoration: myInputDecoration(
-                      label: " ",
-                      icon: Icons.phone_android,
-                    ),
-                  ),
+                FutureBuilder(
+                    future: FlutterSession().get('email'),
+                    builder: (context, snapshot) {
+                      email = _emailcon.text = snapshot.data;
+                      return Container(
+                        child: TextField(
+                          controller: _emailcon,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontFamily: "Lemonada",
+                          ),
+                          readOnly: true,
+                          autofocus: false,
+                          decoration: myInputDecoration(
+                            label: " ",
+                            icon: Icons.email,
+                          ),
+                        ),
+                      );
+                    }),
+                SizedBox(
+                  height: 20,
                 ),
+                FutureBuilder(
+                    future: FlutterSession().get('phone'),
+                    builder: (context, snapshot) {
+                      _phonecon.text = snapshot.data.toString();
+                      return Container(
+                        child: TextField(
+                          controller: _phonecon,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontFamily: "Lemonada",
+                          ),
+                          readOnly: true,
+                          autofocus: false,
+                          decoration: myInputDecoration(
+                            label: " ",
+                            icon: Icons.phone_android,
+                          ),
+                        ),
+                      );
+                    }),
                 SizedBox(
                   height: 40,
                 ),
@@ -705,13 +865,15 @@ class _PassMapState extends State<PassMap> {
                           backgroundColor: apBcolor,
                           isExtended: reqbook,
                           onPressed: () {
+                            if (reqbook) {
+                              createRequest();
+                              startGeoListen();
+                            }
                             setState(
                               () {
-                                reqbook = !reqbook;
+                                reqbook = false;
                               },
                             );
-                            createRequest();
-                            startGeoListen();
                           },
                           label: reqbook
                               ? Row(
