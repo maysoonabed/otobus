@@ -75,11 +75,11 @@ class _LoginPageState extends State<LoginPage> {
           thisUser.email = email;
           thisUser.name = jsondata["name"];
           thisUser.phone = jsondata["phonenum"];
-          String pic = jsondata["profpic"];
           if (id == 2) {
             //String ph = phone.toString();
             /* box = GetStorage();
             box.write('Email', email); */
+            String pic = jsondata["profpic"];
             await FlutterSession().set('email', email);
             await FlutterSession().set('name', thisUser.name);
             await FlutterSession().set('phone', thisUser.phone);

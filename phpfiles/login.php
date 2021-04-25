@@ -4,36 +4,30 @@
     $Email = $_POST['email'];
     $Password = md5($_POST['password']);   
     $idtype=(int)($_POST['id']);
-    //echo  $Password;
 
     if ($connect) {
        $json['error'] =0;
+
        if($idtype==2){     
           $query = "SELECT * FROM `passenger` WHERE `email`='$Email' AND `password` ='$Password'";
        }else{
-       $query = "SELECT * FROM `driver` WHERE `email`='$Email' AND `password` ='$Password'"; 
+          $query = "SELECT * FROM `driver` WHERE `email`='$Email' AND `password` ='$Password'"; 
        }
-       //echo $query;
       $result = $connect->query($query);
-      //$result = mysqli_query($connect, $query);
-      //echo $result->num_rows;
       
       if($result->num_rows>0){
+
          if($idtype==1){
              $driver = mysqli_fetch_array($result);
              $q = "SELECT * FROM `driver` WHERE `driverid`='$driver[0]' AND `active`=0b1";
              $res = $connect->query($q);
-             // echo $res->num_rows;
-             //$active = mysqli_fetch_array($res);
-             //echo $active;
-             //echo $q;
              if($res->num_rows>0){
                $json['value'] = 1;
-               $row = mysqli_fetch_assoc($result);
+               while($row = mysqli_fetch_assoc($result)){
                $json['name']=$row['name'];
                $json['phonenum'] =$row['phonenum'];
                //$json['insdate']=$row[''];
-               $json['error'] =0;
+               }
              }else{
                $json['value'] = 2;
                $json['error'] =1;
