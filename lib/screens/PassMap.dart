@@ -23,7 +23,7 @@ import '../configMaps.dart';
 import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
 
-import 'passchat.dart';
+import '../chat/passchat.dart';
 
 class PassMap extends StatefulWidget {
   @override
