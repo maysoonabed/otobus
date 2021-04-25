@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:OtoBus/configMaps.dart';
+import 'package:OtoBus/screens/noDriversDialog.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
-//import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import '../main.dart';
 import 'package:OtoBus/dataProvider/address.dart';
@@ -37,6 +38,8 @@ final List<Marker> markers = [];
 var data;
 latLng.LatLng currLatLng;
 DatabaseReference rideReq;
+DatabaseReference driverRef =
+    FirebaseDatabase.instance.reference().child('Drivers');
 bool nearLoaded = false;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -242,7 +245,7 @@ class _PassengerMapState extends State<PassengerMap> {
                 padding: const EdgeInsets.only(right: 8.0),
                 child: Icon(Icons.check),
               ),
-              Text("اظهار الباصات"),
+              Text(" طلب توصيلة"),
             ],
           );
         }
@@ -308,6 +311,8 @@ class _PassengerMapState extends State<PassengerMap> {
                     if (isExtended == 1) {
                       createRequest();
                       startGeoListen();
+                      availableDrivers = FireDrivers.nDrivers;
+                      searchNearestDriver();
                     } else if (isExtended == 2) {
                       cancelReq();
                       setState(() {
@@ -334,6 +339,67 @@ class _PassengerMapState extends State<PassengerMap> {
               width: 0.1,
             ),
     ]);
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void searchNearestDriver() {
+    if (availableDrivers.length == 0) {
+      cancelReq();
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => NoDriverDialog(),
+      );
+      setState(() {
+        markers.length > 1 ? markers.removeRange(2, markers.length - 1) : null;
+      });
+    } else {
+      var driver = availableDrivers[0];
+      notifyDriver(driver);
+      availableDrivers.removeAt(0);
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void notifyDriver(NearDrivers driver) {
+    driverRef.child(driver.key).child('newTrip').set(rideReq.key);
+    driverRef.child(driver.key).child('token').once().then((DataSnapshot snap) {
+      if (snap.value != null) {
+        String token = snap.value.toString();
+        sendNotifToDriver(token, rideReq.key, context);
+      }
+    });
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void sendNotifToDriver(String token, String rideReqId, context) async {
+    var destin =
+        Provider.of<AppData>(context, listen: false).destinationAddress;
+    Map<String, String> headerMap = {
+      'Content-Type': 'application/json',
+      'Authorization': serverToken,
+    };
+    Map notificationMap = {
+      'body': '${destin.placeName} إلى ',
+      'title': 'طلب توصيلة جديد'
+    };
+    Map dataMap = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'riderequest_id': rideReqId,
+    };
+    Map sendNotificationMao = {
+      "notification": notificationMap,
+      "data": dataMap,
+      'priority': 'high',
+      'to': token,
+    };
+    var respon = await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: headerMap,
+      body: jsonEncode(sendNotificationMao),
+    );
   }
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

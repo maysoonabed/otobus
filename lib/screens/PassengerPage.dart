@@ -17,6 +17,7 @@ import 'NetworkHelper.dart';
 import 'LineString.dart';
 import 'CurrUserInfo.dart';
 import 'package:OtoBus/configMaps.dart';
+import 'package:OtoBus/dataProvider/nearDriver.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -31,6 +32,7 @@ bool homeispress = false;
 bool msgispress = false;
 bool notispress = false;
 bool proispress = false;
+List<NearDrivers> availableDrivers;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class PassengerPage extends StatefulWidget {

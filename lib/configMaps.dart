@@ -19,7 +19,8 @@ DatabaseReference ridRef;
 var currUser;
 StreamSubscription<Position> posStream;
 StreamSubscription<Position> ridePosStream;
-
+String serverToken =
+    'key=AAAAR4af78E:APA91bHxmXSF2dTgOFlJbTjs_20A0lkyTKPYOFz_HOOzGIqTk7lDZidJC5SfcUNQQp6RsyxRabVwHyJ1EItvuTuwZ1xdA7SztFkes8Icu3PN2_Qu4RGisXuU74m0kmMnJs1CaMkXOIYO';
 
 AudioCache cache = AudioCache();
 AudioPlayer notifPlayer = AudioPlayer();
