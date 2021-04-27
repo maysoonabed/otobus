@@ -1,9 +1,16 @@
+import 'package:OtoBus/chat/Curruser.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'PassChatUsers.dart';
 import 'PassConversationList .dart';
 
+Curruser myuser;
+
 class PassChat extends StatefulWidget {
+  PassChat(this.myemail, this.myname);
+  final String myname;
+  final String myemail;
   @override
   _PassChatState createState() => _PassChatState();
 }
@@ -15,45 +22,14 @@ class _PassChatState extends State<PassChat> {
         messageText: "Awesome Setup",
         imageURL: "phpfiles/cardlic/image_picker1196946746.jpg",
         time: "Now"),
-    PassChatUsers(
-        name: "Glady's Murphy",
-        messageText: "That's Great",
-        imageURL: "phpfiles/cardlic/image_picker-28516318.jpg",
-        time: "Yesterday"),
-    PassChatUsers(
-        name: "Jorge Henry",
-        messageText: "Hey where are you?",
-        imageURL: "phpfiles/cardlic/image_picker-1364311807.jpg",
-        time: "31 Mar"),
-    PassChatUsers(
-        name: "Philip Fox",
-        messageText: "Busy! Call me in 20 mins",
-        imageURL: "phpfiles/cardlic/image_picker1196946746.jpg",
-        time: "28 Mar"),
-    PassChatUsers(
-        name: "Debra Hawkins",
-        messageText: "Thankyou, It's awesome",
-        imageURL: "phpfiles/cardlic/image_picker-1364311807.jpg",
-        time: "23 Mar"),
-    PassChatUsers(
-        name: "Jacob Pena",
-        messageText: "will update you in evening",
-        imageURL: "phpfiles/cardlic/image_picker1196946746.jpg",
-        time: "17 Mar"),
-    PassChatUsers(
-        name: "Andrey Jones",
-        messageText: "Can you please share the file?",
-        imageURL: "phpfiles/cardlic/image_picker-1364311807.jpg",
-        time: "24 Feb"),
-    PassChatUsers(
-        name: "John Wick",
-        messageText: "How are you?",
-        imageURL: "phpfiles/cardlic/image_picker-28516318.jpg",
-        time: "18 Feb"),
   ];
   @override
   Widget build(BuildContext context) {
-    //SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+    Firebase.initializeApp();
+    String em = widget.myemail;
+    String nm = widget.myname;
+    myuser = Curruser(email: em, name: nm);
+    //print(myuser.email);print(myuser.name);
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -100,6 +76,7 @@ class _PassChatState extends State<PassChat> {
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     return PassConversationList(
+                      //user: myuser,
                       name: chatUsers[index].name,
                       messageText: chatUsers[index].messageText,
                       imageUrl: chatUsers[index].imageURL,

@@ -22,7 +22,7 @@ import 'package:provider/provider.dart';
 import '../configMaps.dart';
 import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
-
+import 'SignupPage.dart';
 import '../chat/passchat.dart';
 
 class PassMap extends StatefulWidget {
@@ -172,9 +172,12 @@ class _PassMapState extends State<PassMap> {
     thisUser.phone = r.toString();
     setState(() {
       _namecon.text = thisUser.name;
-      _emailcon.text = thisUser.email;
+      email = _emailcon.text = thisUser.email;
       _phonecon.text = thisUser.phone;
     });
+    /* if (_emailcon.text == "") {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
+    } */
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -662,6 +665,7 @@ class _PassMapState extends State<PassMap> {
                       _destName = "";
                       _startPointController.text = "";
                       //box.remove('Email');
+                      //auth.signOut();
                       FlutterSession().set('email', '');
                       FlutterSession().set('name', '');
                       FlutterSession().set('phone', '');
@@ -857,8 +861,9 @@ class _PassMapState extends State<PassMap> {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) =>
-                                                  PassChat()));
+                                              builder: (context) => PassChat(
+                                                  thisUser.email,
+                                                  thisUser.name)));
 
                                       //_scaffoldkey.currentState.openDrawer();
                                     }),

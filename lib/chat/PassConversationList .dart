@@ -1,7 +1,10 @@
 import 'package:OtoBus/chat/PassChatDetailes.dart';
+import 'package:OtoBus/chat/curruser.dart';
+import 'package:OtoBus/chat/passchat.dart';
 import 'package:flutter/material.dart';
 
 class PassConversationList extends StatefulWidget {
+  //Curruser user;//@required this.user,
   String name;
   String messageText;
   String imageUrl;
@@ -20,6 +23,7 @@ class PassConversationList extends StatefulWidget {
 class _PassConversationListState extends State<PassConversationList> {
   @override
   Widget build(BuildContext context) {
+    //print(myuser.email); print(myuser.name);
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
