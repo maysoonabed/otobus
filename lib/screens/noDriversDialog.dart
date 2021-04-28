@@ -17,7 +17,7 @@ class NoDriverDialog extends StatelessWidget {
           children: <Widget>[
             Center(
               child: Text(
-                "تم التسجيل بنجاح",
+                "تعذر إيجاد باص",
                 style: TextStyle(fontSize: 24.0),
               ),
             ),
@@ -30,7 +30,7 @@ class NoDriverDialog extends StatelessWidget {
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
                   hintText:
-                      "لا تتوافر باصات قريبة حاليًا, يرجى المحاولة لاحقًا",
+                      "لا تتوافر باصات قريبة حاليًا, يرجى إعادة المحاولة لاحقًا",
                   border: InputBorder.none,
                 ),
                 maxLines: 5,

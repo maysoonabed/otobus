@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/screens/noDriversDialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ DatabaseReference rideReq;
 DatabaseReference driverRef =
     FirebaseDatabase.instance.reference().child('Drivers');
 bool nearLoaded = false;
+double driversDetailes = 0;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -56,11 +58,21 @@ class _PassengerMapState extends State<PassengerMap> {
 
   var geoLocator = Geolocator();
   Position currentPosition;
+  String stat = 'normal';
+  StreamSubscription<Event> ridestreams;
+  bool reqPosDet = false;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void putvalues() async {
     thisUser.email = await FlutterSession().get('email');
     thisUser.name = await FlutterSession().get('name');
     thisUser.phone = await FlutterSession().get('phone').toString();
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void displayDriverDetails() {
+    setState(() {
+      driversDetailes = 400;
+    });
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,13 +103,87 @@ class _PassengerMapState extends State<PassengerMap> {
       'status': 'waiting',
     };
     rideReq.set(rideMap);
+    ridestreams = rideReq.onValue.listen((event) {
+      if (event.snapshot.value == null) {
+        return;
+      }
+      if (event.snapshot.value['driver_location'] != null) {
+        double driverLat = double.parse(
+            event.snapshot.value['driver_location']['latitude'].toString());
+        double driverLong = double.parse(
+            event.snapshot.value['driver_location']['longitude'].toString());
+        latLng.LatLng driverCurrLoc = latLng.LatLng(driverLat, driverLong);
+        if (statusRide == 'accepted') {
+          updateDriTime(driverCurrLoc);
+        } else if (statusRide == 'onTrip') {
+          updateTripTime(driverCurrLoc);
+        } else if (statusRide == 'arrived') {
+          setState(() {
+            arrivalStatus = 'وصل الباص';
+          });
+        }
+      }
+      if (event.snapshot.value['status'] != null) {
+        statusRide = event.snapshot.value['status'].toString();
+      }
+      if (statusRide == 'accepted') {
+        displayDriverDetails();
+        Geofire.stopListener();
+        //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
+      }
+    });
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void updateDriTime(latLng.LatLng driverCurrLoc) async {
+    if (reqPosDet == false) {
+      reqPosDet = true;
+      var pos = latLng.LatLng(currLatLng.latitude, currLatLng.longitude);
+      String time = await calcTime(pos, driverCurrLoc);
+      setState(() {
+        arrivalStatus = ' سيصل الباص بحدود ' + time /* + " دقائق " */;
+      });
+      reqPosDet = false;
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void updateTripTime(latLng.LatLng driverCurrLoc) async {
+    if (reqPosDet == false) {
+      reqPosDet = true;
+      var posAdd =
+          Provider.of<AppData>(context, listen: false).destinationAddress;
+      var pos = latLng.LatLng(posAdd.lat, posAdd.long);
+      String time = await calcTime(pos, driverCurrLoc);
+      setState(() {
+        arrivalStatus = ' باقٍ على الوصول للوجهة ' + time /* + 'دقائق' */;
+      });
+      reqPosDet = false;
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future<String> calcTime(latLng.LatLng source, latLng.LatLng dest) async {
+    Response response = await get(
+        'https://maps.googleapis.com/maps/api/distancematrix/json?origins=${source.latitude},${source.longitude}&destinations=side_of_road:${dest.latitude},${dest.longitude}&key=$googlekey');
+    //rows[0].elements[0].duration.text
+    if (response.statusCode == 200) {
+      String data = response.body;
+      String input =
+          jsonDecode(data)['rows'][0]['elements'][0]['duration']['text'];
+      int i = input.indexOf(' ');
+      String word = input.substring(0, i);
+      return word + ' دقائق ';
+    }
+    return 'لم يحدد';
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void cancelReq() {
     rideReq.remove();
     setState(() {
-      markers.removeAt(1);
+      stat = 'normal';
+      markers.length > 1 ? markers.removeRange(1, markers.length) : null;
       points.clear();
       polyLines.clear();
     });
@@ -208,6 +294,11 @@ class _PassengerMapState extends State<PassengerMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void driversMarkers() {
+    setState(() {
+      markers.length > 1 ? markers.removeRange(1, markers.length) : null;
+      points.clear();
+      polyLines.clear();
+    });
     for (NearDrivers driver in FireDrivers.nDrivers) {
       setState(() {
         latLng.LatLng driverPos = latLng.LatLng(driver.lat, driver.long);
@@ -315,18 +406,15 @@ class _PassengerMapState extends State<PassengerMap> {
                       searchNearestDriver();
                     } else if (isExtended == 2) {
                       cancelReq();
-                      setState(() {
-                        markers.length > 1
-                            ? markers.removeRange(2, markers.length - 1)
-                            : null;
-                      });
                     }
                     setState(
                       () {
                         if (isExtended < 2) {
                           isExtended++;
-                        } else
+                          isExtended == 1 ? stat = 'requesting' : null;
+                        } else {
                           isExtended = 0;
+                        }
                       },
                     );
                   },
@@ -338,25 +426,155 @@ class _PassengerMapState extends State<PassengerMap> {
               height: 0.1,
               width: 0.1,
             ),
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//Display driver's info
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      Positioned(
+        bottom: 10,
+        left: 0,
+        right: 0,
+        child: Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(16), topLeft: Radius.circular(16)),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    spreadRadius: 0.5,
+                    blurRadius: 16,
+                    color: Colors.black54,
+                    offset: Offset(0.7, 0.7)),
+              ]),
+          height: driversDetailes,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 6,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      arrivalStatus,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 22,
+                ),
+                Divider(),
+                Text(
+                  '  نوع الباص',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  ' اسم السواق ',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                ),
+                SizedBox(
+                  height: 22,
+                ),
+                Divider(),
+                SizedBox(
+                  height: 22,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 55,
+                          width: 55,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(26)),
+                            border: Border.all(width: 2, color: Colors.grey),
+                          ),
+                          child: Icon(Icons.cancel),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text('إلغاء طلب الرحلة'),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 55,
+                          width: 55,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(26)),
+                            border: Border.all(width: 2, color: Colors.grey),
+                          ),
+                          child: Icon(Icons.message),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text('تواصل مع السائق'),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 55,
+                          width: 55,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(26)),
+                            border: Border.all(width: 2, color: Colors.grey),
+                          ),
+                          child: Icon(Icons.list),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(' معلومات السائق'),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     ]);
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void searchNearestDriver() {
     if (availableDrivers.length == 0) {
+      setState(() {
+        isExtended = -1;
+      });
       cancelReq();
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => NoDriverDialog(),
       );
-      setState(() {
-        markers.length > 1 ? markers.removeRange(2, markers.length - 1) : null;
-      });
     } else {
+      setState(() {
+        markers.length > 1 ? markers.removeRange(1, markers.length) : null;
+        points.clear();
+        polyLines.clear();
+      });
       var driver = availableDrivers[0];
-      notifyDriver(driver);
+      print(driver.key);
       availableDrivers.removeAt(0);
+      notifyDriver(driver);
     }
   }
 
@@ -367,7 +585,33 @@ class _PassengerMapState extends State<PassengerMap> {
       if (snap.value != null) {
         String token = snap.value.toString();
         sendNotifToDriver(token, rideReq.key, context);
+      } else {
+        return;
       }
+      const sec = Duration(seconds: 1);
+      var timer = Timer.periodic(sec, (timer) {
+        if (stat != 'requesting') {
+          driverRef.child(driver.key).child('newTrip').set('cancelled');
+          driverRef.child(driver.key).child('newTrip').onDisconnect();
+          dReqTimeout = 10;
+          timer.cancel();
+        }
+        dReqTimeout = dReqTimeout - 1;
+        driverRef.child(driver.key).child('newTrip').onValue.listen((event) {
+          if (event.snapshot.value.toString() == 'accepted') {
+            driverRef.child(driver.key).child('newTrip').onDisconnect();
+            dReqTimeout = 10;
+            timer.cancel();
+          }
+        });
+        if (dReqTimeout == 0) {
+          driverRef.child(driver.key).child('newTrip').set('timeout');
+          driverRef.child(driver.key).child('newTrip').onDisconnect();
+          dReqTimeout = 10;
+          timer.cancel();
+          searchNearestDriver();
+        }
+      });
     });
   }
 

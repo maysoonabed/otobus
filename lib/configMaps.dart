@@ -28,3 +28,6 @@ AudioPlayer notifPlayer = AudioPlayer();
 LatLng driverF = LatLng(32.2934, 35.3458);
 LatLng driverT = LatLng(32.2227, 35.2621);
 TripInfo tripInfo = TripInfo();
+int dReqTimeout = 10;
+String statusRide = '';
+String arrivalStatus = ' الباص على الطريق ';
