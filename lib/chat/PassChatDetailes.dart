@@ -1,7 +1,14 @@
+import 'package:OtoBus/chat/passchat.dart';
 import 'package:OtoBus/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import 'PasschatMessageModel.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+var mesg = TextEditingController();
+var message;
+final FirebaseAuth auth = FirebaseAuth.instance;
+final _firestore = Firestore.instance; //FierbaseFirestore
 
 class PassChatDetailes extends StatefulWidget {
   @override
@@ -9,20 +16,24 @@ class PassChatDetailes extends StatefulWidget {
 }
 
 class _PassChatDetailesState extends State<PassChatDetailes> {
-  List<PassChatMessage> messages = [
-    PassChatMessage(messageContent: "Hello, Will", messageType: "receiver"),
-    PassChatMessage(
-        messageContent: "How have you been?", messageType: "receiver"),
-    PassChatMessage(
-        messageContent: "Hey Kriss, I am doing fine dude. wbu?",
-        messageType: "sender"),
-    PassChatMessage(
-        messageContent: "ehhhh, doing OK.", messageType: "receiver"),
-    PassChatMessage(
-        messageContent: "Is there any thing wrong?", messageType: "sender"),
-  ];
+  List<PassChatMessage> messages = []; //
+
+  void messagesstream() async {
+    Stream collectionStream = _firestore.collection('passMessages').snapshots();
+    await for (var snapshot in collectionStream) {
+      for (var message in snapshot.docs) {
+        setState(() {
+          messages.add(PassChatMessage(
+              messageContent: message.data()['text'], messageType: "sender"));
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    //print(myuser.email);print(myuser.name);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -74,10 +85,11 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.settings,
-                  color: Colors.black54,
-                ),
+                IconButton(
+                    icon: Icon(Icons.settings, color: Colors.black54),
+                    onPressed: () {
+                      messagesstream();
+                    })
               ],
             ),
           ),
@@ -85,35 +97,38 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
       ),
       body: Stack(
         children: <Widget>[
-          ListView.builder(
-            itemCount: messages.length,
-            shrinkWrap: true,
-            padding: EdgeInsets.only(top: 10, bottom: 10),
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return Container(
-                padding:
-                    EdgeInsets.only(left: 14, right: 14, top: 10, bottom: 10),
-                child: Align(
-                  alignment: (messages[index].messageType == "receiver"
-                      ? Alignment.topLeft
-                      : Alignment.topRight),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: (messages[index].messageType == "receiver"
-                          ? Colors.grey.shade200
-                          : Colors.blue[200]),
-                    ),
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      messages[index].messageContent,
-                      style: TextStyle(fontSize: 15),
+          SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: ListView.builder(
+              itemCount: messages.length,
+              shrinkWrap: true,
+              padding: EdgeInsets.only(top: 10, bottom: 10),
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return Container(
+                  padding:
+                      EdgeInsets.only(left: 14, right: 14, top: 15, bottom: 15),
+                  child: Align(
+                    alignment: (messages[index].messageType == "receiver"
+                        ? Alignment.topLeft
+                        : Alignment.topRight),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: (messages[index].messageType == "receiver"
+                            ? Colors.grey.shade200
+                            : apcolor),
+                      ),
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        messages[index].messageContent,
+                        style: TextStyle(fontSize: 15),
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           Align(
             alignment: Alignment.bottomLeft,
@@ -130,7 +145,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                       height: 30,
                       width: 30,
                       decoration: BoxDecoration(
-                        color: Colors.lightBlue,
+                        color: apBcolor,
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: Icon(
@@ -145,6 +160,10 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                   ),
                   Expanded(
                     child: TextField(
+                      controller: mesg,
+                      onChanged: (value) {
+                        message = value;
+                      },
                       decoration: InputDecoration(
                           hintText: "Write message...",
                           hintStyle: TextStyle(color: Colors.black54),
@@ -155,13 +174,26 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     width: 15,
                   ),
                   FloatingActionButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if (message != null && message != "")
+                        _firestore.collection('passMessages').add({
+                          'sender': myuser.email,
+                          'text': message,
+                        });
+                      setState(() {
+                        if (message != null && message != "")
+                          messages.add(PassChatMessage(
+                              messageContent: message, messageType: "sender"));
+                        mesg.clear();
+                        message = "";
+                      });
+                    },
                     child: Icon(
                       Icons.send,
                       color: Colors.white,
                       size: 18,
                     ),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: apBcolor,
                     elevation: 0,
                   ),
                 ],
