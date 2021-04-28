@@ -70,9 +70,6 @@ packages:
       name: clock
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
-    version: "1.1.0"
-=======
     version: "1.1.0-nullsafety.1"
   cloud_firestore:
     dependency: "direct main"
@@ -95,7 +92,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.1+2"
->>>>>>> 5f56b7ed418fdc167836791880709d6318cf51b8
   collection:
     dependency: transitive
     description:
