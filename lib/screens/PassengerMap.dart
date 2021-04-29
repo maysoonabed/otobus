@@ -14,14 +14,13 @@ import '../main.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
-import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong/latlong.dart" as latLng;
 import 'PassengerPage.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/dataProvider/nearDriver.dart';
 import 'package:OtoBus/dataProvider/fireDrivers.dart';
-
+import 'package:OtoBus/screens/rating.dart';
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 const keyOpS = 'e29278e269d34185897708d17cb83bc4';
@@ -42,7 +41,6 @@ DatabaseReference rideReq;
 DatabaseReference driverRef =
     FirebaseDatabase.instance.reference().child('Drivers');
 bool nearLoaded = false;
-double driversDetailes = 0;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -130,6 +128,27 @@ class _PassengerMapState extends State<PassengerMap> {
         displayDriverDetails();
         Geofire.stopListener();
         //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
+      }
+      if (statusRide == 'ended') {
+        String driverId = '';
+        if (event.snapshot.value['driver_id'] != null) {
+          driverId = event.snapshot.value['driver_id'].toString();
+        }
+         showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) =>
+                 Rating(driverId:driverId));
+      
+        rideReq.onDisconnect();
+        rideReq = null;
+        ridestreams.cancel();
+        ridestreams = null;
+        //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
+
+        driversDetailes = 0;
+        statusRide = '';
+        arrivalStatus = ' الباص على الطريق ';
       }
     });
   }
