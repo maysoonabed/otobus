@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:io' as Io;
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
@@ -17,12 +16,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../configMaps.dart';
 import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
-import 'SignupPage.dart';
 import '../chat/passchat.dart';
 
 class PassMap extends StatefulWidget {
@@ -73,16 +70,6 @@ var fileImg;
 var _namecon = TextEditingController();
 var _emailcon = TextEditingController();
 var _phonecon = TextEditingController();
-//////////////////////////insurance Date/////////////////////////
-var _insdate = TextEditingController();
-DateTime _insT;
-String date;
-final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
-final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
-DateTime displayDate;
-String formatted;
-
-//////////////////////////insurance Date/////////////////////////
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
@@ -166,7 +153,7 @@ class _PassMapState extends State<PassMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void putvalues() async {
-    thisUser.email = await FlutterSession().get('email');
+    thisUser.email = await FlutterSession().get('passemail');
     thisUser.name = await FlutterSession().get('name');
     var r = await FlutterSession().get('phone');
     thisUser.phone = r.toString();
@@ -419,7 +406,7 @@ class _PassMapState extends State<PassMap> {
                     enabled: true,
                   ),
                 ),
-                new Expanded(
+                /*  new Expanded(
                   child: new TextField(
                     controller: distance,
                     readOnly: true,
@@ -428,7 +415,7 @@ class _PassMapState extends State<PassMap> {
                     autofocus: false,
                     decoration: new InputDecoration(labelText: 'المسافة'),
                   ),
-                ),
+                ), */
               ],
             )),
         actions: <Widget>[
@@ -471,12 +458,10 @@ class _PassMapState extends State<PassMap> {
     pic();
     initState();
     putvalues();
-    /*  setState(() {
-      homeispress = true;
+    /*  homeispress = true;
       msgispress = false;
       notispress = false;
-      proispress = false;
-    }); */
+      proispress = false;*/
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -595,56 +580,7 @@ class _PassMapState extends State<PassMap> {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
-                ),
-                Container(
-                    child: TextField(
-                  readOnly: true,
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.datetime,
-                  controller: _insdate, //set username controller
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontFamily: "Lemonada"),
-                  decoration: myInputDecoration(
-                      label: "تحديث تاريخ انتهاء التأمين",
-                      icon: Icons.date_range_rounded),
-                  onTap: () {
-                    showDatePicker(
-                            builder: (BuildContext context, Widget child) {
-                              return Theme(
-                                data: ThemeData.light().copyWith(
-                                  colorScheme: ColorScheme.light(
-                                      primary: apcolor,
-                                      onPrimary: Colors.white,
-                                      surface: apBcolor,
-                                      onSurface: Colors.black),
-                                  dialogBackgroundColor: Colors.white,
-                                ),
-                                child: child,
-                              );
-                            },
-                            context: context,
-                            initialDate: _insT == null ? DateTime.now() : _insT,
-                            firstDate: DateTime(DateTime.now().year,
-                                DateTime.now().month, DateTime.now().day),
-                            lastDate: DateTime(2100))
-                        .then((value) {
-                      setState(() {
-                        _insT = value;
-                        date = _insT.toString();
-                        _insdate.text = DateFormat.yMMMd().format(value);
-                        displayDate = displayFormater.parse(date);
-                        formatted = serverFormater.format(displayDate);
-                        //updateDate();
-                      });
-                      //print(formatted);
-                    });
-                  },
-                )),
-                SizedBox(
-                  height: 20,
+                  height: 50,
                 ),
                 MaterialButton(
                   color: apBcolor,
@@ -666,7 +602,7 @@ class _PassMapState extends State<PassMap> {
                       _startPointController.text = "";
                       //box.remove('Email');
                       //auth.signOut();
-                      FlutterSession().set('email', '');
+                      FlutterSession().set('passemail', '');
                       FlutterSession().set('name', '');
                       FlutterSession().set('phone', '');
                       FlutterSession().set('profpic', '');

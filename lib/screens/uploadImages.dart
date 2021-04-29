@@ -14,6 +14,8 @@ import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 
+import 'SignupPage.dart';
+
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 class UploadImages extends StatefulWidget {
@@ -82,6 +84,11 @@ class _UploadImagesState extends State<UploadImages> {
       Map userMap = {
         'phone': widget.phone,
       };
+      if (widget.email != null) {
+        firest
+            .collection('users')
+            .add({'email': widget.email, 'name': widget.name});
+      }
       newUser.set(userMap);
       print('registFFFire');
     } else
