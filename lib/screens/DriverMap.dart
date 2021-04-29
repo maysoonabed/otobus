@@ -1,18 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:io' as Io;
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/dataProvider/fUNCS.dart';
-import 'package:OtoBus/screens/PassengerMap.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import 'package:custom_switch/custom_switch.dart';
@@ -20,16 +25,14 @@ import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/dataProvider/pushNoteficationsFire.dart';
 import 'package:OtoBus/dataProvider/mapKit.dart';
 
-_DriverMapState globalState = new _DriverMapState();
+DriverMapState globalState = new DriverMapState();
 
 class DriverMap extends StatefulWidget {
   @override
-  _DriverMapState createState() => globalState;
+  DriverMapState createState() => globalState;
 }
 
 Position currentPosition;
-double _originLatitude;
-double _originLongitude;
 double destLatitude;
 double destLongitude;
 String currName;
@@ -44,12 +47,33 @@ Set<Circle> circles = {};
 PolylinePoints polylinePoints = PolylinePoints();
 Map<PolylineId, Polyline> polylines = {};
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
-final _startPointController = TextEditingController();
 GoogleMapController newGoogleMapController;
 BitmapDescriptor movingMarkerIcon;
 Position myPos;
+//////////////////////////////////////////////////////////////////
+final GlobalKey _photopickey = GlobalKey();
+File _prof;
+String _profname;
+var profile;
+var fileImg;
+String base64prof;
+AssetImage img;
+final picker = ImagePicker();
+String name, email, phone;
+var _namecon = TextEditingController();
+var _emailcon = TextEditingController();
+var _phonecon = TextEditingController();
+//////////////////////////insurance Date/////////////////////////
+var _insdate = TextEditingController();
+DateTime _insT;
+String date;
+final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
+DateTime displayDate;
+String formatted;
 
-class _DriverMapState extends State<DriverMap> {
+//////////////////////////////////////////////////////////////////
+class DriverMapState extends State<DriverMap> {
   Completer<GoogleMapController> _controller = Completer();
 
   static final CameraPosition _kGooglePlex = CameraPosition(
@@ -188,14 +212,68 @@ class _DriverMapState extends State<DriverMap> {
     pushNot.getToken();
   }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void putvalues() async {
+    email = await FlutterSession().get('driveremail');
+    name = await FlutterSession().get('name');
+    var r = await FlutterSession().get('phone');
+    phone = r.toString();
+    var s = await FlutterSession().get('insdate');
+    _insT = DateTime.parse(s);
+    _namecon.text = name; //thisUser.name;
+    _emailcon.text = email;
+    _phonecon.text = phone; //thisUser.phone;
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void pic() async {
+    var pic = await FlutterSession().get('profpic');
+    setState(() {
+      _profname = pic;
+    });
+    img = AssetImage('phpfiles/cardlic/$_profname');
+    //print('phpfiles/cardlic/$_profname');
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future upload(File img, String imgname) async {
+    profile = Io.File(img.path).readAsBytesSync();
+    base64prof = base64Encode(profile);
+    String url =
+        "http://192.168.1.108:8089/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
+    var response = await http.post(url, body: {
+      'profimg': base64prof,
+      'profname': imgname,
+      'email': email,
+    });
+    if (response.statusCode == 200) {
+      //print(jsonDecode(response.body));
+    }
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future updateinsdate(String formatted) async {
+    String url =
+        "http://192.168.1.108:8089/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
+    var response =
+        await http.post(url, body: {'endate': formatted, 'email': email});
+    if (response.statusCode == 200) {
+      //print(jsonDecode(response.body));
+    }
+  }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   void initState() {
+    name = "";
+    phone = "";
+    email = "";
     acc = false;
     super.initState();
     driverInfo();
+    putvalues();
+    pic();
   }
-
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   bool status = false;
@@ -207,6 +285,9 @@ class _DriverMapState extends State<DriverMap> {
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
           appBar: AppBar(
+            actions: <Widget>[
+              new Container(),
+            ],
             title: Center(
               child: Text(
                 "OtoBüs",
@@ -219,6 +300,185 @@ class _DriverMapState extends State<DriverMap> {
             ),
             backgroundColor: apcolor,
           ),
+          endDrawer: Drawer(
+            child: Column(
+              children: <Widget>[
+                Stack(
+                  overflow: Overflow.visible,
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    Image(image: AssetImage('lib/Images/passengercover.jpg')),
+                    Positioned(
+                        key: _photopickey,
+                        bottom: -50.0,
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundColor: Colors.white,
+                          backgroundImage: (_prof != null)
+                              ? FileImage(_prof)
+                              : (_profname != null
+                                  ? img
+                                  : AssetImage('lib/Images/Defultprof.jpg')),
+                          child: MaterialButton(
+                            height: 170,
+                            minWidth: 170.0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(80)),
+                            onPressed: () async {
+                              var picked = await picker.getImage(
+                                  source: ImageSource.gallery);
+                              _prof = File(picked.path);
+                              _profname = _prof.path.split('/').last;
+                              upload(_prof, _profname);
+                              setState(() {
+                                img = AssetImage('phpfiles/cardlic/$_profname');
+                              });
+                            },
+                          ),
+                        )),
+                  ],
+                ),
+                SizedBox(
+                  height: 70,
+                ),
+                Container(
+                    child: TextField(
+                  controller: _namecon,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: "Lemonada",
+                  ),
+                  readOnly: true,
+                  autofocus: false,
+                  decoration: myInputDecoration(
+                    label: " ",
+                    icon: Icons.person,
+                  ),
+                )),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  child: TextField(
+                    controller: _emailcon,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: "Lemonada",
+                    ),
+                    readOnly: true,
+                    autofocus: false,
+                    decoration: myInputDecoration(
+                      label: " ",
+                      icon: Icons.email,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  child: TextField(
+                    controller: _phonecon,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: "Lemonada",
+                    ),
+                    readOnly: true,
+                    autofocus: false,
+                    decoration: myInputDecoration(
+                      label: " ",
+                      icon: Icons.phone_android,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                    child: TextField(
+                  readOnly: true,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.datetime,
+                  controller: _insdate, //set username controller
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontFamily: "Lemonada"),
+                  decoration: myInputDecoration(
+                      label: "تحديث تاريخ انتهاء التأمين",
+                      icon: Icons.date_range_rounded),
+                  onTap: () {
+                    showDatePicker(
+                            builder: (BuildContext context, Widget child) {
+                              return Theme(
+                                data: ThemeData.light().copyWith(
+                                  colorScheme: ColorScheme.light(
+                                      primary: apcolor,
+                                      onPrimary: Colors.white,
+                                      surface: apBcolor,
+                                      onSurface: Colors.black),
+                                  dialogBackgroundColor: Colors.white,
+                                ),
+                                child: child,
+                              );
+                            },
+                            context: context,
+                            initialDate: _insT == null ? DateTime.now() : _insT,
+                            firstDate: DateTime(DateTime.now().year,
+                                DateTime.now().month, DateTime.now().day),
+                            lastDate: DateTime(2100))
+                        .then((value) {
+                      setState(() {
+                        _insT = value;
+                        date = _insT.toString();
+                        _insdate.text = DateFormat.yMMMd().format(value);
+                        displayDate = displayFormater.parse(date);
+                        formatted = serverFormater.format(displayDate);
+                        updateinsdate(formatted);
+                        //updateDate();
+                      });
+                      //print(formatted);
+                    });
+                  },
+                )),
+                SizedBox(
+                  height: 20,
+                ),
+                MaterialButton(
+                  color: apBcolor,
+                  height: 30,
+                  minWidth: 150.0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  onPressed: () {
+                    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                    setState(() {
+                      //box.remove('Email');
+                      //auth.signOut();
+                      //_prof = null;
+                      //_profname = null;
+                      globalState;
+                      FlutterSession().set('driveremail', '');
+                      FlutterSession().set('name', '');
+                      FlutterSession().set('phone', '');
+                      FlutterSession().set('profpic', '');
+                    });
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => MyApp()));
+                  },
+                  child: Text('تسجيل الخروج',
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontFamily: "Lemonada",
+                          color: Colors.white)),
+                ),
+              ],
+            ),
+          ),
+          //#######################################
           body: Stack(children: [
             GoogleMap(
               mapType: MapType.normal,
@@ -533,5 +793,28 @@ class _DriverMapState extends State<DriverMap> {
     ridRef.child('driver_id').set(currUser.uid);
   }
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  InputDecoration myInputDecoration({String label, IconData icon}) {
+    return InputDecoration(
+      hintText: label, //show label as placeholder
+      alignLabelWithHint: true,
+      suffixIcon: Padding(
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Icon(
+            icon,
+            color: Colors.black,
+          )),
+      contentPadding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide:
+              BorderSide(color: apcolor, width: 1)), //default border of input
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(40),
+          borderSide: BorderSide(color: apBcolor, width: 1)),
+      fillColor: apcolor,
+      filled: false, //set true if you want to show input background
+    );
+  }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 }

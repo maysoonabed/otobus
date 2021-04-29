@@ -22,7 +22,7 @@
                     $subject = "مستخدم جديد";
                     $body ="أهلاً بك $Name كراكب جديد لدى أوتوباس ";
                     $headers = "From: otobus@gmail.com";
-					//mail($to_email, $subject, $body, $headers);//if ( ){echo "Passenger added succ";} else {echo "Email sending failed...";}  			
+					mail($to_email, $subject, $body, $headers);//if ( ){echo "Passenger added succ";} else {echo "Email sending failed...";}  			
 					$json['success'] = 1;
     				$json['value'] = 1;
 					$json['error'] =0;

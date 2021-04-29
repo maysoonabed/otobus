@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:OtoBus/screens/uploadImages.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +16,7 @@ import 'package:connectivity/connectivity.dart';
 
 int id = 1;
 final FirebaseAuth _auth = FirebaseAuth.instance;
+final firest = Firestore.instance;
 
 class SignupPage extends StatefulWidget {
   @override
@@ -51,6 +53,9 @@ class _SignupPageState extends State<SignupPage> {
         'phone': phone,
       };
       newUser.set(userMap);
+      if (email != null) {
+        firest.collection('users').add({'email': email, 'name': name});
+      }
       print('registFFFire');
     } else
       print('regFFFFAAAAAAIIIILLL');

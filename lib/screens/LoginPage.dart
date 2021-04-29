@@ -75,22 +75,25 @@ class _LoginPageState extends State<LoginPage> {
           thisUser.email = email;
           thisUser.name = jsondata["name"];
           thisUser.phone = jsondata["phonenum"];
+          String pic = jsondata["profpic"];
+
+          await FlutterSession().set('name', thisUser.name);
+          await FlutterSession().set('phone', thisUser.phone);
+          if (pic != null) {
+            await FlutterSession().set('profpic', pic);
+          }
+
           if (id == 2) {
-            //String ph = phone.toString();
-            /* box = GetStorage();
-            box.write('Email', email); */
-            String pic = jsondata["profpic"];
-            await FlutterSession().set('email', email);
-            await FlutterSession().set('name', thisUser.name);
-            await FlutterSession().set('phone', thisUser.phone);
-            if (pic != null) {
-              await FlutterSession().set('profpic', pic);
-            }
+            //session/* box = GetStorage();box.write('Email', email); */
+            await FlutterSession().set('passemail', email);
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => PassMap())); //PassengerPage()
           } else {
+            await FlutterSession().set('driveremail', email);
+            var indate = jsondata["insdate"];
+            await FlutterSession().set('insdate', indate);
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => DriverMap()));
           }

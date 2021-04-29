@@ -1,12 +1,19 @@
 import 'package:OtoBus/chat/Curruser.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'PassChatUsers.dart';
 import 'PassConversationList .dart';
 
+//******************************************************/
 Curruser myuser;
+final FirebaseAuth auth = FirebaseAuth.instance;
+final firestore = Firestore.instance;
+String em, nm;
 
+//******************************************************/
 class PassChat extends StatefulWidget {
   PassChat(this.myemail, this.myname);
   final String myname;
@@ -26,8 +33,8 @@ class _PassChatState extends State<PassChat> {
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
-    String em = widget.myemail;
-    String nm = widget.myname;
+    em = widget.myemail;
+    nm = widget.myname;
     myuser = Curruser(email: em, name: nm);
     //print(myuser.email);print(myuser.name);
     return MaterialApp(
@@ -38,28 +45,12 @@ class _PassChatState extends State<PassChat> {
             leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context)),
-            title: Padding(
-              padding: EdgeInsets.only(top: 20, left: 0, right: 0, bottom: 20),
-              child: TextField(
-                textAlign: TextAlign.right,
-                decoration: InputDecoration(
-                  hintText: "... بحث",
-                  hintStyle: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontFamily: 'Lemonada',
-                      fontSize: 15),
-                  suffixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey.shade600,
-                    size: 20,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  contentPadding: EdgeInsets.all(8),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(color: Colors.grey)),
-                ),
+            title: Text(
+              "OtoBüs",
+              style: TextStyle(
+                fontSize: 25,
+                fontFamily: 'Pacifico',
+                color: Colors.white,
               ),
             ),
           ),

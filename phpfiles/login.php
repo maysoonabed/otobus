@@ -4,6 +4,7 @@
     $Email = $_POST['email'];
     $Password = md5($_POST['password']);   
     $idtype=(int)($_POST['id']);
+    $busid="";
 
     if ($connect) {
        $json['error'] =0;
@@ -23,11 +24,18 @@
              $res = $connect->query($q);
              if($res->num_rows>0){
                $json['value'] = 1;
-               while($row = mysqli_fetch_assoc($result)){
-               $json['name']=$row['name'];
-               $json['phonenum'] =$row['phonenum'];
-               //$json['insdate']=$row[''];
-               }
+               $rrw = mysqli_fetch_assoc($res);
+               $json['name']=$rrw['name'];
+               $json['phonenum'] =$rrw['phonenum'];
+               $json['profpic']=$rrw['picture'];
+               $busid=$rrw['busid'];
+               
+               $quy = "SELECT * FROM `bus` WHERE `busid`='$busid'";
+               $resu = $connect->query($quy);
+               $rw=mysqli_fetch_assoc($resu);
+               $json['insdate']=$rw['insurend']; 
+               //echo "yes Im Here"; 
+
              }else{
                $json['value'] = 2;
                $json['error'] =1;

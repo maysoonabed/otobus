@@ -42,7 +42,7 @@
     if(mysqli_num_rows($result)>0){
         $json['value'] = 2;
         $json['error'] =1;
-        $json['message'] = '  رقم الهاتف أو البريد الإلكتروني مستخدم  ' ;
+        $json['message'] = 'رقم الهاتف أو البريد الإلكتروني مستخدم' ;
         
     }else{
         $query1="INSERT INTO bus(busid ,type,idcard,cardencoded,numofpass,insurend,insurname,insurencoded)VALUES('$busid','$type','$idcardname','$idcardimg','$numpass','$enddate','$insurancname','$insurancimg')";
