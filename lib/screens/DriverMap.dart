@@ -176,7 +176,7 @@ class DriverMapState extends State<DriverMap> {
       fillColor: Colors.green,
     );
     Circle destCircle = Circle(
-      circleId: CircleId('current'),
+      circleId: CircleId('destination'),
       strokeColor: Colors.green,
       strokeWidth: 3,
       radius: 40,
@@ -791,6 +791,7 @@ class DriverMapState extends State<DriverMap> {
     };
     ridRef.child('driver_location').set(locationMap);
     ridRef.child('driver_id').set(currUser.uid);
+    ridRef.child('driver_phone').set(phone);
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

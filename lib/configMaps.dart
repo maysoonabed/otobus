@@ -31,3 +31,4 @@ TripInfo tripInfo = TripInfo();
 int dReqTimeout = 10;
 String statusRide = '';
 String arrivalStatus = ' الباص على الطريق ';
+double driversDetailes = 0;

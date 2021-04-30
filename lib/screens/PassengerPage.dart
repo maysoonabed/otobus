@@ -362,7 +362,7 @@ class _PassengerPageState extends State<PassengerPage> {
                     heightFactor: 0.6,
                     child: FloatingActionButton(
                       onPressed: () {
-                        _searchDialog();
+                        driversDetailes == 0 ? _searchDialog() : null;
                       },
                       backgroundColor: mypink,
                       //Color(0xFF0e6655),  //Colors.black,

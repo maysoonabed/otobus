@@ -14,13 +14,13 @@ import '../main.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
-import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong/latlong.dart" as latLng;
 import 'PassengerPage.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/dataProvider/nearDriver.dart';
 import 'package:OtoBus/dataProvider/fireDrivers.dart';
+import 'package:OtoBus/screens/rating.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
@@ -42,7 +42,6 @@ DatabaseReference rideReq;
 DatabaseReference driverRef =
     FirebaseDatabase.instance.reference().child('Drivers');
 bool nearLoaded = false;
-double driversDetailes = 0;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -63,9 +62,12 @@ class _PassengerMapState extends State<PassengerMap> {
   bool reqPosDet = false;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void putvalues() async {
+    var x;
     thisUser.email = await FlutterSession().get('email');
     thisUser.name = await FlutterSession().get('name');
-    thisUser.phone = await FlutterSession().get('phone').toString();
+
+    x = await FlutterSession().get('phone');
+    thisUser.phone = x.toString();
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -107,6 +109,9 @@ class _PassengerMapState extends State<PassengerMap> {
       if (event.snapshot.value == null) {
         return;
       }
+      if (event.snapshot.value['status'] != null) {
+        statusRide = event.snapshot.value['status'].toString();
+      }
       if (event.snapshot.value['driver_location'] != null) {
         double driverLat = double.parse(
             event.snapshot.value['driver_location']['latitude'].toString());
@@ -123,13 +128,31 @@ class _PassengerMapState extends State<PassengerMap> {
           });
         }
       }
-      if (event.snapshot.value['status'] != null) {
-        statusRide = event.snapshot.value['status'].toString();
-      }
+
       if (statusRide == 'accepted') {
         displayDriverDetails();
         Geofire.stopListener();
         //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
+      }
+      if (statusRide == 'ended') {
+        String driverId = '';
+        if (event.snapshot.value['driver_phone'] != null) {
+          driverId = event.snapshot.value['driver_phone'].toString();
+        }
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) => Rating(driverPhone: driverId));
+
+        rideReq.onDisconnect();
+        rideReq = null;
+        ridestreams.cancel();
+        ridestreams = null;
+        //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
+
+        driversDetailes = 0;
+        statusRide = '';
+        arrivalStatus = ' الباص على الطريق ';
       }
     });
   }
@@ -189,7 +212,7 @@ class _PassengerMapState extends State<PassengerMap> {
     });
   }
 
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//^^^^^^^^^/^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void getData(double lat, double long) async {
     Response response = await get(
@@ -205,25 +228,7 @@ class _PassengerMapState extends State<PassengerMap> {
         pickUp.long = long;
 
         src_loc.text = pickUp.placeName;
-        setState(() {
-          currLatLng = latLng.LatLng(lat, long);
-        });
-
-        markers.add(
-          Marker(
-            width: 80.0,
-            height: 80.0,
-            point: currLatLng,
-            builder: (ctx) => Container(
-                child: Icon(
-              Icons.location_on,
-              color: mypink,
-              size: 40,
-            )),
-          ),
-        );
-
-        Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
+        currLatLng = latLng.LatLng(lat, long);
       });
     } else {
       print(response.statusCode);
@@ -234,7 +239,27 @@ class _PassengerMapState extends State<PassengerMap> {
   void setupPositionLocator() async {
     Position currentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
-
+    setState(() {
+      currLatLng =
+          latLng.LatLng(currentPosition.latitude, currentPosition.longitude);
+      Adress pickUp = new Adress();
+      pickUp.lat = currentPosition.latitude;
+      pickUp.long = currentPosition.longitude;
+      Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
+    });
+    markers.add(
+      Marker(
+        width: 80.0,
+        height: 80.0,
+        point: currLatLng,
+        builder: (ctx) => Container(
+            child: Icon(
+          Icons.location_on,
+          color: mypink,
+          size: 40,
+        )),
+      ),
+    );
     getData(currentPosition.latitude, currentPosition.longitude);
   }
 
