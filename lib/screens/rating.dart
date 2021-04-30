@@ -4,12 +4,13 @@ import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:http/http.dart' as http;
 
 class Rating extends StatefulWidget {
-  final String driverId;
-  Rating({this.driverId});
+  final String driverPhone;
+  Rating({this.driverPhone});
 
   @override
   _RatingState createState() => _RatingState();
@@ -17,9 +18,12 @@ class Rating extends StatefulWidget {
 
 class _RatingState extends State<Rating> {
   double rating = 0;
-  bool error, showprogress;
+  bool error = false, showprogress = false;
   String errormsg;
-  TextEditingController comm;
+  String comm;
+  int rep = 0;
+  String repo = 'إبلاغ';
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -42,10 +46,7 @@ class _RatingState extends State<Rating> {
                   borderColor: apcolor,
                   rating: rating,
                   size: 35,
-                  filledIconData: Icons.directions_bus,
                   allowHalfRating: false,
-                  halfFilledIconData: Icons.star_half,
-                  defaultIconData: Icons.directions_bus_outlined,
                   starCount: 5,
                   spacing: 2.0,
                   onRated: (value) {
@@ -70,17 +71,47 @@ class _RatingState extends State<Rating> {
             Padding(
               padding: EdgeInsets.only(left: 30.0, right: 30.0),
               child: TextField(
-                controller: comm,
                 textAlign: TextAlign.end,
+                onChanged: (value) {
+                  comm = value;
+                },
                 decoration: InputDecoration(
                   hintText: "إضافة تعليق",
                   border: InputBorder.none,
                 ),
-                maxLines: 8,
+                maxLines: 6,
               ),
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                    tooltip: repo,
+                    alignment: Alignment.bottomLeft,
+                    icon: Icon(
+                      rep == 0 ? Icons.report_off_outlined : Icons.report,
+                      color: rep == 0 ? Colors.grey : Colors.red,
+                    ),
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onPressed: () {
+                      setState(() {
+                        rep == 0 ? rep = 1 : rep = 0;
+                        rep == 0 ? repo = 'إبلاغ' : repo = 'عدم الإبلاغ';
+                      });
+                    }),
+              ],
+            ),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                setState(() {
+                  //show progress indicator on click
+                  showprogress = true;
+                });
+
+                rate();
+              },
               child: Container(
                 padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
                 decoration: BoxDecoration(
@@ -90,13 +121,15 @@ class _RatingState extends State<Rating> {
                       bottomRight: Radius.circular(32.0)),
                 ),
                 child: showprogress
-                    ? SizedBox(
-                        height: 30,
-                        width: 30,
-                        child: CircularProgressIndicator(
-                          backgroundColor: apcolor,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.lightGreenAccent),
+                    ? Center(
+                        child: SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            backgroundColor: apcolor,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.lightGreenAccent),
+                          ),
                         ),
                       )
                     : Text(
@@ -112,15 +145,15 @@ class _RatingState extends State<Rating> {
     );
   }
 
-  startLogin() async {
+  rate() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl = "http://10.0.0.9/otobus/phpfiles/rate.php"; //10.0.0.8//
-    var response = await http.post(apiurl, body:{
+    var response = await http.post(apiurl, body: {
       'passid': thisUser.phone, //get the username text
-      'driverid': widget.driverId,
-      'taq': rating.toInt(),
-      'comment': comm.text,
-      'report':true, //get password text
+      'driverid': widget.driverPhone,
+      'taq': rating.toInt().toString(),
+      'comment': comm != null ? comm : '-',
+      'report': rep.toString() //get password text
     });
 
     if (response.statusCode == 200) {
@@ -136,6 +169,7 @@ class _RatingState extends State<Rating> {
           setState(() {
             error = false;
             showprogress = false;
+            errormsg = jsondata["message"];
           });
 
           Navigator.pop(context);
@@ -152,5 +186,9 @@ class _RatingState extends State<Rating> {
         errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
       });
     }
+    Fluttertoast.showToast(
+      context,
+      msg: errormsg,
+    );
   }
 }

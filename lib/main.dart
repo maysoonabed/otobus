@@ -2,6 +2,7 @@ import 'package:OtoBus/configMaps.dart';
 import 'dart:io' show Platform;
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/screens/PassengerPage.dart';
+import 'package:OtoBus/screens/rating.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -122,7 +123,7 @@ void main() {
       create: (context) => AppData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home:/*  token != null ? PassMap() :  */MyApp(), //MyApp()
+        home: /*  token != null ? PassMap() :  */ MyApp(), //MyApp()
         // currUser != null? DriverMap(): MyApp(),
       )));
 }
@@ -377,10 +378,11 @@ class _MyAppState extends State<MyApp> {
                                 primary: apBcolor,
                               ),
                               onPressed: () {
-                                Navigator.push(
+                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => PassengerPage()));
+                       
                               },
                             ),
                           ),

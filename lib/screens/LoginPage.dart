@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:OtoBus/screens/PassengerPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -46,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/login.php"; //10.0.0.8////192.168.1.108:8089
+        "http://10.0.0.9/otobus/phpfiles/login.php"; //10.0.0.8////192.168.1.108:8089
 
     var response = await http.post(apiurl, body: {
       'email': email,
@@ -89,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => PassMap())); //PassengerPage()
+                    builder: (context) => PassengerPage())); //PassengerPage()
           } else {
             await FlutterSession().set('driveremail', email);
             var indate = jsondata["insdate"];
