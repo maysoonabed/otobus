@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:io' as Io;
+import 'package:OtoBus/chat/PassChatDetailes.dart';
 import 'package:http/http.dart' as http;
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
@@ -170,10 +171,13 @@ class _PassMapState extends State<PassMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void pic() async {
     var pic = await FlutterSession().get('profpic');
-    if (pic != "") {
-      _profname = pic;
-    } else
-      _profname = null;
+    setState(() {
+      if (pic != "") {
+        _profname = pic;
+        img = AssetImage('phpfiles/cardlic/$_profname');
+      } else
+        _profname = null;
+    });
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -452,7 +456,6 @@ class _PassMapState extends State<PassMap> {
           .then((onValue) {
         myIcon = onValue;
       });
-      img = AssetImage('phpfiles/cardlic/$_profname');
     }
 
     pic();
@@ -818,6 +821,15 @@ class _PassMapState extends State<PassMap> {
                                         : Icon(Icons.notifications_outlined),
                                     color: (notispress) ? mypink : Colors.white,
                                     onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PassChatDetailes(
+                                                      username: name,
+                                                      imageURL:
+                                                          "phpfiles/cardlic/image_picker-840323637.jpg",
+                                                      secUser: "salma")));
                                       setState(() {
                                         homeispress = false;
                                         msgispress = false;

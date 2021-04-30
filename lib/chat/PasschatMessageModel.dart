@@ -5,22 +5,23 @@ import 'passchat.dart';
 
 class PassChatMessage extends StatelessWidget {
   String messageContent;
-  String useremil;
-  PassChatMessage({@required this.messageContent, @required this.useremil});
+  String username;
+  PassChatMessage({@required this.messageContent, @required this.username});
 
   @override
   Widget build(BuildContext context) {
-    var curruseremail = myuser.email;
+    var currusername = myuser.name;
+    //print(useremil);
     return Container(
       padding: EdgeInsets.all(10.0),
       child: Align(
-          alignment: (useremil != curruseremail
+          alignment: (username != currusername
               ? Alignment.bottomLeft
               : Alignment.topRight),
           child: Material(
             // decoration: BoxDecoration(),
             borderRadius: BorderRadius.circular(20),
-            color: (useremil != curruseremail ? Colors.grey.shade200 : apcolor),
+            color: (username != currusername ? Colors.grey.shade300 : apcolor),
             elevation: 5.0,
             //padding: EdgeInsets.all(16),
             child: Padding(
@@ -30,7 +31,7 @@ class PassChatMessage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   color:
-                      (useremil != curruseremail ? Colors.black : Colors.white),
+                      (username != currusername ? Colors.black : Colors.white),
                 ),
               ),
             ),

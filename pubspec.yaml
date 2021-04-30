@@ -51,6 +51,7 @@ dependencies:
   maps_toolkit: ^1.1.0+1
   audioplayers: ^0.16.2
   get_storage: ^1.3.0
+  random_string:
 
 dev_dependencies:
   flutter_test:

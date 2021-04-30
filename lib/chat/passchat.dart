@@ -4,14 +4,59 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
-import 'PassChatUsers.dart';
 import 'PassConversationList .dart';
+import 'getFrronPhp.dart';
+import 'globalFunctions.dart';
 
 //******************************************************/
 Curruser myuser;
 final FirebaseAuth auth = FirebaseAuth.instance;
 final firestore = Firestore.instance;
 String em, nm;
+String roomid = "";
+String anotherUserEmail, anotherUserName = "";
+Stream chatRoomStream;
+String mynm = globalFunctions().getUsernamefromemail(myuser.email);
+String roomName = "";
+//******************************************************/
+getCurrUser() {
+  return auth.currentUser;
+}
+
+//******************************************************/
+Widget chatRoomList() {
+  return StreamBuilder(
+      stream: chatRoomStream,
+      builder: (context, snapshot) {
+        return snapshot.hasData
+            ? ListView.builder(
+                itemCount: snapshot.data.docs.length,
+                shrinkWrap: true,
+                padding: EdgeInsets.only(top: 16),
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  print(snapshot.data.docs.length);
+                  DocumentSnapshot ds = snapshot.data.docs[index];
+                  String romid = ds.id;
+                  roomName = romid.replaceAll("$mynm", "");
+                  roomName = roomName.replaceAll("_", "");
+                  print(roomName);
+
+                  String eml;
+                  //String imgpath = getFromPhp().getUserImagePath(eml);
+                  return PassConversationList(
+                    secUsername: roomName,
+                    messageText: "Hello", //chatUsers[index].messageText,
+                    imageUrl:
+                        "phpfiles/cardlic/image_picker-840323637.jpg", // imgpath,
+                    time: "2:51:41 PM", //chatUsers[index].time,
+                    secUseremail: anotherUserEmail,
+                    isMessageRead: (index == 0 || index == 3) ? true : false,
+                  );
+                })
+            : Center(child: CircularProgressIndicator());
+      });
+}
 
 //******************************************************/
 class PassChat extends StatefulWidget {
@@ -23,20 +68,32 @@ class PassChat extends StatefulWidget {
 }
 
 class _PassChatState extends State<PassChat> {
-  List<PassChatUsers> chatUsers = [
-    PassChatUsers(
-        name: "Jane Russel",
-        messageText: "Awesome Setup",
-        imageURL: "phpfiles/cardlic/image_picker1196946746.jpg",
-        time: "Now"),
-  ];
+  getRooms() async {
+    chatRoomStream = await globalFunctions().getChatRooms();
+  }
+
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     em = widget.myemail;
     nm = widget.myname;
-    myuser = Curruser(email: em, name: nm);
-    //print(myuser.email);print(myuser.name);
+    setState(() {
+      myuser = Curruser(email: em, name: nm);
+      anotherUserEmail = "samah.tobasi@gmail.com";
+      anotherUserName = "Samah Tobasi";
+      roomid = globalFunctions().getChatRoomByUserEmails(
+          globalFunctions().getUsernamefromemail(myuser.email),
+          globalFunctions()
+              .getUsernamefromemail(anotherUserEmail)); //هون إيميل الشخص الثاني
+      //print(roomid);
+    }); //getRooms();
+    getRooms();
+    //###########################################################
+    Map<String, dynamic> chatRoomInfoMap = {
+      "users": [myuser.email, anotherUserEmail], //هون إيميل الشخص الثاني
+    };
+    //globalFunctions().createchatroom(roomid, chatRoomInfoMap);
+    //###########################################################
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -60,22 +117,7 @@ class _PassChatState extends State<PassChat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                ListView.builder(
-                  itemCount: chatUsers.length,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.only(top: 16),
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return PassConversationList(
-                      //user: myuser,
-                      name: chatUsers[index].name,
-                      messageText: chatUsers[index].messageText,
-                      imageUrl: chatUsers[index].imageURL,
-                      time: chatUsers[index].time,
-                      isMessageRead: (index == 0 || index == 3) ? true : false,
-                    );
-                  },
-                ),
+                chatRoomList(),
               ],
             ),
           ),

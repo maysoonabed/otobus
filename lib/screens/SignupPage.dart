@@ -89,7 +89,7 @@ class _SignupPageState extends State<SignupPage> {
 
           regFire();
           //if(){}else{}
-          await FlutterSession().set('email', email);
+          await FlutterSession().set('passemail', email);
           await FlutterSession().set('name', name);
           await FlutterSession().set('phone', phone);
           FlutterToast(context).showToast(

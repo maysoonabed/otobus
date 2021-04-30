@@ -4,13 +4,72 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'PasschatMessageModel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:random_string/random_string.dart';
 
 //******************************************************/
 var mesg = TextEditingController();
-var message; //FierbaseFirestore
+var mes = "";
+String messageId = "";
+String chatRoomId = "";
 //******************************************************/
+Future addmsgToDatabase(String chatRoomId, String msgId, Map msgInfoMap) async {
+  return FirebaseFirestore.instance
+      .collection("chatrooms")
+      .doc(chatRoomId)
+      .collection("chats")
+      .doc(msgId)
+      .set(msgInfoMap);
+}
 
+//*********************************//
+updateLastMessageSend(String chatRoomId, Map lastMessageInfoMap) {
+  return FirebaseFirestore.instance
+      .collection("chatrooms")
+      .doc(chatRoomId)
+      .update(lastMessageInfoMap);
+}
+
+//*********************************//
+addMessage(bool sendClicked) {
+  String masS = mes;
+  if (masS != "") {
+    //mesg.text
+    var lastMessageTs = DateTime.now();
+
+    Map<String, dynamic> messageInfoMap = {
+      "message": masS,
+      "sendBy": myuser.name,
+      "ts": lastMessageTs
+    };
+    if (messageId == "") {
+      messageId = randomAlphaNumeric(12);
+    }
+    addmsgToDatabase(chatRoomId, messageId, messageInfoMap).then((value) {
+      Map<String, dynamic> lastMessageInfoMap = {
+        "lastMessageSendBy": myuser.name,
+        "lastMessageSendTs": lastMessageTs,
+        "lastMessage": masS,
+      };
+      updateLastMessageSend(chatRoomId, lastMessageInfoMap);
+      if (sendClicked) {
+        masS = "";
+        mes = "";
+        mesg.text = "";
+        messageId = "";
+      }
+    });
+  }
+}
+
+//*********************************//
 class PassChatDetailes extends StatefulWidget {
+  String username;
+  String imageURL;
+  String secUser;
+  PassChatDetailes(
+      {@required this.username,
+      @required this.imageURL,
+      @required this.secUser});
   @override
   _PassChatDetailesState createState() => _PassChatDetailesState();
 }
@@ -21,7 +80,8 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
   @override
   Widget build(BuildContext context) {
     //print(myuser.email);print(myuser.name);\
-
+    chatRoomId = roomid;
+    print(chatRoomId);
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -45,8 +105,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     width: 2,
                   ),
                   CircleAvatar(
-                    backgroundImage: AssetImage(
-                        'phpfiles/cardlic/image_picker-1364311807.jpg'),
+                    backgroundImage: AssetImage(widget.imageURL),
                     maxRadius: 20,
                   ),
                   SizedBox(
@@ -58,7 +117,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                          "Kriss Benwat",
+                          widget.username,
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w600),
                         ),
@@ -86,19 +145,25 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
           Container(
             padding: EdgeInsets.only(bottom: 65),
             child: StreamBuilder<QuerySnapshot>(
-              stream: firestore.collection('passMessages').snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection("chatrooms")
+                  .doc(chatRoomId)
+                  .collection("chats")
+                  .orderBy("ts", descending: true)
+                  .snapshots(), //firestore.collection('passMessages').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Container(//width: 0.0, height: 0.0,
                       );
                 }
-                final msgs = snapshot.data.docs.reversed;
+                final msgs = snapshot.data.docs;
                 List<PassChatMessage> messages = [];
                 for (var message in msgs) {
-                  final messText = message.data()['text'];
-                  final messSender = message.data()['sender'];
+                  final messText = message.data()['message'];
+                  final messSender = message.data()['sendBy'];
+                  //print(messText);print(messSender);
                   final msgwidget = PassChatMessage(
-                      messageContent: messText, useremil: messSender);
+                      messageContent: messText, username: messSender);
                   messages.add(msgwidget);
                 }
                 return ListView(
@@ -141,7 +206,9 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                       child: TextField(
                         controller: mesg,
                         onChanged: (value) {
-                          message = value;
+                          setState(() {
+                            mes = value;
+                          });
                         },
                         decoration: InputDecoration(
                             hintText: "Write message...",
@@ -155,13 +222,14 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     FloatingActionButton(
                       onPressed: () {
                         SystemChannels.textInput.invokeMethod('TextInput.hide');
-                        if (message != null && message != "")
+                        addMessage(true);
+                        /* if (message != null && message != "")
                           firestore.collection('passMessages').add({
                             'sender': myuser.email,
                             'text': message,
-                          });
+                          }); */
                         mesg.clear();
-                        message = "";
+                        mes = "";
                       },
                       child: Icon(
                         Icons.send,

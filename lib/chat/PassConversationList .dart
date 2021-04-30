@@ -1,21 +1,22 @@
 import 'package:OtoBus/chat/PassChatDetailes.dart';
-import 'package:OtoBus/chat/curruser.dart';
-import 'package:OtoBus/chat/passchat.dart';
 import 'package:flutter/material.dart';
 
 class PassConversationList extends StatefulWidget {
   //Curruser user;//@required this.user,
-  String name;
+  String secUsername;
   String messageText;
   String imageUrl;
   String time;
   bool isMessageRead;
-  PassConversationList(
-      {@required this.name,
-      @required this.messageText,
-      @required this.imageUrl,
-      @required this.time,
-      @required this.isMessageRead});
+  String secUseremail;
+  PassConversationList({
+    @required this.secUsername,
+    @required this.messageText,
+    @required this.imageUrl,
+    @required this.time,
+    @required this.isMessageRead,
+    @required this.secUseremail,
+  });
   @override
   _PassConversationListState createState() => _PassConversationListState();
 }
@@ -27,7 +28,10 @@ class _PassConversationListState extends State<PassConversationList> {
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return PassChatDetailes();
+          return PassChatDetailes(
+              username: widget.secUsername,
+              imageURL: widget.imageUrl,
+              secUser: widget.secUseremail);
         }));
       },
       child: Container(
@@ -51,7 +55,7 @@ class _PassConversationListState extends State<PassConversationList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            widget.name,
+                            widget.secUsername,
                             style: TextStyle(fontSize: 16),
                           ),
                           SizedBox(
