@@ -189,6 +189,7 @@ class NotificationsDialog extends StatelessWidget {
       }
       if (thisRideId == trip.ridrReqId) {
         nRideRef.set('accepted');
+
         globalState.setState(() {
           Funcs.disbleLocUpdate();
           globalState.putMarker();

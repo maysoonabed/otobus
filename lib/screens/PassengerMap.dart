@@ -103,6 +103,7 @@ class _PassengerMapState extends State<PassengerMap> {
       'destination': destinationMap,
       'driver_id': 'waiting',
       'status': 'waiting',
+      'passengers':numCont,
     };
     rideReq.set(rideMap);
     ridestreams = rideReq.onValue.listen((event) {

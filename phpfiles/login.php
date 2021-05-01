@@ -28,12 +28,22 @@
                $json['name']=$rrw['name'];
                $json['phonenum'] =$rrw['phonenum'];
                $json['profpic']=$rrw['picture'];
+               $json['begN']=$rrw['begname'];
+               $json['begLat']=$rrw['beglat'];
+               $json['begLng']=$rrw['beglng'];
+               $json['endN']=$rrw['endname'];
+               $json['endLat']=$rrw['endlat'];
+               $json['endLng']=$rrw['endlng'];
+
                $busid=$rrw['busid'];
                
                $quy = "SELECT * FROM `bus` WHERE `busid`='$busid'";
                $resu = $connect->query($quy);
                $rw=mysqli_fetch_assoc($resu);
                $json['insdate']=$rw['insurend']; 
+               $json['busType']=$rw['type']; 
+               $json['numOfPass']=$rw['numofpass']; 
+
                //echo "yes Im Here"; 
 
              }else{

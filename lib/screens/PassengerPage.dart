@@ -25,6 +25,7 @@ import 'package:OtoBus/dataProvider/nearDriver.dart';
 String name, email, password, errormsg, phone;
 bool error = false;
 final _startPointController = TextEditingController();
+
 Adress destinationAdd = new Adress();
 var src_loc = TextEditingController();
 var des_loc = TextEditingController();
@@ -109,29 +110,37 @@ class _PassengerPageState extends State<PassengerPage> {
             height: 200.0,
             child: Column(
               children: <Widget>[
+                SizedBox(height: 10),
                 new Expanded(
                   child: new TextField(
+                    textAlign: TextAlign.end,
                     controller: src_loc,
                     readOnly: true,
                     minLines: 1,
                     maxLines: null,
                     autofocus: false,
-                    decoration:
-                        new InputDecoration(labelText: 'Source Location'),
+                    decoration: new InputDecoration(
+                      prefixIcon: Icon(Icons.location_on),
+                      hintText: 'الموقع',
+                    ),
                   ),
                 ),
                 new Expanded(
-                  child: CustomTextField(
+                  child: TextField(
                     readOnly: true,
-                    hintText: "Select starting point",
-                    textController: _startPointController,
+                    textAlign: TextAlign.end,
+                    decoration: new InputDecoration(
+                      prefixIcon: Icon(Icons.location_on_outlined),
+                      hintText: 'الوجهة',
+                    ),
+                    controller: _startPointController,
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => MapBoxAutoCompleteWidget(
                             apiKey: tokenkey,
-                            hint: "Select starting point",
+                            hint: "حدد وجهتك",
                             onSelect: (place) {
                               _startPointController.text = place.placeName;
                               setState(() {
@@ -150,6 +159,22 @@ class _PassengerPageState extends State<PassengerPage> {
                       );
                     },
                     enabled: true,
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    textAlign: TextAlign.end,
+                    onChanged: (v) {
+                    numCont = int.parse(v);
+                    },
+                    minLines: 1,
+                    maxLines: null,
+                    keyboardType: TextInputType.number,
+                    autofocus: false,
+                    decoration: new InputDecoration(
+                      prefixIcon: Icon(Icons.person),
+                      hintText: 'عدد الركاب',
+                    ),
                   ),
                 )
               ],

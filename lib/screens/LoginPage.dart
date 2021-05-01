@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import 'DriverMap.dart';
@@ -46,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/login.php"; //10.0.0.8////192.168.1.108:8089
+        "http://10.0.0.9/otobus/phpfiles/login.php"; //10.0.0.8////192.168.1.108:8089
 
     var response = await http.post(apiurl, body: {
       'email': email,
@@ -79,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
 
           await FlutterSession().set('name', thisUser.name);
           await FlutterSession().set('phone', thisUser.phone);
+
           if (pic != null) {
             await FlutterSession().set('profpic', pic);
           }
@@ -92,8 +94,29 @@ class _LoginPageState extends State<LoginPage> {
                     builder: (context) => PassMap())); //PassengerPage()
           } else {
             await FlutterSession().set('driveremail', email);
+
             var indate = jsondata["insdate"];
             await FlutterSession().set('insdate', indate);
+            thisDriver.begN = jsondata["begN"];
+            thisDriver.endN = jsondata["endN"];
+            thisDriver.busType = jsondata["busType"];
+            thisDriver.numOfPass = int.parse(jsondata["numOfPass"]);
+            var bLa = jsondata["begLat"];
+            var bLo = jsondata["begLng"];
+            var eLa = jsondata["endLat"];
+            var eLo = jsondata["endLng"];
+            thisDriver.begLoc = LatLng(double.parse(bLa), double.parse(bLo));
+            thisDriver.endLoc = LatLng(double.parse(eLa), double.parse(eLo));
+
+            await FlutterSession().set('begN', thisDriver.begN);
+            await FlutterSession().set('begLat', thisDriver.begLoc.latitude);
+            await FlutterSession().set('begLng', thisDriver.begLoc.longitude);
+            await FlutterSession().set('endN', thisDriver.endN);
+            await FlutterSession().set('endLat', thisDriver.endLoc.latitude);
+            await FlutterSession().set('endLng', thisDriver.endLoc.longitude);
+            await FlutterSession().set('busType', thisDriver.busType);
+            await FlutterSession().set('numOfPass', thisDriver.numOfPass);
+           
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => DriverMap()));
           }

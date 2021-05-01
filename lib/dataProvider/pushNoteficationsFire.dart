@@ -85,7 +85,9 @@ class PushNotifications {
         double destLong =
             double.parse(snapshot.value['destination']['longitude'].toString());
         String desAdd = snapshot.value['destinationAddress'].toString();
+        int numb = int.parse(snapshot.value['passengers'].toString());
         tripInfo.ridrReqId = rideId;
+        tripInfo.numb = numb;
         tripInfo.destAdd = desAdd;
         tripInfo.pickUpAdd = pickUpAdd;
         tripInfo.dest = LatLng(destLat, destLong);

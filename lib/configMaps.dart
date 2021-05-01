@@ -1,3 +1,4 @@
+import 'package:OtoBus/dataProvider/currDriverInfo.dart';
 import 'package:OtoBus/dataProvider/tripInfo.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -6,6 +7,7 @@ import 'screens/CurrUserInfo.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
 
 const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
@@ -13,8 +15,14 @@ String mapKey = "AIzaSyCU1zRGJNhBvwMisg1zsPg3oOW6Yymq2Sk";
 String googlekey = "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4";
 
 CurrUserInfo thisUser = new CurrUserInfo();
+CurrDriverInfo thisDriver = new CurrDriverInfo();
+
 DatabaseReference tripReq;
+DatabaseReference passNum;
 DatabaseReference ridRef;
+
+int numCont;
+int driverNum;
 
 var currUser;
 StreamSubscription<Position> posStream;
