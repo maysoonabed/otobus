@@ -1,6 +1,7 @@
 import 'package:OtoBus/chat/passchat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 
 class globalFunctions {
   //*********************************//
@@ -145,5 +146,23 @@ class globalFunctions {
       Fluttertoast.showToast(msg: err.message.toString());
     }); */
   }
+
   //*********************************//
+  Future<int> numUnredMsgs() async {
+    var count = 0;
+    await FirebaseFirestore.instance
+        .collection('chatrooms')
+        .where("users", arrayContains: myuser.email)
+        .get()
+        .then((val) {
+      for (int i = 0; i < val.docs.length; i++) {
+        if ((val.docs[i]['lastmsgread'] == false) &&
+            (val.docs[i]['lastMessageSendBy'] != myuser.name)) {
+          count++;
+        }
+      }
+      //print(count);
+      return count;
+    });
+  }
 }

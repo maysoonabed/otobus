@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:io' as Io;
+import 'package:OtoBus/chat/PassChatDetailes.dart';
+import 'package:OtoBus/chat/globalFunctions.dart';
+import 'package:OtoBus/chat/passchat.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
@@ -64,6 +67,12 @@ String name, email, phone;
 var _namecon = TextEditingController();
 var _emailcon = TextEditingController();
 var _phonecon = TextEditingController();
+String roomId = "";
+String passEmail = "";
+String passName = "";
+String passImgPath = "lib/Images/Defultprof.jpg";
+String passPhone = "";
+String path;
 //////////////////////////insurance Date/////////////////////////
 var _insdate = TextEditingController();
 DateTime _insT;
@@ -81,6 +90,25 @@ class DriverMapState extends State<DriverMap> {
     target: LatLng(31.947351, 35.227163),
     zoom: 9.4746,
   );
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  getInfoForChat(String dPhone) async {
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
+    var response = await http.post(apiurl, body: {'phone': dPhone});
+    //print(response.body);
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body);
+      setState(() {
+        passName = jsondata["name"];
+        passEmail = jsondata["email"];
+        path = jsondata["profpic"];
+        if (path != "") {
+          passImgPath = "phpfiles/cardlic/$path";
+        }
+      });
+    }
+  }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void creatMarker() {
     if (movingMarkerIcon == null) {
@@ -217,6 +245,10 @@ class DriverMapState extends State<DriverMap> {
   void putvalues() async {
     email = await FlutterSession().get('driveremail');
     name = await FlutterSession().get('name');
+    setState(() {
+      thisDriver.email = email;
+      thisDriver.name = name;
+    });
     var r = await FlutterSession().get('phone');
     phone = r.toString();
     var s = await FlutterSession().get('insdate');
@@ -285,9 +317,10 @@ class DriverMapState extends State<DriverMap> {
     acc = false;
     super.initState();
     driverInfo();
-    putvalues();
+
     pic();
   }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   bool status = false;
@@ -295,6 +328,7 @@ class DriverMapState extends State<DriverMap> {
 
   @override
   Widget build(BuildContext context) {
+    putvalues();
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -649,16 +683,42 @@ class DriverMapState extends State<DriverMap> {
             color: apcolor,
             backgroundColor: myG,
             items: <Widget>[
-              Icon(
-                Icons.notifications,
-                size: 25,
-                color: Colors.white,
-              ),
-              Icon(
-                Icons.messenger,
-                size: 25,
-                color: Colors.white,
-              ),
+              IconButton(
+                  icon: Icon(
+                    Icons.notifications,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    passPhone = "054584";
+                    getInfoForChat(passPhone);
+                    roomId = globalFunctions()
+                        .creatChatRoomInfo(thisDriver.email, passEmail);
+                    //print(roomId);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PassChatDetailes(
+                                  username: passName,
+                                  imageURL: passImgPath,
+                                  useremail: passEmail,
+                                  roomID: roomId,
+                                )));
+                  }),
+              IconButton(
+                  icon: Icon(
+                    Icons.messenger,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    //print(thisDriver.email);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PassChat(thisDriver.email, thisDriver.name)));
+                  }),
               Icon(
                 Icons.person,
                 size: 25,

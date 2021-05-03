@@ -123,7 +123,7 @@ void main() {
       create: (context) => AppData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home: token != null ? PassMap() : MyApp(), //MyApp() //
+        home: MyApp(), //token != null ? PassMap() : MyApp(), //
         // currUser != null? DriverMap(): MyApp(),
       )));
 }

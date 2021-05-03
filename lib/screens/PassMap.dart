@@ -474,6 +474,11 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  /*  int msgsCount = 0;
+  gg() async {
+    msgsCount = await globalFunctions().numUnredMsgs();
+  } */
+
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
@@ -486,15 +491,18 @@ class _PassMapState extends State<PassMap> {
           .then((onValue) {
         myIcon = onValue;
       });
+
+      homeispress = true;
+      msgispress = false;
+      notispress = false;
+      proispress = false;
     }
 
     pic();
     initState();
     putvalues();
-    /*  homeispress = true;
-      msgispress = false;
-      notispress = false;
-      proispress = false;*/
+    //gg();
+    // print(msgsCount);
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
