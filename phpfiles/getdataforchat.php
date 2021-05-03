@@ -4,7 +4,7 @@
     $Phone = $_POST['phone'];
 
     if ($connect) {
-        $query = "SELECT * FROM `driver` WHERE `phonenum`='$Phone'"; 
+        $query = "SELECT * FROM `driver` WHERE `phonenum`='$Phone'";// echo $query;
         $result = $connect->query($query);
             if($result->num_rows>0){
               $row = mysqli_fetch_assoc($result);

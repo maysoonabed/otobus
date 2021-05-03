@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => PassengerPage())); //PassengerPage()
+                    builder: (context) => PassMap())); //PassengerPage()
           } else {
             await FlutterSession().set('driveremail', email);
 

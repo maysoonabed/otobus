@@ -148,21 +148,4 @@ class globalFunctions {
   }
 
   //*********************************//
-  Future<int> numUnredMsgs() async {
-    var count = 0;
-    await FirebaseFirestore.instance
-        .collection('chatrooms')
-        .where("users", arrayContains: myuser.email)
-        .get()
-        .then((val) {
-      for (int i = 0; i < val.docs.length; i++) {
-        if ((val.docs[i]['lastmsgread'] == false) &&
-            (val.docs[i]['lastMessageSendBy'] != myuser.name)) {
-          count++;
-        }
-      }
-      //print(count);
-      return count;
-    });
-  }
 }
