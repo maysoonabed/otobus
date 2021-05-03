@@ -17,6 +17,7 @@ import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:gradient_bottom_navigation_bar/gradient_bottom_navigation_bar.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -110,6 +111,14 @@ class DriverMapState extends State<DriverMap> {
     }
   }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  int _selectedIndex = 1;
+  final _widgetOptions = [
+    Text('Index 0: Home'),
+    Text('Index 1: Notification'),
+    Text('Index 2: Messages'),
+    Text('Index 2: Profile'),
+  ];
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void creatMarker() {
     if (movingMarkerIcon == null) {
@@ -323,10 +332,11 @@ class DriverMapState extends State<DriverMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
   bool status = false;
   bool backOn = false;
   int msgsCount = 0;
+  final GlobalKey<ScaffoldState> _scaffoldkey = GlobalKey<ScaffoldState>();
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -353,10 +363,12 @@ class DriverMapState extends State<DriverMap> {
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     putvalues();
     pic();
+
     //numUnredMsgs();
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
+          key: _scaffoldkey,
           appBar: AppBar(
             actions: <Widget>[
               new Container(),
@@ -704,33 +716,15 @@ class DriverMapState extends State<DriverMap> {
               ),
             )
           ]),
-          bottomNavigationBar: CurvedNavigationBar(
-            color: apcolor,
-            backgroundColor: myG,
-            items: <Widget>[
-              IconButton(
-                  icon: Icon(
-                    Icons.notifications,
-                    size: 25,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    passPhone = "0595555555";
-                    getInfoForChat(passPhone);
-                    roomId = globalFunctions()
-                        .creatChatRoomInfo(thisDriver.email, passEmail);
-                    //print(roomId);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => PassChatDetailes(
-                                  username: passName,
-                                  imageURL: passImgPath,
-                                  useremail: passEmail,
-                                  roomID: roomId,
-                                )));
-                  }),
-              IconButton(
+          bottomNavigationBar: GradientBottomNavigationBar(
+            backgroundColorStart: Color(0xFF64726f),
+            backgroundColorEnd: Color(0xFF01d5ab),
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.home), title: Text('الخريطة')),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications), title: Text('الإشعارات')),
+              BottomNavigationBarItem(
                   icon: new Stack(
                     children: <Widget>[
                       Icon(
@@ -765,24 +759,47 @@ class DriverMapState extends State<DriverMap> {
                       )
                     ],
                   ),
-                  onPressed: () {
-                    //print(thisDriver.email);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                PassChat(thisDriver.email, thisDriver.name)));
-                  }),
-              Icon(
-                Icons.person,
-                size: 25,
-                color: Colors.white,
-              ),
+                  title: Text('الرسائل')),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.person), title: Text('الصفحة الشخصية')),
             ],
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
           ),
         ));
   }
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (_selectedIndex == 1) {
+      passPhone = "0595555555";
+      getInfoForChat(passPhone);
+      roomId = globalFunctions().creatChatRoomInfo(thisDriver.email, passEmail);
+      //print(roomId);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PassChatDetailes(
+                    username: passName,
+                    imageURL: passImgPath,
+                    useremail: passEmail,
+                    roomID: roomId,
+                  )));
+    } else if (_selectedIndex == 2) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  PassChat(thisDriver.email, thisDriver.name)));
+    } else if (_selectedIndex == 3) {
+      _scaffoldkey.currentState.openEndDrawer();
+    }
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   /*  _addCircle(LatLng position, String id) {
       CircleId circleId = CircleId(id);
     Circle circle =

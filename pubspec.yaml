@@ -54,6 +54,7 @@ dependencies:
   smooth_star_rating: ^1.1.1
   url_launcher: ^5.7.10
   percent_indicator: "^2.1.7+2"
+  gradient_bottom_navigation_bar: ^1.0.0+4
 
   random_string:
     
