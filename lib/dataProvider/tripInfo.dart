@@ -5,6 +5,7 @@ class TripInfo {
   String pickUpAdd;
   LatLng pickUp;
   LatLng dest;
+  int numb;
   String ridrReqId;
   String riderPhone;
   TripInfo({
@@ -14,5 +15,6 @@ class TripInfo {
     this.pickUpAdd,
     this.riderPhone,
     this.ridrReqId,
+    this.numb
   });
 }
