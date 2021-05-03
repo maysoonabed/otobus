@@ -7,6 +7,8 @@ import 'PasschatMessageModel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:random_string/random_string.dart';
 
+import 'globalFunctions.dart';
+
 //******************************************************/
 var mesg = TextEditingController();
 var mes = "";
@@ -220,6 +222,10 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     ),
                     Expanded(
                       child: TextField(
+                        onTap: () {
+                          globalFunctions()
+                              .updateread(widget.roomID, myuser.name);
+                        },
                         controller: mesg,
                         onChanged: (value) {
                           setState(() {

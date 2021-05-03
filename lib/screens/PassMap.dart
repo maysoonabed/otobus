@@ -24,6 +24,7 @@ import '../configMaps.dart';
 import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
 import '../chat/passchat.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PassMap extends StatefulWidget {
   @override
@@ -474,16 +475,36 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  /*  int msgsCount = 0;
-  gg() async {
-    msgsCount = await globalFunctions().numUnredMsgs();
-  } */
 
+  int msgsCount = 0;
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     final Size size = MediaQuery.of(context).size;
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    numUnredMsgs() {
+      int count = 0;
+      FirebaseFirestore.instance
+          .collection('chatrooms')
+          .where("users", arrayContains: thisUser.email)
+          .get()
+          .then((val) {
+        for (int i = 0; i < val.docs.length; i++) {
+          if ((val.docs[i]['lastmsgread'] == false) &&
+              (val.docs[i]['lastMessageSendBy'] != thisUser.name)) {
+            count++;
+          } else {
+            continue;
+          }
+        }
+        setState(() {
+          msgsCount = count;
+        });
+        //print(count);
+      });
+    }
 
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     @override
     void initState() {
       BitmapDescriptor.fromAssetImage(
@@ -501,8 +522,7 @@ class _PassMapState extends State<PassMap> {
     pic();
     initState();
     putvalues();
-    //gg();
-    // print(msgsCount);
+    numUnredMsgs();
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -823,9 +843,41 @@ class _PassMapState extends State<PassMap> {
                                 shape: CircleBorder(),
                                 clipBehavior: Clip.hardEdge,
                                 child: IconButton(
-                                    icon: (msgispress)
-                                        ? Icon(Icons.message)
-                                        : Icon(Icons.message_outlined),
+                                    icon: new Stack(
+                                      children: <Widget>[
+                                        (msgispress)
+                                            ? Icon(Icons.message) //
+                                            : Icon(Icons
+                                                .chat_bubble_outlined), //Icons.message_outlined
+                                        new Positioned(
+                                          right: 0,
+                                          child: new Container(
+                                            padding: EdgeInsets.all(1),
+                                            decoration: new BoxDecoration(
+                                              color: (msgsCount > 0)
+                                                  ? Colors.red
+                                                  : Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            constraints: BoxConstraints(
+                                              minWidth: 15,
+                                              minHeight: 15,
+                                            ),
+                                            child: new Text(
+                                              (msgsCount > 0)
+                                                  ? '$msgsCount'
+                                                  : '',
+                                              style: new TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                     color: (msgispress) ? mypink : Colors.white,
                                     onPressed: () {
                                       setState(() {
@@ -855,8 +907,8 @@ class _PassMapState extends State<PassMap> {
                                 clipBehavior: Clip.hardEdge,
                                 child: IconButton(
                                     icon: (notispress)
-                                        ? Icon(Icons.notifications)
-                                        : Icon(Icons.notifications_outlined),
+                                        ? Icon(Icons.notifications_outlined)
+                                        : Icon(Icons.notifications),
                                     color: (notispress) ? mypink : Colors.white,
                                     onPressed: () {
                                       drivPhone = "054584";
@@ -890,8 +942,8 @@ class _PassMapState extends State<PassMap> {
                                 clipBehavior: Clip.hardEdge,
                                 child: IconButton(
                                     icon: (proispress)
-                                        ? Icon(Icons.person)
-                                        : Icon(Icons.person_outline_rounded),
+                                        ? Icon(Icons.person_outline_rounded)
+                                        : Icon(Icons.person),
                                     color: (proispress) ? mypink : Colors.white,
                                     onPressed: () {
                                       setState(() {
