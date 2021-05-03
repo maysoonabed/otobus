@@ -188,6 +188,7 @@ class NotificationsDialog extends StatelessWidget {
         thisRideId = snapshot.value.toString();
       }
       if (thisRideId == trip.ridrReqId) {
+        
         nRideRef.set('accepted');
         globalState.setState(() {
           Funcs.disbleLocUpdate();

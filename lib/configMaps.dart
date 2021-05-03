@@ -21,8 +21,10 @@ DatabaseReference tripReq;
 DatabaseReference ridRef;
 DatabaseReference nnum;
 DatabaseReference whereTo;
-int s1 , s2 , s3 , s4 , s5 ;
+int s1, s2, s3, s4, s5;
 int rateCount;
+
+List<String> accReq = [];
 
 int numCont;
 int driverNum;
