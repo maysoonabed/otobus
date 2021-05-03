@@ -9,6 +9,14 @@
     			$inserted = mysqli_query($connect, $query);
     			
     			if($inserted == 1 ){  
+					$q ="SELECT AVG(taq) AS avg FROM feedback WHERE `driverid`='$Driverid'";
+					$res = $connect->query($q);
+					if($res->num_rows>0){
+					$rrw = mysqli_fetch_assoc($res);				
+                    $av= $rrw['avg'];
+					$query = "UPDATE `driver` SET `taqyeem`='$av' WHERE `phonenum`='$Driverid' ";
+    			    $ind = mysqli_query($connect, $query);
+					}
 					$json['success'] = 1;
     				$json['value'] = 1;
 					$json['error'] =0;

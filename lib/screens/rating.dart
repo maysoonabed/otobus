@@ -18,7 +18,7 @@ class Rating extends StatefulWidget {
 
 class _RatingState extends State<Rating> {
   double rating = 0;
-  bool error = false, showprogress = false;
+  bool showprogress = false;
   String errormsg;
   String comm;
   int rep = 0;
@@ -149,7 +149,7 @@ class _RatingState extends State<Rating> {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl = "http://10.0.0.9/otobus/phpfiles/rate.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
-      'passid': thisUser.phone, //get the username text
+      'passid': thisUser.name, //get the username text
       'driverid': widget.driverPhone,
       'taq': rating.toInt().toString(),
       'comment': comm != null ? comm : '-',
@@ -161,28 +161,25 @@ class _RatingState extends State<Rating> {
       if (jsondata["error"] == 1) {
         setState(() {
           showprogress = false; //don't show progress indicator
-          error = true;
           errormsg = jsondata["message"];
         });
       } else {
         if (jsondata["success"] == 1) {
           setState(() {
-            error = false;
             showprogress = false;
             errormsg = jsondata["message"];
           });
-
           Navigator.pop(context);
         } else {
-          showprogress = false; //don't show progress indicator
-          error = true;
-          errormsg = "حدث خطأ";
+          setState(() {
+            showprogress = false; //don't show progress indicator
+            errormsg = "حدث خطأ";
+          });
         }
       }
     } else {
       setState(() {
         showprogress = false; //don't show progress indicator
-        error = true;
         errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
       });
     }

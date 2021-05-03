@@ -9,7 +9,6 @@ class FireDrivers {
   static void updateDriver(NearDrivers driver) {
     int indx = nDrivers.indexWhere((element) => element.key == driver.key);
     nDrivers[indx].long = driver.long;
-        nDrivers[indx].lat = driver.lat;
-
+    nDrivers[indx].lat = driver.lat;
   }
 }
