@@ -50,6 +50,7 @@ const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 GoogleMapController newGoogleMapController;
 BitmapDescriptor movingMarkerIcon;
 Position myPos;
+
 //////////////////////////////////////////////////////////////////
 final GlobalKey _photopickey = GlobalKey();
 File _prof;
@@ -98,7 +99,7 @@ class DriverMapState extends State<DriverMap> {
 
     if (response.statusCode == 200) {
       String data = response.body;
-    setState(() {
+      setState(() {
         Adress pickUp = new Adress();
         pickUp.placeName = jsonDecode(data)['data'][0]['label'];
         //  pickUp.placeName = jsonDecode(data)['data'][0]['county'];
@@ -143,7 +144,7 @@ class DriverMapState extends State<DriverMap> {
     gMarkers.removeWhere((marker) => marker.markerId.value == 'current');
     gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
     polylines.clear();
-   setState(() {});
+    setState(() {});
   }
   //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -234,15 +235,14 @@ class DriverMapState extends State<DriverMap> {
     thisDriver.numOfPass = await FlutterSession().get('numOfPass');
     thisDriver.begLoc = LatLng(bLa, bLo);
     thisDriver.endLoc = LatLng(eLa, eLo);
-    print(thisDriver.begLoc.latitude.toString() +
-        thisDriver.numOfPass.toString() +
-        thisDriver.busType);
+    driverT = thisDriver.endLoc;
+    driverF = thisDriver.begLoc;
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void pic() async {
     var pic = await FlutterSession().get('profpic');
-     setState(() {
+    setState(() {
       _profname = pic;
     });
     img = AssetImage('phpfiles/cardlic/$_profname');
@@ -344,7 +344,7 @@ class DriverMapState extends State<DriverMap> {
                               _prof = File(picked.path);
                               _profname = _prof.path.split('/').last;
                               upload(_prof, _profname);
-                             setState(() {
+                              setState(() {
                                 img = AssetImage('phpfiles/cardlic/$_profname');
                               });
                             },
@@ -543,7 +543,15 @@ class DriverMapState extends State<DriverMap> {
                                       Expanded(
                                           child: InkWell(
                                               onTap: () {
-                                              setState(() {
+                                                Map toMap = {
+                                                  'latitude': thisDriver
+                                                      .endLoc.latitude,
+                                                  'longitude': thisDriver
+                                                      .endLoc.longitude
+                                                };
+                                                whereTo.set(toMap);
+
+                                                setState(() {
                                                   destLatitude =
                                                       driverT.latitude;
                                                   destLongitude =
@@ -575,6 +583,14 @@ class DriverMapState extends State<DriverMap> {
                                       Expanded(
                                           child: InkWell(
                                               onTap: () {
+                                                Map toMap = {
+                                                  'latitude': thisDriver
+                                                      .begLoc.latitude,
+                                                  'longitude': thisDriver
+                                                      .begLoc.longitude
+                                                };
+                                                whereTo.set(toMap);
+/////مشكوك في أمرها  تزكريييييهههههههاااااا
                                                 setState(() {
                                                   destLatitude =
                                                       driverF.latitude;
@@ -695,11 +711,25 @@ class DriverMapState extends State<DriverMap> {
     Geofire.initialize('availableDrivers');
     Geofire.setLocation(
         currUser.uid, currentPosition.latitude, currentPosition.longitude);
-     tripReq = FirebaseDatabase.instance
+    tripReq = FirebaseDatabase.instance
         .reference()
         .child('Drivers/${currUser.uid}/newTrip');
-    tripReq.set('waiting'); 
+    tripReq.set('waiting');
+
     tripReq.onValue.listen((event) {});
+    nnum = FirebaseDatabase.instance
+        .reference()
+        .child('Drivers/${currUser.uid}/passengers');
+    nnum.set(thisDriver.numOfPass);
+    driverNum = thisDriver.numOfPass;
+    whereTo = FirebaseDatabase.instance
+        .reference()
+        .child('Drivers/${currUser.uid}/whereTo');
+    Map toMap = {
+      'latitude': thisDriver.endLoc.latitude,
+      'longitude': thisDriver.endLoc.longitude
+    };
+    whereTo.set(toMap);
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -708,6 +738,12 @@ class DriverMapState extends State<DriverMap> {
     tripReq.onDisconnect();
     tripReq.remove();
     tripReq = null;
+    nnum.onDisconnect();
+    nnum.remove();
+    nnum = null;
+    whereTo.onDisconnect();
+    whereTo.remove();
+    whereTo = null;
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -744,7 +780,7 @@ class DriverMapState extends State<DriverMap> {
         rotation: rotate,
         infoWindow: InfoWindow(title: 'الموقع الحالي'),
         onTap: () {
-              if (state == 'accepted') {
+          if (state == 'accepted') {
             state = 'arrived';
             ridRef.child('status').set('arrived');
             setState(() {
@@ -764,7 +800,7 @@ class DriverMapState extends State<DriverMap> {
           }
         },
       );
-     setState(() {
+      setState(() {
         CameraPosition cp = new CameraPosition(target: pos, zoom: 17);
         newGoogleMapController
             .animateCamera(CameraUpdate.newCameraPosition(cp));
@@ -808,16 +844,8 @@ class DriverMapState extends State<DriverMap> {
     ridRef.child('driver_location').set(locationMap);
     ridRef.child('driver_id').set(currUser.uid);
     ridRef.child('driver_phone').set(phone);
-
-    /*   DatabaseReference numnum = FirebaseDatabase.instance
-        .reference()
-        .child('Drivers/${currUser.uid}/passengers');
-    numnum.once().then((DataSnapshot snapshot) {
-      if (snapshot.value != null) {
-        driverNum = driverNum - tripInfo.numb;
-        numnum.set(driverNum);
-      }
-    }); */
+    driverNum = driverNum - tripInfo.numb;
+    nnum.set(driverNum);
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

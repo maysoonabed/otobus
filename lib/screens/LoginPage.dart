@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:OtoBus/screens/PassengerPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -91,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => PassMap())); //PassengerPage()
+                    builder: (context) => PassengerPage())); //PassengerPage()
           } else {
             await FlutterSession().set('driveremail', email);
 
@@ -107,7 +108,8 @@ class _LoginPageState extends State<LoginPage> {
             var eLo = jsondata["endLng"];
             thisDriver.begLoc = LatLng(double.parse(bLa), double.parse(bLo));
             thisDriver.endLoc = LatLng(double.parse(eLa), double.parse(eLo));
-
+            driverT = thisDriver.endLoc;
+            driverF = thisDriver.begLoc;
             await FlutterSession().set('begN', thisDriver.begN);
             await FlutterSession().set('begLat', thisDriver.begLoc.latitude);
             await FlutterSession().set('begLng', thisDriver.begLoc.longitude);
@@ -116,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
             await FlutterSession().set('endLng', thisDriver.endLoc.longitude);
             await FlutterSession().set('busType', thisDriver.busType);
             await FlutterSession().set('numOfPass', thisDriver.numOfPass);
-           
+
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => DriverMap()));
           }

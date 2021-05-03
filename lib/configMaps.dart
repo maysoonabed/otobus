@@ -1,3 +1,4 @@
+import 'package:OtoBus/dataProvider/Spacecraft.dart';
 import 'package:OtoBus/dataProvider/currDriverInfo.dart';
 import 'package:OtoBus/dataProvider/tripInfo.dart';
 import 'package:audioplayers/audio_cache.dart';
@@ -13,17 +14,18 @@ const tokenkey =
     'pk.eyJ1IjoibW15eHQiLCJhIjoiY2ttbDMwZzJuMTcxdDJwazVoYjFmN29vZiJ9.zXZhziLKRg0-JEtO4KPG1w';
 String mapKey = "AIzaSyCU1zRGJNhBvwMisg1zsPg3oOW6Yymq2Sk";
 String googlekey = "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4";
-
 CurrUserInfo thisUser = new CurrUserInfo();
 CurrDriverInfo thisDriver = new CurrDriverInfo();
-
+CurrDriverInfo theDriver = CurrDriverInfo();
 DatabaseReference tripReq;
-DatabaseReference passNum;
 DatabaseReference ridRef;
+DatabaseReference nnum;
+DatabaseReference whereTo;
+int s1 , s2 , s3 , s4 , s5 ;
+int rateCount;
 
 int numCont;
 int driverNum;
-
 var currUser;
 StreamSubscription<Position> posStream;
 StreamSubscription<Position> ridePosStream;

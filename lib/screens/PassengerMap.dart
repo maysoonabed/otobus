@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:OtoBus/configMaps.dart';
+import 'package:OtoBus/dataProvider/currDriverInfo.dart';
+import 'package:OtoBus/screens/CurrUserInfo.dart';
+import 'package:OtoBus/screens/driverInfoBottomSheet.dart';
 import 'package:OtoBus/screens/noDriversDialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
@@ -42,6 +47,9 @@ DatabaseReference rideReq;
 DatabaseReference driverRef =
     FirebaseDatabase.instance.reference().child('Drivers');
 bool nearLoaded = false;
+String errmsg;
+String driverPhone;
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -70,12 +78,86 @@ class _PassengerMapState extends State<PassengerMap> {
     thisUser.phone = x.toString();
   }
 
+   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  getRatings() async {
+
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://10.0.0.9/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+    var response = await http.post(apiurl, body: {
+      'phone': theDriver.phone, //get the username text
+    });
+
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        errormsg = jsondata["message"];
+      } else {
+        if (jsondata["success"] == 1) {
+          print(jsondata['cou']);
+          rateCount = int.parse(jsondata['cou']);
+          s1 = int.parse(jsondata['cnt1']);
+          s2 = int.parse(jsondata['cnt2']);
+          s3 = int.parse(jsondata['cnt3']);
+          s4 = int.parse(jsondata['cnt4']);
+          s5 = int.parse(jsondata['cnt5']);
+
+          errormsg = jsondata["message"];
+        } else {
+          errormsg = "حدث خطأ";
+        }
+      }
+    } else {
+      errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
+    }
+    Fluttertoast.showToast(
+      context,
+      msg: errormsg,
+    );
+  }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void displayDriverDetails() {
+  Future<void> displayDriverDetails() async {
+    driverPhone = '4235235';
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://10.0.0.9/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
+    var response = await http.post(apiurl, body: {
+      'phone': driverPhone,
+    });
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        errmsg = jsondata["message"];
+      } else {
+        theDriver.phone = driverPhone;
+        theDriver.name = jsondata["name"];
+        theDriver.pic = jsondata['profpic'];
+        theDriver.begN = jsondata['begN'];
+        theDriver.endN = jsondata['endN'];
+        theDriver.busType = jsondata["busType"];
+
+        var x = jsondata["rate"];
+        theDriver.rate = double.parse(x);
+        var xx = jsondata["numOfPass"];
+        theDriver.numOfPass = int.parse(xx);
+        getRatings();
+        errmsg = jsondata["message"];
+      }
+    } else {
+      errmsg = "حدث خطأ أثناء الاتصال بالشبكة";
+    }
+    Fluttertoast.showToast(
+      context,
+      msg: errmsg != null ? errmsg : 'hi',
+    );
+
     setState(() {
       driversDetailes = 400;
     });
   }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void createRequest() {
@@ -103,7 +185,7 @@ class _PassengerMapState extends State<PassengerMap> {
       'destination': destinationMap,
       'driver_id': 'waiting',
       'status': 'waiting',
-      'passengers':numCont,
+      'passengers': numCont,
     };
     rideReq.set(rideMap);
     ridestreams = rideReq.onValue.listen((event) {
@@ -119,6 +201,10 @@ class _PassengerMapState extends State<PassengerMap> {
         double driverLong = double.parse(
             event.snapshot.value['driver_location']['longitude'].toString());
         latLng.LatLng driverCurrLoc = latLng.LatLng(driverLat, driverLong);
+        driverPhone = '';
+        if (event.snapshot.value['driver_phone'] != null) {
+          driverPhone = event.snapshot.value['driver_phone'].toString();
+        }
         if (statusRide == 'accepted') {
           updateDriTime(driverCurrLoc);
         } else if (statusRide == 'onTrip') {
@@ -136,14 +222,14 @@ class _PassengerMapState extends State<PassengerMap> {
         //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
       }
       if (statusRide == 'ended') {
-        String driverId = '';
         if (event.snapshot.value['driver_phone'] != null) {
-          driverId = event.snapshot.value['driver_phone'].toString();
+          driverPhone = event.snapshot.value['driver_phone'].toString();
         }
         showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (BuildContext context) => Rating(driverPhone: driverId));
+            builder: (BuildContext context) =>
+                Rating(driverPhone: driverPhone));
 
         rideReq.onDisconnect();
         rideReq = null;
@@ -496,12 +582,12 @@ class _PassengerMapState extends State<PassengerMap> {
                 ),
                 Divider(),
                 Text(
-                  '  نوع الباص',
+                  theDriver.busType != null ? theDriver.busType : ' نوع الباص',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey),
                 ),
                 Text(
-                  ' اسم السواق ',
+                  theDriver.name != null ? theDriver.name : 'اسم السائق',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
                 ),
@@ -554,14 +640,25 @@ class _PassengerMapState extends State<PassengerMap> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Container(
-                          height: 55,
-                          width: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(26)),
-                            border: Border.all(width: 2, color: Colors.grey),
+                        InkWell(
+                          onTap: () {
+                            showBottomSheet(
+                                context: context,
+                                backgroundColor: Colors.transparent,
+                                builder: (BuildContext context) {
+                                  return DriverInfoBottom(); // returns your BottomSheet widget
+                                });
+                          },
+                          child: Container(
+                            height: 55,
+                            width: 55,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(26)),
+                              border: Border.all(width: 2, color: Colors.grey),
+                            ),
+                            child: Icon(Icons.list),
                           ),
-                          child: Icon(Icons.list),
                         ),
                         SizedBox(
                           height: 10,
@@ -598,6 +695,7 @@ class _PassengerMapState extends State<PassengerMap> {
         polyLines.clear();
       });
       var driver = availableDrivers[0];
+
       print(driver.key);
       availableDrivers.removeAt(0);
       notifyDriver(driver);
@@ -625,6 +723,7 @@ class _PassengerMapState extends State<PassengerMap> {
         dReqTimeout = dReqTimeout - 1;
         driverRef.child(driver.key).child('newTrip').onValue.listen((event) {
           if (event.snapshot.value.toString() == 'accepted') {
+       //     driverRef.child(driver.key).child('newTrip').set('waiting');
             driverRef.child(driver.key).child('newTrip').onDisconnect();
             dReqTimeout = 10;
             timer.cancel();
