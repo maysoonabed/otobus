@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:io' as Io;
 import 'package:OtoBus/chat/PassChatDetailes.dart';
+import 'package:OtoBus/chat/globalFunctions.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:http/http.dart' as http;
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
@@ -71,6 +73,12 @@ var fileImg;
 var _namecon = TextEditingController();
 var _emailcon = TextEditingController();
 var _phonecon = TextEditingController();
+String roomId = "";
+String drivEmail = "";
+String drivName = "";
+String drivImgPath = "lib/Images/Defultprof.jpg";
+String drivPhone = "";
+String path;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
@@ -96,6 +104,10 @@ class _PassMapState extends State<PassMap> {
     email = ""; //thisUser.email != null ? thisUser.email :
     errormsg = "";
     error = false;
+    homeispress = false;
+    msgispress = false;
+    notispress = false;
+    proispress = false;
     super.initState();
   }
 
@@ -110,8 +122,25 @@ class _PassMapState extends State<PassMap> {
       'profname': imgname,
       'email': email,
     });
+    if (response.statusCode == 200) {}
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  getInfoForChat(String dPhone) async {
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
+    var response = await http.post(apiurl, body: {'phone': dPhone});
+    //print(response.body);
     if (response.statusCode == 200) {
-      // print(jsonDecode(response.body));
+      var jsondata = jsonDecode(response.body);
+      setState(() {
+        drivName = jsondata["name"];
+        drivEmail = jsondata["email"];
+        path = jsondata["profpic"];
+        if (path != "") {
+          drivImgPath = "phpfiles/cardlic/$path";
+        }
+      });
     }
   }
 
@@ -447,6 +476,7 @@ class _PassMapState extends State<PassMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
+    Firebase.initializeApp();
     final Size size = MediaQuery.of(context).size;
 
     @override
@@ -821,15 +851,22 @@ class _PassMapState extends State<PassMap> {
                                         : Icon(Icons.notifications_outlined),
                                     color: (notispress) ? mypink : Colors.white,
                                     onPressed: () {
+                                      drivPhone = "054584";
+                                      getInfoForChat(drivPhone);
+                                      roomId = globalFunctions()
+                                          .creatChatRoomInfo(
+                                              thisUser.email, drivEmail);
+                                      //print(roomId);
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   PassChatDetailes(
-                                                      username: name,
-                                                      imageURL:
-                                                          "phpfiles/cardlic/image_picker-840323637.jpg",
-                                                      secUser: "salma")));
+                                                    username: drivName,
+                                                    imageURL: drivImgPath,
+                                                    useremail: drivEmail,
+                                                    roomID: roomId,
+                                                  )));
                                       setState(() {
                                         homeispress = false;
                                         msgispress = false;

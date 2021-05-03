@@ -1,48 +1,93 @@
 import 'package:OtoBus/chat/PassChatDetailes.dart';
+import 'package:OtoBus/chat/passchat.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'globalFunctions.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class PassConversationList extends StatefulWidget {
-  //Curruser user;//@required this.user,
-  String secUsername;
   String messageText;
-  String imageUrl;
   String time;
   bool isMessageRead;
   String secUseremail;
+  String roomID;
   PassConversationList({
-    @required this.secUsername,
     @required this.messageText,
-    @required this.imageUrl,
     @required this.time,
     @required this.isMessageRead,
     @required this.secUseremail,
+    @required this.roomID,
   });
   @override
   _PassConversationListState createState() => _PassConversationListState();
 }
 
 class _PassConversationListState extends State<PassConversationList> {
+  String userName = "";
+  String profPic = "lib/Images/Defultprof.jpg";
+  String path;
+
+  getUserfromphp(String usEmail) async {
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/lib/chat/chatphp/getImage.php"; //10.0.0.8////192.168.1.108:8089
+    var response = await http.post(apiurl, body: {'email': usEmail});
+    //print(response.body);
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body);
+      setState(() {
+        userName = jsondata["name"];
+        path = jsondata["profpic"];
+        if (path != "") {
+          profPic = "phpfiles/cardlic/$path";
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    //print(myuser.email); print(myuser.name);
+    /* getinfo(String em) async {
+      QuerySnapshot qs = await globalFunctions().getuserinfo(em);
+      //print(qs.docs[0]["name"]); print(qs.docs[0]["profpic"]);
+      setState(() {
+        userName = qs.docs[0]["name"];
+        profPic = qs.docs[0]["profpic"];
+      });
+      if (profPic != null) {
+        profPic = "phpfiles/cardlic/$profPic";
+      } else {
+        profPic = "lib/Images/Defultprof.jpg";
+      }
+    } */
+
+    getUserfromphp(widget.secUseremail);
+    //getinfo(widget.secUseremail);
+
     return GestureDetector(
       onTap: () {
+        globalFunctions().updateread(widget.roomID, myuser.name);
         Navigator.push(context, MaterialPageRoute(builder: (context) {
           return PassChatDetailes(
-              username: widget.secUsername,
-              imageURL: widget.imageUrl,
-              secUser: widget.secUseremail);
+            username: userName,
+            imageURL: profPic,
+            useremail: widget.secUseremail,
+            roomID: widget.roomID,
+          );
         }));
       },
       child: Container(
         padding: EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 10),
+        color: widget.isMessageRead
+            ? Colors.transparent
+            : Colors.grey.shade400, //Color(0xFF01d5ab), //(0xFF548279)
         child: Row(
           children: <Widget>[
             Expanded(
               child: Row(
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundImage: AssetImage(widget.imageUrl),
+                    backgroundImage: AssetImage(profPic),
                     maxRadius: 30,
                   ),
                   SizedBox(
@@ -55,8 +100,12 @@ class _PassConversationListState extends State<PassConversationList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            widget.secUsername,
-                            style: TextStyle(fontSize: 16),
+                            userName,
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: widget.isMessageRead
+                                    ? FontWeight.normal
+                                    : FontWeight.bold),
                           ),
                           SizedBox(
                             height: 6,
@@ -64,11 +113,13 @@ class _PassConversationListState extends State<PassConversationList> {
                           Text(
                             widget.messageText,
                             style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade600,
+                                fontSize: widget.isMessageRead ? 13 : 16,
+                                color: widget.isMessageRead
+                                    ? Colors.grey.shade600
+                                    : Colors.black,
                                 fontWeight: widget.isMessageRead
-                                    ? FontWeight.bold
-                                    : FontWeight.normal),
+                                    ? FontWeight.normal
+                                    : FontWeight.bold),
                           ),
                         ],
                       ),
@@ -80,10 +131,10 @@ class _PassConversationListState extends State<PassConversationList> {
             Text(
               widget.time,
               style: TextStyle(
-                  fontSize: 12,
+                  fontSize: widget.isMessageRead ? 12 : 14,
                   fontWeight: widget.isMessageRead
-                      ? FontWeight.bold
-                      : FontWeight.normal),
+                      ? FontWeight.normal
+                      : FontWeight.bold),
             ),
           ],
         ),

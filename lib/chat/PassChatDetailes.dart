@@ -2,6 +2,7 @@ import 'package:OtoBus/chat/passchat.dart';
 import 'package:OtoBus/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'PasschatMessageModel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:random_string/random_string.dart';
@@ -11,6 +12,8 @@ var mesg = TextEditingController();
 var mes = "";
 String messageId = "";
 String chatRoomId = "";
+AssetImage img;
+//ScrollController listScrollController;
 //******************************************************/
 Future addmsgToDatabase(String chatRoomId, String msgId, Map msgInfoMap) async {
   return FirebaseFirestore.instance
@@ -39,7 +42,8 @@ addMessage(bool sendClicked) {
     Map<String, dynamic> messageInfoMap = {
       "message": masS,
       "sendBy": myuser.name,
-      "ts": lastMessageTs
+      "ts": lastMessageTs,
+      "read": false
     };
     if (messageId == "") {
       messageId = randomAlphaNumeric(12);
@@ -49,6 +53,7 @@ addMessage(bool sendClicked) {
         "lastMessageSendBy": myuser.name,
         "lastMessageSendTs": lastMessageTs,
         "lastMessage": masS,
+        "lastmsgread": false
       };
       updateLastMessageSend(chatRoomId, lastMessageInfoMap);
       if (sendClicked) {
@@ -65,11 +70,13 @@ addMessage(bool sendClicked) {
 class PassChatDetailes extends StatefulWidget {
   String username;
   String imageURL;
-  String secUser;
+  String useremail;
+  String roomID;
   PassChatDetailes(
       {@required this.username,
       @required this.imageURL,
-      @required this.secUser});
+      @required this.useremail,
+      @required this.roomID});
   @override
   _PassChatDetailesState createState() => _PassChatDetailesState();
 }
@@ -79,9 +86,10 @@ class PassChatDetailes extends StatefulWidget {
 class _PassChatDetailesState extends State<PassChatDetailes> {
   @override
   Widget build(BuildContext context) {
-    //print(myuser.email);print(myuser.name);\
-    chatRoomId = roomid;
-    print(chatRoomId);
+    setState(() {
+      chatRoomId = widget.roomID;
+      img = AssetImage(widget.imageURL);
+    });
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -105,7 +113,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     width: 2,
                   ),
                   CircleAvatar(
-                    backgroundImage: AssetImage(widget.imageURL),
+                    backgroundImage: img,
                     maxRadius: 20,
                   ),
                   SizedBox(
@@ -152,18 +160,26 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                   .orderBy("ts", descending: true)
                   .snapshots(), //firestore.collection('passMessages').snapshots(),
               builder: (context, snapshot) {
+                //controller:listScrollController;
                 if (!snapshot.hasData) {
                   return Container(//width: 0.0, height: 0.0,
                       );
                 }
+
                 final msgs = snapshot.data.docs;
                 List<PassChatMessage> messages = [];
                 for (var message in msgs) {
                   final messText = message.data()['message'];
                   final messSender = message.data()['sendBy'];
+                  final Timestamp timestamp = message.data()['ts'] as Timestamp;
+                  final DateTime dateTime = timestamp.toDate();
+                  final dateString = DateFormat('dd/M k:mm').format(dateTime);
                   //print(messText);print(messSender);
                   final msgwidget = PassChatMessage(
-                      messageContent: messText, username: messSender);
+                    messageContent: messText,
+                    username: messSender,
+                    msgTime: dateString,
+                  );
                   messages.add(msgwidget);
                 }
                 return ListView(
@@ -221,8 +237,11 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     ),
                     FloatingActionButton(
                       onPressed: () {
-                        SystemChannels.textInput.invokeMethod('TextInput.hide');
                         addMessage(true);
+                        //SystemChannels.textInput.invokeMethod('TextInput.hide'),
+                        /*  listScrollController.animateTo(0.0,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.easeOut); */
                         /* if (message != null && message != "")
                           firestore.collection('passMessages').add({
                             'sender': myuser.email,

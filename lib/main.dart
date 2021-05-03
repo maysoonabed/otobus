@@ -111,7 +111,7 @@ GetStorage box;
 void main() {
   //***********Session*************
   WidgetsFlutterBinding.ensureInitialized();
-  dynamic token = FlutterSession().get('email');
+  dynamic token = FlutterSession().get('paasemail');
 
   //*******************************
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
@@ -123,7 +123,7 @@ void main() {
       create: (context) => AppData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home: /*  token != null ? PassMap() :  */ MyApp(), //MyApp()
+        home: token != null ? PassMap() : MyApp(), //MyApp() //
         // currUser != null? DriverMap(): MyApp(),
       )));
 }
@@ -378,11 +378,10 @@ class _MyAppState extends State<MyApp> {
                                 primary: apBcolor,
                               ),
                               onPressed: () {
-                                 Navigator.push(
+                                Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => PassengerPage()));
-                       
                               },
                             ),
                           ),

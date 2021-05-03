@@ -1,11 +1,11 @@
 import 'package:OtoBus/chat/Curruser.dart';
+import 'package:OtoBus/screens/PassMap.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../main.dart';
 import 'PassConversationList .dart';
-import 'getFrronPhp.dart';
 import 'globalFunctions.dart';
 
 //******************************************************/
@@ -13,49 +13,15 @@ Curruser myuser;
 final FirebaseAuth auth = FirebaseAuth.instance;
 final firestore = Firestore.instance;
 String em, nm;
-String roomid = "";
+String roomid, romid = "";
 String anotherUserEmail, anotherUserName = "";
 Stream chatRoomStream;
-String mynm = globalFunctions().getUsernamefromemail(myuser.email);
-String roomName = "";
+String mynm, myem;
+String secemail = " ";
+String lastMsg = "";
 //******************************************************/
 getCurrUser() {
   return auth.currentUser;
-}
-
-//******************************************************/
-Widget chatRoomList() {
-  return StreamBuilder(
-      stream: chatRoomStream,
-      builder: (context, snapshot) {
-        return snapshot.hasData
-            ? ListView.builder(
-                itemCount: snapshot.data.docs.length,
-                shrinkWrap: true,
-                padding: EdgeInsets.only(top: 16),
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  print(snapshot.data.docs.length);
-                  DocumentSnapshot ds = snapshot.data.docs[index];
-                  String romid = ds.id;
-                  roomName = romid.replaceAll("$mynm", "");
-                  roomName = roomName.replaceAll("_", "");
-                  print(roomName);
-
-                  String eml;
-                  //String imgpath = getFromPhp().getUserImagePath(eml);
-                  return PassConversationList(
-                    secUsername: roomName,
-                    messageText: "Hello", //chatUsers[index].messageText,
-                    imageUrl:
-                        "phpfiles/cardlic/image_picker-840323637.jpg", // imgpath,
-                    time: "2:51:41 PM", //chatUsers[index].time,
-                    secUseremail: anotherUserEmail,
-                    isMessageRead: (index == 0 || index == 3) ? true : false,
-                  );
-                })
-            : Center(child: CircularProgressIndicator());
-      });
 }
 
 //******************************************************/
@@ -68,31 +34,18 @@ class PassChat extends StatefulWidget {
 }
 
 class _PassChatState extends State<PassChat> {
-  getRooms() async {
-    chatRoomStream = await globalFunctions().getChatRooms();
-  }
-
   @override
   Widget build(BuildContext context) {
-    Firebase.initializeApp();
     em = widget.myemail;
     nm = widget.myname;
     setState(() {
       myuser = Curruser(email: em, name: nm);
-      anotherUserEmail = "samah.tobasi@gmail.com";
-      anotherUserName = "Samah Tobasi";
-      roomid = globalFunctions().getChatRoomByUserEmails(
-          globalFunctions().getUsernamefromemail(myuser.email),
-          globalFunctions()
-              .getUsernamefromemail(anotherUserEmail)); //هون إيميل الشخص الثاني
-      //print(roomid);
-    }); //getRooms();
-    getRooms();
+      mynm = globalFunctions().getUsernamefromemail(myuser.email);
+      myem = myuser.email;
+      chatRoomStream = globalFunctions().getChatRooms();
+    });
     //###########################################################
-    Map<String, dynamic> chatRoomInfoMap = {
-      "users": [myuser.email, anotherUserEmail], //هون إيميل الشخص الثاني
-    };
-    //globalFunctions().createchatroom(roomid, chatRoomInfoMap);
+    globalFunctions().registerNotification();
     //###########################################################
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
@@ -101,7 +54,12 @@ class _PassChatState extends State<PassChat> {
             backgroundColor: apcolor,
             leading: IconButton(
                 icon: Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context)),
+                onPressed: () {
+                  //Navigator.push(context,MaterialPageRoute(builder: (context) => PassMap()));
+                  //dispose();
+                  Navigator.pop(
+                      context); //مشان لما ترجع يا للباس ماب أو الباس مسنجر وحدة منهم
+                }),
             title: Text(
               "OtoBüs",
               style: TextStyle(
@@ -117,7 +75,42 @@ class _PassChatState extends State<PassChat> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                chatRoomList(),
+                StreamBuilder(
+                    stream: chatRoomStream,
+                    builder: (context, snapshot) {
+                      return snapshot.hasData
+                          ? ListView.builder(
+                              itemCount: snapshot.data.docs.length,
+                              shrinkWrap: true,
+                              padding: EdgeInsets.only(top: 16),
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                DocumentSnapshot ds = snapshot.data.docs[index];
+                                romid = ds.id;
+                                secemail = romid.replaceAll("$myem", "");
+                                secemail = secemail.replaceAll("*", "");
+                                lastMsg = ds["lastMessage"];
+                                var lastread = ds["lastmsgread"];
+                                var lastsender = ds["lastMessageSendBy"];
+                                if (!lastread) {
+                                  if (lastsender == myuser.name)
+                                    lastread = true;
+                                }
+                                final Timestamp timestamp =
+                                    ds["lastMessageSendTs"] as Timestamp;
+                                final DateTime dateTime = timestamp.toDate();
+                                final dateString =
+                                    DateFormat('k:mm:ss').format(dateTime);
+                                return PassConversationList(
+                                  secUseremail: secemail,
+                                  messageText: lastMsg,
+                                  time: dateString,
+                                  isMessageRead: lastread,
+                                  roomID: romid,
+                                );
+                              })
+                          : Center(child: CircularProgressIndicator());
+                    }),
               ],
             ),
           ),

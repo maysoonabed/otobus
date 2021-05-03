@@ -54,7 +54,9 @@ class _SignupPageState extends State<SignupPage> {
       };
       newUser.set(userMap);
       if (email != null) {
-        firest.collection('users').add({'email': email, 'name': name});
+        firest
+            .collection('users')
+            .add({'email': email, 'name': name, 'profpic': ""});
       }
       print('registFFFire');
     } else
@@ -116,9 +118,11 @@ class _SignupPageState extends State<SignupPage> {
               MaterialPageRoute(
                   builder: (context) => PassMap())); //PassengerPage()
         } else {
-          showprogress = false; //don't show progress indicator
-          error = true;
-          errormsg = "حدث خطأ";
+          setState(() {
+            showprogress = false; //don't show progress indicator
+            error = true;
+            errormsg = "حدث خطأ";
+          });
         }
       }
     } else {
