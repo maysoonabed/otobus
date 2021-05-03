@@ -27,6 +27,7 @@ import 'package:custom_switch/custom_switch.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/dataProvider/pushNoteficationsFire.dart';
 import 'package:OtoBus/dataProvider/mapKit.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 DriverMapState globalState = new DriverMapState();
 
@@ -275,10 +276,12 @@ class DriverMapState extends State<DriverMap> {
   void pic() async {
     var pic = await FlutterSession().get('profpic');
     setState(() {
-      _profname = pic;
+      if (pic != "") {
+        _profname = pic;
+        img = AssetImage('phpfiles/cardlic/$_profname');
+      } else
+        _profname = null;
     });
-    img = AssetImage('phpfiles/cardlic/$_profname');
-    //print('phpfiles/cardlic/$_profname');
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -317,18 +320,40 @@ class DriverMapState extends State<DriverMap> {
     acc = false;
     super.initState();
     driverInfo();
-
-    pic();
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   bool status = false;
   bool backOn = false;
-
+  int msgsCount = 0;
   @override
   Widget build(BuildContext context) {
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    numUnredMsgs() {
+      int count = 0;
+      FirebaseFirestore.instance
+          .collection('chatrooms')
+          .where("users", arrayContains: thisDriver.email)
+          .get()
+          .then((val) {
+        for (int i = 0; i < 2; i++) {
+          if ((val.docs[i]['lastmsgread'] == false) &&
+              (val.docs[i]['lastMessageSendBy'] != thisDriver.name)) {
+            count++;
+          }
+        }
+        setState(() {
+          msgsCount = count;
+        });
+        //print(count);
+      });
+    }
+
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     putvalues();
+    pic();
+    //numUnredMsgs();
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -706,10 +731,39 @@ class DriverMapState extends State<DriverMap> {
                                 )));
                   }),
               IconButton(
-                  icon: Icon(
-                    Icons.messenger,
-                    size: 25,
-                    color: Colors.white,
+                  icon: new Stack(
+                    children: <Widget>[
+                      Icon(
+                        Icons.messenger,
+                        size: 25,
+                        color: Colors.white,
+                      ), //Icons.message_outlined
+                      new Positioned(
+                        right: 0,
+                        child: new Container(
+                          padding: EdgeInsets.all(1),
+                          decoration: new BoxDecoration(
+                            color: //(msgsCount > 0)?
+                                Colors.red,
+                            // : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 17,
+                            minHeight: 17,
+                          ),
+                          child: new Text(
+                            '$msgsCount',
+                            //(msgsCount > 0) ?  : '',
+                            style: new TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                   onPressed: () {
                     //print(thisDriver.email);

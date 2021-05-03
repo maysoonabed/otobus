@@ -489,7 +489,7 @@ class _PassMapState extends State<PassMap> {
           .where("users", arrayContains: thisUser.email)
           .get()
           .then((val) {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < val.docs.length; i++) {
           if ((val.docs[i]['lastmsgread'] == false) &&
               (val.docs[i]['lastMessageSendBy'] != thisUser.name)) {
             count++;
@@ -523,8 +523,6 @@ class _PassMapState extends State<PassMap> {
     initState();
     putvalues();
     numUnredMsgs();
-    //print(msgsCount);
-
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
