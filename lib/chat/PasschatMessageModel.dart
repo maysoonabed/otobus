@@ -3,19 +3,22 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'passchat.dart';
 
+String currusername;
+
 class PassChatMessage extends StatelessWidget {
   String messageContent;
   String username;
   String msgTime;
+  String sendername;
   PassChatMessage(
       {@required this.messageContent,
       @required this.username,
-      @required this.msgTime});
+      @required this.msgTime,
+      @required this.sendername});
 
   @override
   Widget build(BuildContext context) {
-    var currusername = myuser.name;
-    //print(useremil);
+    var currusername = sendername;
     return Container(
         padding: EdgeInsets.all(10.0),
         child: Align(

@@ -25,6 +25,9 @@ import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
 import '../chat/passchat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../chat/Notifi.dart';
 
 class PassMap extends StatefulWidget {
   @override
@@ -100,6 +103,7 @@ class _PassMapState extends State<PassMap> {
   );
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void initState() {
+    //if (Firebase.initializeApp() == null) Firebase.initializeApp();
     name = ""; //thisUser.name != null ? thisUser.name :
     phone = ""; //thisUser.phone != null ? thisUser.phone :
     email = ""; //thisUser.email != null ? thisUser.email :
@@ -474,14 +478,13 @@ class _PassMapState extends State<PassMap> {
     );
   }
 
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
   int msgsCount = 0;
+  //Notifi notif;
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
     Firebase.initializeApp();
     final Size size = MediaQuery.of(context).size;
-    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     numUnredMsgs() {
       int count = 0;
       FirebaseFirestore.instance
@@ -490,11 +493,11 @@ class _PassMapState extends State<PassMap> {
           .get()
           .then((val) {
         for (int i = 0; i < val.docs.length; i++) {
-          if ((val.docs[i]['lastmsgread'] == false) &&
+          if (val.docs[i]['lastmsgread'] == null) {
+            break;
+          } else if ((val.docs[i]['lastmsgread'] == false) &&
               (val.docs[i]['lastMessageSendBy'] != thisUser.name)) {
             count++;
-          } else {
-            continue;
           }
         }
         setState(() {
@@ -505,6 +508,7 @@ class _PassMapState extends State<PassMap> {
     }
 
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     @override
     void initState() {
       BitmapDescriptor.fromAssetImage(
@@ -587,6 +591,36 @@ class _PassMapState extends State<PassMap> {
                 SizedBox(
                   height: 70,
                 ),
+                /* notif != null
+                    ? notif.notificationInfo != null
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'TITLE: ${notif.notificationInfo.title}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                              SizedBox(height: 8.0),
+                              Text(
+                                'BODY: ${notif.notificationInfo.body}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                              Text(
+                                'TITLE: ${notif.notificationInfo.title ?? notif.notificationInfo.dataTitle}',
+                              ),
+                              Text(
+                                'BODY: ${notif.notificationInfo.body ?? notif.notificationInfo.dataBody}',
+                              ),
+                            ],
+                          )
+                        : Container()
+                    : Container(), */
                 Container(
                     child: TextField(
                   controller: _namecon,
@@ -911,7 +945,7 @@ class _PassMapState extends State<PassMap> {
                                         : Icon(Icons.notifications),
                                     color: (notispress) ? mypink : Colors.white,
                                     onPressed: () {
-                                      drivPhone = "054584";
+                                      drivPhone = "87";
                                       getInfoForChat(drivPhone);
                                       roomId = globalFunctions()
                                           .creatChatRoomInfo(
@@ -926,6 +960,7 @@ class _PassMapState extends State<PassMap> {
                                                     imageURL: drivImgPath,
                                                     useremail: drivEmail,
                                                     roomID: roomId,
+                                                    sendername: thisUser.name,
                                                   )));
                                       setState(() {
                                         homeispress = false;

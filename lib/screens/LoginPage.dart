@@ -13,6 +13,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'PassMap.dart';
 import 'package:OtoBus/configMaps.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 int id = 1;
 final FirebaseAuth _auth = FirebaseAuth.instance;

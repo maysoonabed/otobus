@@ -27,7 +27,7 @@ class _PassConversationListState extends State<PassConversationList> {
   String userName = "";
   String profPic = "lib/Images/Defultprof.jpg";
   String path;
-
+  AssetImage img;
   getUserfromphp(String usEmail) async {
     String apiurl =
         "http://192.168.1.108:8089/otobus/lib/chat/chatphp/getImage.php"; //10.0.0.8////192.168.1.108:8089
@@ -41,6 +41,7 @@ class _PassConversationListState extends State<PassConversationList> {
         if (path != "") {
           profPic = "phpfiles/cardlic/$path";
         }
+        img = AssetImage(profPic);
       });
     }
   }
@@ -73,6 +74,7 @@ class _PassConversationListState extends State<PassConversationList> {
             imageURL: profPic,
             useremail: widget.secUseremail,
             roomID: widget.roomID,
+            sendername: myuser.name,
           );
         }));
       },
@@ -87,7 +89,7 @@ class _PassConversationListState extends State<PassConversationList> {
               child: Row(
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundImage: AssetImage(profPic),
+                    backgroundImage: img,
                     maxRadius: 30,
                   ),
                   SizedBox(
