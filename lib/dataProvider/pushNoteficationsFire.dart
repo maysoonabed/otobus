@@ -27,6 +27,8 @@ class PushNotifications {
         fetchInfo(message, context);
       },
     );
+    /* fireMess.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true)); */
   }
 
   Future<String> getToken() async {

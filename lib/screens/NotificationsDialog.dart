@@ -184,11 +184,26 @@ class NotificationsDialog extends StatelessWidget {
       Navigator.pop(context);
 
       String thisRideId;
+
       if (snapshot.value != null) {
         thisRideId = snapshot.value.toString();
       }
       if (thisRideId == trip.ridrReqId) {
         nRideRef.set('accepted');
+        firebaseRef = FirebaseDatabase()
+            .reference()
+            .child('Drivers/${currUser.uid}/acceptedReqs');
+        firebaseRef.push().set({
+          'pickUpLat': trip.pickUp.latitude.toString(),
+          'pickUpLng': trip.pickUp.longitude.toString(),
+          'destLng': trip.dest.longitude.toString(),
+          'destLat': trip.dest.latitude.toString(),
+          'numb': trip.numb.toString(),
+          'ridrReqId': trip.ridrReqId,
+          'destAdd': trip.destAdd,
+          'pickUpAdd': trip.pickUpAdd
+        });
+
         globalState.setState(() {
           Funcs.disbleLocUpdate();
           globalState.putMarker();
