@@ -15,6 +15,7 @@ var mes = "";
 String messageId = "";
 String chatRoomId = "";
 AssetImage img;
+String myusName;
 //ScrollController listScrollController;
 //******************************************************/
 Future addmsgToDatabase(String chatRoomId, String msgId, Map msgInfoMap) async {
@@ -43,7 +44,7 @@ addMessage(bool sendClicked) {
 
     Map<String, dynamic> messageInfoMap = {
       "message": masS,
-      "sendBy": myuser.name,
+      "sendBy": myusName,
       "ts": lastMessageTs,
       "read": false
     };
@@ -52,7 +53,7 @@ addMessage(bool sendClicked) {
     }
     addmsgToDatabase(chatRoomId, messageId, messageInfoMap).then((value) {
       Map<String, dynamic> lastMessageInfoMap = {
-        "lastMessageSendBy": myuser.name,
+        "lastMessageSendBy": myusName,
         "lastMessageSendTs": lastMessageTs,
         "lastMessage": masS,
         "lastmsgread": false
@@ -74,11 +75,13 @@ class PassChatDetailes extends StatefulWidget {
   String imageURL;
   String useremail;
   String roomID;
+  String sendername;
   PassChatDetailes(
       {@required this.username,
       @required this.imageURL,
       @required this.useremail,
-      @required this.roomID});
+      @required this.roomID,
+      @required this.sendername});
   @override
   _PassChatDetailesState createState() => _PassChatDetailesState();
 }
@@ -90,6 +93,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
   Widget build(BuildContext context) {
     setState(() {
       chatRoomId = widget.roomID;
+      myusName = widget.sendername;
       img = AssetImage(widget.imageURL);
     });
     return Scaffold(
@@ -181,6 +185,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     messageContent: messText,
                     username: messSender,
                     msgTime: dateString,
+                    sendername: widget.sendername,
                   );
                   messages.add(msgwidget);
                 }
@@ -223,8 +228,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     Expanded(
                       child: TextField(
                         onTap: () {
-                          globalFunctions()
-                              .updateread(widget.roomID, myuser.name);
+                          globalFunctions().updateread(widget.roomID, myusName);
                         },
                         controller: mesg,
                         onChanged: (value) {

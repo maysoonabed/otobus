@@ -358,8 +358,10 @@ class DriverMapState extends State<DriverMap> {
           .where("users", arrayContains: thisDriver.email)
           .get()
           .then((val) {
-        for (int i = 0; i < 2; i++) {
-          if ((val.docs[i]['lastmsgread'] == false) &&
+        for (int i = 0; i < val.docs.length; i++) {
+          if (val.docs[i]['lastmsgread'] == null) {
+            break;
+          } else if ((val.docs[i]['lastmsgread'] == false) &&
               (val.docs[i]['lastMessageSendBy'] != thisDriver.name)) {
             count++;
           }
@@ -374,8 +376,7 @@ class DriverMapState extends State<DriverMap> {
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     putvalues();
     pic();
-
-    //numUnredMsgs();
+    numUnredMsgs();
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -887,7 +888,7 @@ class DriverMapState extends State<DriverMap> {
       _selectedIndex = index;
     });
     if (_selectedIndex == 1) {
-      passPhone = "0595555555";
+      passPhone = "187";
       getInfoForChat(passPhone);
       roomId = globalFunctions().creatChatRoomInfo(thisDriver.email, passEmail);
       //print(roomId);
@@ -899,6 +900,7 @@ class DriverMapState extends State<DriverMap> {
                     imageURL: passImgPath,
                     useremail: passEmail,
                     roomID: roomId,
+                    sendername: thisDriver.name,
                   )));
     } else if (_selectedIndex == 2) {
       Navigator.push(

@@ -56,8 +56,9 @@ dependencies:
   percent_indicator: "^2.1.7+2"
   gradient_bottom_navigation_bar: ^1.0.0+4
   flutter_local_notifications: 1.4.4+4
-
-  random_string:
+  overlay_support: 
+  random_string: 
+  
     
 dev_dependencies:
   flutter_test:

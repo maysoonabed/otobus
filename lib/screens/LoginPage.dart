@@ -13,6 +13,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'PassMap.dart';
 import 'package:OtoBus/configMaps.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 int id = 1;
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -48,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://10.0.0.9/otobus/phpfiles/login.php"; //10.0.0.9////192.168.1.108:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/login.php"; //10.0.0.9////192.168.1.108:8089
 
     var response = await http.post(apiurl, body: {
       'email': email,
@@ -92,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => PassengerPage())); //PassengerPage()//PassMap
+                    builder: (context) => PassMap())); //PassengerPage()//
           } else {
             await FlutterSession().set('driveremail', email);
 
