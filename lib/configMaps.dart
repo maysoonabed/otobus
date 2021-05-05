@@ -21,10 +21,10 @@ DatabaseReference tripReq;
 DatabaseReference ridRef;
 DatabaseReference nnum;
 DatabaseReference whereTo;
+var firebaseRef;
 int s1, s2, s3, s4, s5;
-int rateCount;
-
-List<String> accReq = [];
+int rateCount, acCount;
+bool chP = false;
 
 int numCont;
 int driverNum;

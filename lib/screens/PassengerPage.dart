@@ -112,104 +112,127 @@ class _PassengerPageState extends State<PassengerPage> {
               children: <Widget>[
                 SizedBox(height: 10),
                 new Expanded(
-                  child: new TextField(
-                    textAlign: TextAlign.end,
-                    controller: src_loc,
-                    readOnly: true,
-                    minLines: 1,
-                    maxLines: null,
-                    autofocus: false,
-                    decoration: new InputDecoration(
-                      prefixIcon: Icon(Icons.location_on),
-                      hintText: 'الموقع',
+                  child: Theme(
+                    data: Theme.of(context).copyWith(primaryColor: apcolor),
+                    child: new TextField(
+                      textAlign: TextAlign.end,
+                      controller: src_loc,
+                      readOnly: true,
+                      minLines: 1,
+                      maxLines: null,
+                      autofocus: false,
+                      decoration: new InputDecoration(
+                        prefixIcon: Icon(Icons.location_on),
+                        hintText: 'الموقع',
+                      ),
                     ),
                   ),
                 ),
                 new Expanded(
-                  child: TextField(
-                    readOnly: true,
-                    textAlign: TextAlign.end,
-                    decoration: new InputDecoration(
-                      prefixIcon: Icon(Icons.location_on_outlined),
-                      hintText: 'الوجهة',
-                    ),
-                    controller: _startPointController,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MapBoxAutoCompleteWidget(
-                            apiKey: tokenkey,
-                            hint: "حدد وجهتك",
-                            onSelect: (place) {
-                              _startPointController.text = place.placeName;
-                              setState(() {
-                                destinationAdd.lat = place.center[1];
-                                destinationAdd.long = place.center[0];
-                                destinationAdd.placeName = place.placeName;
-                                Provider.of<AppData>(context, listen: false)
-                                    .updateDestAddress(destinationAdd);
-                              });
-                            },
-                            limit: 30,
-                            country: 'Ps',
-                            //language: 'ar',
+                  child: Theme(
+                    data: Theme.of(context).copyWith(primaryColor: apcolor),
+                    child: TextField(
+                      readOnly: true,
+                      textAlign: TextAlign.end,
+                      decoration: new InputDecoration(
+                        prefixIcon: Icon(Icons.location_on_outlined),
+                        hintText: 'الوجهة',
+                      ),
+                      controller: _startPointController,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MapBoxAutoCompleteWidget(
+                              apiKey: tokenkey,
+                              hint: "حدد وجهتك",
+                              onSelect: (place) {
+                                _startPointController.text = place.placeName;
+                                setState(() {
+                                  destinationAdd.lat = place.center[1];
+                                  destinationAdd.long = place.center[0];
+                                  destinationAdd.placeName = place.placeName;
+                                  Provider.of<AppData>(context, listen: false)
+                                      .updateDestAddress(destinationAdd);
+                                });
+                                print(destinationAdd.lat.toString() +
+                                    destinationAdd.long.toString());
+                              },
+                              limit: 30,
+                              country: 'Ps',
+                              //language: 'ar',
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    enabled: true,
+                        );
+                      },
+                      enabled: true,
+                    ),
                   ),
                 ),
                 Expanded(
-                  child: TextField(
-                    textAlign: TextAlign.end,
-                    onChanged: (v) {
-                    numCont = int.parse(v);
-                    },
-                    minLines: 1,
-                    maxLines: null,
-                    keyboardType: TextInputType.number,
-                    autofocus: false,
-                    decoration: new InputDecoration(
-                      prefixIcon: Icon(Icons.person),
-                      hintText: 'عدد الركاب',
+                  child: Theme(
+                    data: Theme.of(context).copyWith(primaryColor: apcolor),
+                    child: TextField(
+                      textAlign: TextAlign.end,
+                      onChanged: (v) {
+                        numCont = int.parse(v);
+                      },
+                      minLines: 1,
+                      maxLines: null,
+                      keyboardType: TextInputType.number,
+                      autofocus: false,
+                      decoration: new InputDecoration(
+                        prefixIcon: Icon(Icons.person),
+                        hintText: 'عدد الركاب',
+                      ),
                     ),
                   ),
                 )
               ],
             )),
         actions: <Widget>[
-          new FlatButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          new FlatButton(
-              child: const Text('CHOOSE'),
-              onPressed: () {
-                setState(() {
-                  markers.length == 2 ? markers.removeAt(1) : null;
-                });
-
-                markers.insert(
-                  1,
-                  Marker(
-                    width: 80.0,
-                    height: 80.0,
-                    point:
-                        latLng.LatLng(destinationAdd.lat, destinationAdd.long),
-                    builder: (ctx) => Container(
-                        child: Icon(
-                      Icons.location_on,
-                      color: Colors.black,
-                      size: 40,
-                    )),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              FlatButton(
+                  child: const Text(
+                    'إلغاء',
+                    style: TextStyle(color: Colors.black),
                   ),
-                );
-                getJsonData();
-                Navigator.pop(context);
-              })
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }),
+              FlatButton(
+                  child: const Text(
+                    'اختيار',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      markers.length == 2 ? markers.removeAt(1) : null;
+                    });
+
+                    markers.insert(
+                      1,
+                      Marker(
+                        width: 80.0,
+                        height: 80.0,
+                        point: latLng.LatLng(
+                            destinationAdd.lat, destinationAdd.long),
+                        builder: (ctx) => Container(
+                            child: Icon(
+                          Icons.location_on,
+                          color: Colors.black,
+                          size: 40,
+                        )),
+                      ),
+                    );
+                    getJsonData();
+                    Navigator.pop(context);
+                  })
+            ],
+          ),
         ],
       ),
       context: context,

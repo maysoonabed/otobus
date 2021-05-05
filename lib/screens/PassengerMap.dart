@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/currDriverInfo.dart';
+import 'package:OtoBus/dataProvider/fUNCS.dart';
 import 'package:OtoBus/screens/CurrUserInfo.dart';
 import 'package:OtoBus/screens/driverInfoBottomSheet.dart';
 import 'package:OtoBus/screens/noDriversDialog.dart';
@@ -10,6 +11,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -26,7 +28,7 @@ import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/dataProvider/nearDriver.dart';
 import 'package:OtoBus/dataProvider/fireDrivers.dart';
 import 'package:OtoBus/screens/rating.dart';
-
+ 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 const keyOpS = 'e29278e269d34185897708d17cb83bc4';
@@ -78,10 +80,9 @@ class _PassengerMapState extends State<PassengerMap> {
     thisUser.phone = x.toString();
   }
 
-   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   getRatings() async {
-
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
         "http://10.0.0.9/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
@@ -119,7 +120,6 @@ class _PassengerMapState extends State<PassengerMap> {
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future<void> displayDriverDetails() async {
-    driverPhone = '4235235';
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
         "http://10.0.0.9/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
@@ -351,6 +351,8 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void startGeoListen() {
     Geofire.initialize('availableDrivers');
     Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
@@ -365,13 +367,31 @@ class _PassengerMapState extends State<PassengerMap> {
         switch (callBack) {
           case Geofire.onKeyEntered:
             NearDrivers nDriver = NearDrivers();
+            int dNum;
             nDriver.key = map['key'];
             nDriver.lat = map['latitude'];
             nDriver.long = map['longitude'];
-            FireDrivers.nDrivers.add(nDriver);
-            if (nearLoaded) {
-              driversMarkers();
-            }
+            DatabaseReference nDrivers = FirebaseDatabase.instance
+                .reference()
+                .child('Drivers/${nDriver.key}');
+            nDrivers.once().then((DataSnapshot snapshot) {
+              if (snapshot.value != null) {
+                dNum = snapshot.value['passengers'];
+                double wLat = double.parse(
+                    snapshot.value['whereTo']['latitude'].toString());
+                double wLng = double.parse(
+                    snapshot.value['whereTo']['longitude'].toString());
+                Funcs.checkPoint(wLat, wLng, nDriver.lat, nDriver.long,
+                     destinationAdd.lat,  destinationAdd.long);
+                if (dNum >= numCont && chP == true) {
+                  FireDrivers.nDrivers.add(nDriver);
+                  if (nearLoaded) {
+                    driversMarkers();
+                  }
+                  chP = false;
+                 }
+              }
+            });
             break;
 
           case Geofire.onKeyExited:
@@ -679,9 +699,7 @@ class _PassengerMapState extends State<PassengerMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void searchNearestDriver() {
     if (availableDrivers.length == 0) {
-      setState(() {
-        isExtended = -1;
-      });
+        isExtended = 0;    
       cancelReq();
       showDialog(
         context: context,
@@ -723,7 +741,7 @@ class _PassengerMapState extends State<PassengerMap> {
         dReqTimeout = dReqTimeout - 1;
         driverRef.child(driver.key).child('newTrip').onValue.listen((event) {
           if (event.snapshot.value.toString() == 'accepted') {
-       //     driverRef.child(driver.key).child('newTrip').set('waiting');
+            //     driverRef.child(driver.key).child('newTrip').set('waiting');
             driverRef.child(driver.key).child('newTrip').onDisconnect();
             dReqTimeout = 10;
             timer.cancel();

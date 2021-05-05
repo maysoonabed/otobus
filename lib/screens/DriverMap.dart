@@ -9,9 +9,11 @@ import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/dataProvider/fUNCS.dart';
+import 'package:OtoBus/dataProvider/tripInfo.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
@@ -36,6 +38,8 @@ class DriverMap extends StatefulWidget {
   @override
   DriverMapState createState() => globalState;
 }
+
+TextEditingController _txtCtrl = TextEditingController();
 
 Position currentPosition;
 double destLatitude;
@@ -84,6 +88,8 @@ final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
 DateTime displayDate;
 String formatted;
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 //////////////////////////////////////////////////////////////////
 class DriverMapState extends State<DriverMap> {
   Completer<GoogleMapController> _controller = Completer();
@@ -92,6 +98,8 @@ class DriverMapState extends State<DriverMap> {
     target: LatLng(31.947351, 35.227163),
     zoom: 9.4746,
   );
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
@@ -327,11 +335,14 @@ class DriverMapState extends State<DriverMap> {
     phone = "";
     email = "";
     acc = false;
+    acCount = 0;
+
     super.initState();
     driverInfo();
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
   bool status = false;
   bool backOn = false;
   int msgsCount = 0;
@@ -714,7 +725,108 @@ class DriverMapState extends State<DriverMap> {
                   ],
                 ),
               ),
-            )
+            ),
+            //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: EdgeInsets.all(1.0),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        topLeft: Radius.circular(16)),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                          spreadRadius: 0.5,
+                          blurRadius: 16,
+                          color: Colors.black54,
+                          offset: Offset(0.7, 0.7)),
+                    ]),
+                height: 240,
+                child: Column(
+                  children: [
+                    firebaseRef != null
+                        ? Container(
+                            padding: EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(16),
+                                  topLeft: Radius.circular(16)),
+                              color: apBcolor,
+                            ),
+                            height: 40,
+                            width: double.infinity,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'الوجهة',
+                                  textAlign: TextAlign.end,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text(
+                                  'الموقع',
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ))
+                        : Container(
+                            height: 0,
+                          ),
+                    Flexible(
+                      child: firebaseRef != null
+                          ? StreamBuilder(
+                              stream: firebaseRef.onValue,
+                              builder: (context, snap) {
+                                if (snap.hasData &&
+                                    !snap.hasError &&
+                                    snap.data.snapshot.value != null) {
+                                  Map data = snap.data.snapshot.value;
+                                  List item = [];
+
+                                  data.forEach((index, data) =>
+                                      item.add({"key": index, ...data}));
+
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: item.length,
+                                    itemBuilder: (context, index) {
+                                      return ListTile(
+                                        title: Text(item[index]['destAdd']),
+                                        trailing:
+                                            Text(item[index]['pickUpAdd']),
+
+                                        /*   onTap: () =>
+                          updateTimeStamp(item[index]['key']),
+                      onLongPress: () =>
+                          deleteMessage(item[index]['key']), */
+                                      );
+                                    },
+                                  );
+                                } else
+                                  return Center(
+                                      child: Text(
+                                    "لا يوجد ركاب حاليًا",
+                                    style: TextStyle(
+                                      fontSize: 25,
+                                      fontFamily: "Lemonada",
+                                    ),
+                                  ));
+                              },
+                            )
+                          : Container(
+                              height: 0,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ]),
           bottomNavigationBar: GradientBottomNavigationBar(
             backgroundColorStart: Color(0xFF64726f),
@@ -861,6 +973,9 @@ class DriverMapState extends State<DriverMap> {
       'longitude': thisDriver.endLoc.longitude
     };
     whereTo.set(toMap);
+    firebaseRef = FirebaseDatabase()
+        .reference()
+        .child('Drivers/${currUser.uid}/acceptedReqs');
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1002,5 +1117,10 @@ class DriverMapState extends State<DriverMap> {
       filled: false, //set true if you want to show input background
     );
   }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+}
+
+deletePassenger(key) {
+  firebaseRef.child(key).remove();
 }
