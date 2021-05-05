@@ -107,34 +107,36 @@ class _PassengerPageState extends State<PassengerPage> {
         contentPadding: EdgeInsets.all(20.0),
         content: Container(
             width: 300.0,
-            height: 200.0,
+            height: 300.0,
             child: Column(
               children: <Widget>[
                 SizedBox(height: 10),
-                new Expanded(
+                Expanded(
                   child: Theme(
                     data: Theme.of(context).copyWith(primaryColor: apcolor),
-                    child: new TextField(
+                    child: TextField(
                       textAlign: TextAlign.end,
                       controller: src_loc,
                       readOnly: true,
                       minLines: 1,
                       maxLines: null,
                       autofocus: false,
-                      decoration: new InputDecoration(
+                      decoration: InputDecoration(
                         prefixIcon: Icon(Icons.location_on),
                         hintText: 'الموقع',
                       ),
                     ),
                   ),
                 ),
-                new Expanded(
+                Expanded(
                   child: Theme(
                     data: Theme.of(context).copyWith(primaryColor: apcolor),
                     child: TextField(
+                      minLines: 1,
+                      maxLines: null,
                       readOnly: true,
                       textAlign: TextAlign.end,
-                      decoration: new InputDecoration(
+                      decoration: InputDecoration(
                         prefixIcon: Icon(Icons.location_on_outlined),
                         hintText: 'الوجهة',
                       ),
@@ -177,63 +179,61 @@ class _PassengerPageState extends State<PassengerPage> {
                       onChanged: (v) {
                         numCont = int.parse(v);
                       },
-                      minLines: 1,
-                      maxLines: null,
                       keyboardType: TextInputType.number,
                       autofocus: false,
-                      decoration: new InputDecoration(
+                      decoration: InputDecoration(
                         prefixIcon: Icon(Icons.person),
                         hintText: 'عدد الركاب',
                       ),
                     ),
                   ),
-                )
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      FlatButton(
+                          child: const Text(
+                            'إلغاء',
+                            style: TextStyle(
+                                color: Colors.black, fontFamily: 'Lemonada'),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          }),
+                      FlatButton(
+                          child: const Text(
+                            'اختيار',
+                            style: TextStyle(
+                                color: Colors.black, fontFamily: 'Lemonada'),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              markers.length == 2 ? markers.removeAt(1) : null;
+                            });
+
+                            markers.insert(
+                              1,
+                              Marker(
+                                width: 80.0,
+                                height: 80.0,
+                                point: latLng.LatLng(
+                                    destinationAdd.lat, destinationAdd.long),
+                                builder: (ctx) => Container(
+                                    child: Icon(
+                                  Icons.location_on,
+                                  color: Colors.black,
+                                  size: 40,
+                                )),
+                              ),
+                            );
+                            getJsonData();
+                            Navigator.pop(context);
+                          })
+                    ])
               ],
             )),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              FlatButton(
-                  child: const Text(
-                    'إلغاء',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              FlatButton(
-                  child: const Text(
-                    'اختيار',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      markers.length == 2 ? markers.removeAt(1) : null;
-                    });
-
-                    markers.insert(
-                      1,
-                      Marker(
-                        width: 80.0,
-                        height: 80.0,
-                        point: latLng.LatLng(
-                            destinationAdd.lat, destinationAdd.long),
-                        builder: (ctx) => Container(
-                            child: Icon(
-                          Icons.location_on,
-                          color: Colors.black,
-                          size: 40,
-                        )),
-                      ),
-                    );
-                    getJsonData();
-                    Navigator.pop(context);
-                  })
-            ],
-          ),
-        ],
+        /*
+         */
       ),
       context: context,
     );

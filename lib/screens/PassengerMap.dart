@@ -28,7 +28,7 @@ import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/dataProvider/nearDriver.dart';
 import 'package:OtoBus/dataProvider/fireDrivers.dart';
 import 'package:OtoBus/screens/rating.dart';
- 
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 const keyOpS = 'e29278e269d34185897708d17cb83bc4';
@@ -382,14 +382,14 @@ class _PassengerMapState extends State<PassengerMap> {
                 double wLng = double.parse(
                     snapshot.value['whereTo']['longitude'].toString());
                 Funcs.checkPoint(wLat, wLng, nDriver.lat, nDriver.long,
-                     destinationAdd.lat,  destinationAdd.long);
+                    destinationAdd.lat, destinationAdd.long);
+                print(chP.toString());
                 if (dNum >= numCont && chP == true) {
                   FireDrivers.nDrivers.add(nDriver);
                   if (nearLoaded) {
                     driversMarkers();
                   }
-                  chP = false;
-                 }
+                }
               }
             });
             break;
@@ -699,7 +699,7 @@ class _PassengerMapState extends State<PassengerMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void searchNearestDriver() {
     if (availableDrivers.length == 0) {
-        isExtended = 0;    
+      isExtended = 0;
       cancelReq();
       showDialog(
         context: context,

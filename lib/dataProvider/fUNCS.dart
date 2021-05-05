@@ -6,7 +6,6 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:math' show cos, sqrt, asin;
 import 'package:maps_toolkit/maps_toolkit.dart';
 
- 
 class Funcs {
   static void disbleLocUpdate() {
     posStream.pause();
@@ -39,6 +38,7 @@ class Funcs {
       pCoor.add(LatLng(tLat, tLng));
       pCoor.add(LatLng(fLat, fLng));
       chP = await PolygonUtil.isLocationOnPath(LatLng(pLat, pLng), pCoor, true);
+      print(chP.toString());
     }
   }
 
