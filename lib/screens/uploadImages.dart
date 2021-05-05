@@ -85,9 +85,12 @@ class _UploadImagesState extends State<UploadImages> {
         'phone': widget.phone,
       };
       if (widget.email != null) {
-        firest
-            .collection('users')
-            .add({'email': widget.email, 'name': widget.name, 'profpic': ""});
+        firest.collection('users').doc('${user.uid}').set({
+          'email': widget.email,
+          'name': widget.name,
+          'profpic': "",
+          'token': ""
+        });
       }
       newUser.set(userMap);
       print('registFFFire');
