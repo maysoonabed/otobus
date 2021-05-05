@@ -54,9 +54,8 @@ class _SignupPageState extends State<SignupPage> {
       };
       newUser.set(userMap);
       if (email != null) {
-        firest
-            .collection('users')
-            .add({'email': email, 'name': name, 'profpic': ""});
+        firest.collection('users').doc('${user.uid}').set(
+            {'email': email, 'name': name, 'profpic': "", 'token': ""}); //add
       }
       print('registFFFire');
     } else
