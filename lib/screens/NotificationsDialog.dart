@@ -54,7 +54,7 @@ class NotificationsDialog extends StatelessWidget {
                     children: [
                       Expanded(
                           child: Container(
-                              child: Text(trip.pickUpAdd,
+                              child: Text(trip.pickUpAdd,textAlign: TextAlign.center,
                                   style: TextStyle(fontSize: 18)))),
                       SizedBox(height: 18),
                       Icon(
@@ -70,11 +70,27 @@ class NotificationsDialog extends StatelessWidget {
                     children: [
                       Expanded(
                           child: Container(
-                              child: Text(trip.destAdd,
+                              child: Text(trip.destAdd,textAlign: TextAlign.center,
                                   style: TextStyle(fontSize: 18)))),
                       SizedBox(height: 18),
                       Icon(
                         Icons.location_on,
+                        color: apBcolor,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                          child: Container(
+                              child: Text(trip.numb.toString(),textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 18)))),
+                      SizedBox(height: 18),
+                      Icon(
+                        Icons.person,
                         color: apBcolor,
                       ),
                     ],

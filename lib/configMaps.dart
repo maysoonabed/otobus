@@ -44,3 +44,4 @@ int dReqTimeout = 10;
 String statusRide = '';
 String arrivalStatus = ' الباص على الطريق ';
 double driversDetailes = 0;
+double accHeight = 0;

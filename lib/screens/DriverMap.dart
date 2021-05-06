@@ -366,9 +366,11 @@ class DriverMapState extends State<DriverMap> {
             count++;
           }
         }
-        setState(() {
-          msgsCount = count;
-        });
+        if (mounted) {
+          setState(() {
+            msgsCount = count;
+          });
+        }
         //print(count);
       });
     }
@@ -712,7 +714,7 @@ class DriverMapState extends State<DriverMap> {
                             width: 0.1,
                           ),
                     CustomSwitch(
-                      activeColor: Color(0xFF094338),
+                      activeColor: iconBack,
                       value: status,
                       onChanged: (value) {
                         value ? GoOnline() : GoOffline();
@@ -746,20 +748,12 @@ class DriverMapState extends State<DriverMap> {
                           color: Colors.black54,
                           offset: Offset(0.7, 0.7)),
                     ]),
-                height: 240,
+                height: accHeight,
                 child: Column(
                   children: [
                     firebaseRef != null
-                        ? Container(
-                            padding: EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(16),
-                                  topLeft: Radius.circular(16)),
-                              color: apBcolor,
-                            ),
-                            height: 40,
-                            width: double.infinity,
+                        ? Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -767,18 +761,18 @@ class DriverMapState extends State<DriverMap> {
                                 Text(
                                   'الوجهة',
                                   textAlign: TextAlign.end,
-                                  style: TextStyle(color: Colors.white),
                                 ),
                                 Text(
                                   'الموقع',
                                   textAlign: TextAlign.start,
-                                  style: TextStyle(color: Colors.white),
                                 ),
                               ],
-                            ))
+                            ),
+                          )
                         : Container(
                             height: 0,
                           ),
+                    Divider(),
                     Flexible(
                       child: firebaseRef != null
                           ? StreamBuilder(
@@ -789,9 +783,12 @@ class DriverMapState extends State<DriverMap> {
                                     snap.data.snapshot.value != null) {
                                   Map data = snap.data.snapshot.value;
                                   List item = [];
+                                  data.forEach((index, data) {
+                                    item.add({"key": index, ...data});
+                                  //  double distanceInMeters = Geolocator.distanceBetween(double.parse(item[index]['pickUpLat'].toString()),double.parse(item[index]['pickUpLng'].toString()), currentPosition.latitude, currentPosition.longitude);
 
-                                  data.forEach((index, data) =>
-                                      item.add({"key": index, ...data}));
+                              //      print(distanceInMeters.toString());
+                                  });
 
                                   return ListView.builder(
                                     shrinkWrap: true,
@@ -850,9 +847,9 @@ class DriverMapState extends State<DriverMap> {
                         child: new Container(
                           padding: EdgeInsets.all(1),
                           decoration: new BoxDecoration(
-                            color: //(msgsCount > 0)?
-                                Colors.red,
-                            // : Colors.transparent,
+                            color: (msgsCount > 0)
+                                ? Colors.red
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(9),
                           ),
                           constraints: BoxConstraints(
@@ -860,8 +857,7 @@ class DriverMapState extends State<DriverMap> {
                             minHeight: 17,
                           ),
                           child: new Text(
-                            '$msgsCount',
-                            //(msgsCount > 0) ?  : '',
+                            (msgsCount > 0) ? '$msgsCount' : '',
                             style: new TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -1084,7 +1080,9 @@ class DriverMapState extends State<DriverMap> {
 
     ridRef = FirebaseDatabase.instance.reference().child('rideRequest/$rideId');
     ridRef.child('status').set('accepted');
-
+    setState(() {
+      accHeight = 222;
+    });
     Map locationMap = {
       'latitude': currentPosition.latitude.toString(),
       'longitude': currentPosition.longitude.toString(),
@@ -1126,3 +1124,5 @@ class DriverMapState extends State<DriverMap> {
 deletePassenger(key) {
   firebaseRef.child(key).remove();
 }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
