@@ -125,7 +125,7 @@ void main() {
       create: (context) => AppData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home: token != null ? MapTy() : MyApp(), //MyApp(),
+        home: MyApp(), //token != null ? MapTy() : MyApp(), //
         // currUser != null? DriverMap(): MyApp(),
       )));
 }
