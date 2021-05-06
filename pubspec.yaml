@@ -46,7 +46,7 @@ dependencies:
   connectivity: ^0.4.9+5
   custom_switch: ^0.0.1
   flutter_geofire: ^1.0.3
-  firebase_messaging: ^6.0.16
+  firebase_messaging: ^7.0.3
   intl: ^0.16.1
   maps_toolkit: ^1.1.0+1
   audioplayers: ^0.16.2

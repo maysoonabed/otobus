@@ -480,6 +480,9 @@ class _PassMapState extends State<PassMap> {
 
   int msgsCount = 0;
   //Notifi notif;
+  String messageTitle = "Empty";
+  String notificationAlert = "alert";
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
@@ -516,6 +519,25 @@ class _PassMapState extends State<PassMap> {
           .then((onValue) {
         myIcon = onValue;
       });
+
+      _firebaseMessaging.configure(
+        onMessage: (message) async {
+          setState(() {
+            messageTitle = message["notification"]["title"];
+            notificationAlert = "New Notification Alert";
+          });
+        },
+        onResume: (message) async {
+          setState(() {
+            messageTitle = message["data"]["title"];
+            notificationAlert = "Application opened from Notification";
+          });
+        },
+      );
+      /*  print("messageTitle  :::: " +
+          messageTitle +
+          "  notificationAlert  ::::  " +
+          notificationAlert); */
 
       homeispress = true;
       msgispress = false;
@@ -591,6 +613,23 @@ class _PassMapState extends State<PassMap> {
                 SizedBox(
                   height: 70,
                 ),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    "",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Text(
+                    "",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                ]),
                 /* notif != null
                     ? notif.notificationInfo != null
                         ? Column(

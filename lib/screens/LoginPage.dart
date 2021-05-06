@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'PassMap.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 int id = 1;
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -31,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _password = TextEditingController();
   TextEditingController _email = TextEditingController();
   bool _obscureText = true;
-
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   void logFire() async {
     final User user = (await _auth.signInWithEmailAndPassword(
       email: email,
@@ -74,12 +75,22 @@ class _LoginPageState extends State<LoginPage> {
             showprogress = false;
           });
           logFire();
+          String pic;
 
           thisUser.email = email;
           thisUser.name = jsondata["name"];
           thisUser.phone = jsondata["phonenum"];
-          String pic = jsondata["profpic"];
+          pic = jsondata["profpic"];
 
+          setState(() {
+            _firebaseMessaging.getToken().then((token) {
+              //print('token: $token');
+              FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(currUser.uid) //current user id
+                  .update({'token': token});
+            });
+          });
           await FlutterSession().set('name', thisUser.name);
           await FlutterSession().set('phone', thisUser.phone);
 
