@@ -1,6 +1,7 @@
 import 'package:OtoBus/configMaps.dart';
 import 'dart:io' show Platform;
 import 'package:OtoBus/dataProvider/appData.dart';
+import 'package:OtoBus/screens/MapTy.dart';
 import 'package:OtoBus/screens/PassengerPage.dart';
 import 'package:OtoBus/screens/rating.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:page_transition/page_transition.dart';
 import 'screens/DriverMap.dart';
 import 'screens/LoginPage.dart';
 import 'screens/SignupPage.dart';
@@ -123,7 +125,7 @@ void main() {
       create: (context) => AppData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home: MyApp(), //token != null ? PassMap() : MyApp(), //
+        home: token != null ? MapTy() : MyApp(), //MyApp(),
         // currUser != null? DriverMap(): MyApp(),
       )));
 }
@@ -204,7 +206,7 @@ class _MyAppState extends State<MyApp> {
                         BottomCircle(),
                         //*********************************
                         SizedBox(
-                          height: 250.0,
+                          height: 300.0,
                         ),
                         //*********************************
                         Center(
@@ -241,11 +243,19 @@ class _MyAppState extends State<MyApp> {
                                 children: <Widget>[
                                   new GestureDetector(
                                     onTap: () {
+                                      setState(() {});
+
                                       Navigator.push(
                                           context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  LoginPage()));
+                                          PageTransition(
+                                            type: PageTransitionType
+                                                .rightToLeftWithFade,
+                                            alignment: Alignment.topCenter,
+                                            duration: Duration(seconds: 1),
+                                            reverseDuration:
+                                                Duration(seconds: 1),
+                                            child: LoginPage(),
+                                          ));
                                     },
                                     child: new Container(
                                       alignment: Alignment.center,
@@ -299,11 +309,16 @@ class _MyAppState extends State<MyApp> {
                                   new GestureDetector(
                                       onTap: () {
                                         Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SignupPage()),
-                                        );
+                                            context,
+                                            PageTransition(
+                                              type: PageTransitionType
+                                                  .rightToLeftWithFade,
+                                              alignment: Alignment.topCenter,
+                                              duration: Duration(seconds: 1),
+                                              reverseDuration:
+                                                  Duration(seconds: 1),
+                                              child: SignupPage(),
+                                            ));
                                         //setState(() {});
                                       },
                                       child: new Container(
@@ -347,47 +362,6 @@ class _MyAppState extends State<MyApp> {
                             );
                           }),
                         ),
-                        //*********************************
-
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: ElevatedButton(
-                              child: Text('driver map'),
-                              style: ElevatedButton.styleFrom(
-                                primary: apBcolor,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => DriverMap()));
-                              },
-                            ),
-                          ),
-                        ),
-
-                        //*********************************
-
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: ElevatedButton(
-                              child: Text('Passenger'),
-                              style: ElevatedButton.styleFrom(
-                                primary: apBcolor,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => PassengerPage()));
-                              },
-                            ),
-                          ),
-                        ),
-
-                        //*********************************
                       ],
                     )))));
   }

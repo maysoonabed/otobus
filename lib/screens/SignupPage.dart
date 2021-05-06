@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
+import 'package:page_transition/page_transition.dart';
 import '../main.dart';
 import 'LoginPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -54,8 +55,10 @@ class _SignupPageState extends State<SignupPage> {
       };
       newUser.set(userMap);
       if (email != null) {
-        firest.collection('users').doc('${user.uid}').set(
-            {'email': email, 'name': name, 'profpic': "", 'token': ""}); //add
+        firest
+            .collection('users')
+            .doc('${user.uid}')
+            .set({'email': email, 'name': name, 'token': ""}); //add
       }
       print('registFFFire');
     } else
@@ -327,10 +330,17 @@ class _SignupPageState extends State<SignupPage> {
                   } else {
                     Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    UploadImages(name, phone, email, password)))
+                            PageTransition(
+                                alignment: Alignment.bottomCenter,
+                                curve: Curves.easeInOut,
+                                duration: Duration(milliseconds: 600),
+                                reverseDuration: Duration(milliseconds: 600),
+                                type: PageTransitionType.rightToLeftJoined,
+                                child:
+                                    UploadImages(name, phone, email, password),
+                                childCurrent: SignupPage()))
                         .whenComplete(pf);
+                    //setState(() {});
                   }
                 },
                 child: showprogress

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:io' as Io;
 import 'package:OtoBus/chat/PassChatDetailes.dart';
 import 'package:OtoBus/chat/globalFunctions.dart';
+import 'package:cube_transition/cube_transition.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:http/http.dart' as http;
 import 'package:OtoBus/dataProvider/address.dart';
@@ -959,14 +960,15 @@ class _PassMapState extends State<PassMap> {
                                         notispress = false;
                                         proispress = false;
                                       });
-
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => PassChat(
-                                                  thisUser.email,
-                                                  thisUser.name)));
-
+                                      Navigator.of(context).push(
+                                        CubePageRoute(
+                                          enterPage: PassChat(
+                                              thisUser.email, thisUser.name),
+                                          exitPage: PassMap(),
+                                          duration: const Duration(
+                                              milliseconds: 1200),
+                                        ),
+                                      );
                                       //_scaffoldkey.currentState.openDrawer();
                                     }),
                               ),
@@ -990,17 +992,21 @@ class _PassMapState extends State<PassMap> {
                                           .creatChatRoomInfo(
                                               thisUser.email, drivEmail);
                                       //print(roomId);
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  PassChatDetailes(
-                                                    username: drivName,
-                                                    imageURL: drivImgPath,
-                                                    useremail: drivEmail,
-                                                    roomID: roomId,
-                                                    sendername: thisUser.name,
-                                                  )));
+                                      Navigator.of(context).push(
+                                        CubePageRoute(
+                                          enterPage: PassChatDetailes(
+                                            username: drivName,
+                                            imageURL: drivImgPath,
+                                            useremail: drivEmail,
+                                            roomID: roomId,
+                                            sendername: thisUser.name,
+                                          ),
+                                          exitPage: PassMap(),
+                                          duration: const Duration(
+                                              milliseconds: 1200),
+                                        ),
+                                      );
+
                                       setState(() {
                                         homeispress = false;
                                         msgispress = false;
