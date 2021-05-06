@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:OtoBus/screens/PassengerPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -11,9 +10,12 @@ import 'DriverMap.dart';
 import 'SignupPage.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'PassMap.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'MapTy.dart';
+import 'package:cube_transition/cube_transition.dart';
+import 'package:page_transition/page_transition.dart';
 
 int id = 1;
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -31,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _password = TextEditingController();
   TextEditingController _email = TextEditingController();
   bool _obscureText = true;
-
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   void logFire() async {
     final User user = (await _auth.signInWithEmailAndPassword(
       email: email,
@@ -74,11 +76,12 @@ class _LoginPageState extends State<LoginPage> {
             showprogress = false;
           });
           logFire();
+          String pic;
 
           thisUser.email = email;
           thisUser.name = jsondata["name"];
           thisUser.phone = jsondata["phonenum"];
-          String pic = jsondata["profpic"];
+          pic = jsondata["profpic"];
 
           await FlutterSession().set('name', thisUser.name);
           await FlutterSession().set('phone', thisUser.phone);
@@ -92,8 +95,13 @@ class _LoginPageState extends State<LoginPage> {
             await FlutterSession().set('passemail', email);
             Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => PassMap())); //PassengerPage()//
+                PageTransition(
+                    //type: PageTransitionType.fade,
+                    type: PageTransitionType.rightToLeftWithFade,
+                    alignment: Alignment.topCenter,
+                    duration: Duration(seconds: 1),
+                    reverseDuration: Duration(seconds: 1),
+                    child: MapTy()));
           } else {
             await FlutterSession().set('driveremail', email);
 
@@ -121,7 +129,14 @@ class _LoginPageState extends State<LoginPage> {
             await FlutterSession().set('numOfPass', thisDriver.numOfPass);
 
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => DriverMap()));
+                context,
+                PageTransition(
+                    //type: PageTransitionType.fade,
+                    type: PageTransitionType.rightToLeftWithFade,
+                    alignment: Alignment.topCenter,
+                    duration: Duration(seconds: 1),
+                    reverseDuration: Duration(seconds: 1),
+                    child: DriverMap()));
           }
         }
       }

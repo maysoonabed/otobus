@@ -300,7 +300,7 @@ class _PassengerPageState extends State<PassengerPage> {
             ),
             Container(
               child: FutureBuilder(
-                  future: FlutterSession().get('token'),
+                  future: FlutterSession().get('passemail'),
                   builder: (context, snapshot) {
                     //email = snapshot.hasData ? snapshot.data : '';
                     return Text(snapshot.hasData ? snapshot.data : 'Loading...',
@@ -372,7 +372,7 @@ class _PassengerPageState extends State<PassengerPage> {
                   markers.isNotEmpty ? markers.clear() : null;
                   polyLines.isNotEmpty ? polyLines.clear() : null;
 
-                  FlutterSession().set('token', '');
+                  FlutterSession().set('passemail', '');
                   FlutterSession().set('name', '');
                   FlutterSession().set('phone', '');
                   FirebaseAuth.instance.signOut();

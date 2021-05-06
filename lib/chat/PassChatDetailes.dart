@@ -235,6 +235,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                           setState(() {
                             mes = value;
                           });
+                          //notify(widget.useremail,widget.username,mes);
                         },
                         decoration: InputDecoration(
                             hintText: "Write message...",
@@ -248,6 +249,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     FloatingActionButton(
                       onPressed: () {
                         addMessage(true);
+                        //notify(user);
                         //SystemChannels.textInput.invokeMethod('TextInput.hide'),
                         /*  listScrollController.animateTo(0.0,
                             duration: Duration(milliseconds: 300),
