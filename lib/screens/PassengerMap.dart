@@ -185,7 +185,7 @@ class _PassengerMapState extends State<PassengerMap> {
       'destination': destinationMap,
       'driver_id': 'waiting',
       'status': 'waiting',
-      'passengers': numCont,
+      'passengers': numCont != null ? numCont : 1,
     };
     rideReq.set(rideMap);
     ridestreams = rideReq.onValue.listen((event) {
@@ -313,6 +313,7 @@ class _PassengerMapState extends State<PassengerMap> {
         //   pickUp.placeName = jsonDecode(data)['data'][0]['county'];
         pickUp.lat = lat;
         pickUp.long = long;
+        Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
 
         src_loc.text = pickUp.placeName;
         currLatLng = latLng.LatLng(lat, long);

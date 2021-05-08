@@ -37,14 +37,15 @@ class Funcs {
       });
       pCoor.add(LatLng(tLat, tLng));
       pCoor.add(LatLng(fLat, fLng));
-      chP = await PolygonUtil.isLocationOnPath(LatLng(pLat, pLng), pCoor, true); //PolygonUtil.isLocationOnEdge نجرب نعمل بينها و بين هاي اورينج
-      print(chP.toString());
+      bool x = PolygonUtil.isLocationOnEdge(LatLng(pLat, pLng), pCoor, true);
+      bool y = PolygonUtil.isLocationOnPath(LatLng(pLat, pLng), pCoor, true);
+
+      chP = x ||
+          y; 
+      print(chP.toString() + ' ' + x.toString()+' '+y.toString());
     }
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-void sort (){
-  
-}
-
+  void sort() {}
 }

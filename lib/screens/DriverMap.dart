@@ -10,10 +10,8 @@ import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/dataProvider/fUNCS.dart';
 import 'package:OtoBus/dataProvider/tripInfo.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:geolocator/geolocator.dart';
@@ -40,15 +38,12 @@ class DriverMap extends StatefulWidget {
 }
 
 TextEditingController _txtCtrl = TextEditingController();
-
 Position currentPosition;
-double destLatitude;
 double destLongitude;
 String currName;
 String destName;
 var currltlg;
 var destltlg;
-var pickUpLatLng;
 String state = 'accepted';
 bool acc;
 Set<Marker> gMarkers = {};
@@ -170,7 +165,7 @@ class DriverMapState extends State<DriverMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void updMark() {
+  /* void updMark() {
     gMarkers.removeWhere((marker) => marker.markerId.value == 'destination');
     Marker destMarker = Marker(
       markerId: MarkerId("destination"),
@@ -179,46 +174,60 @@ class DriverMapState extends State<DriverMap> {
       infoWindow: InfoWindow(title: destName, snippet: 'Destination'),
     );
     gMarkers.add(destMarker);
-  }
+  } */
 
   //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void endTrip() {
-    state = 'ended';
+    accepted = FirebaseDatabase.instance.reference().child('rideRequest');
+
     ridRef.child('status').set('ended');
     ridePosStream.cancel();
+
     gMarkers.removeWhere((marker) => marker.markerId.value == 'destination');
     gMarkers.removeWhere((marker) => marker.markerId.value == 'current');
     gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
     polylines.clear();
     setState(() {});
   }
-  //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  void putMarker() {
+  //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void reqMarker() {
+    Marker reqMarker = Marker(
+      markerId: MarkerId(tripInfo.ridrReqId),
+      position: tripInfo.pickUp,
+      icon: BitmapDescriptor.defaultMarkerWithHue(200),
+      infoWindow: InfoWindow(
+          title: tripInfo.pickUpAdd,
+          snippet: tripInfo.numb.toString() + 'ركاب'),
+    );
+    gMarkers.add(reqMarker);
+  }
+//  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void putMarker() async {
     LatLngBounds bounds;
-    destLatitude = tripInfo.pickUp.latitude;
-    destLongitude = tripInfo.pickUp.longitude;
-    destltlg = tripInfo.pickUp;
+    await setupPositionLocator();
+    currltlg = LatLng(currentPosition.latitude, currentPosition.longitude);
     Marker currMarker = Marker(
-      markerId: MarkerId("current"),
+      markerId: MarkerId("Current"),
       position: currltlg,
       icon: BitmapDescriptor.defaultMarker,
-      infoWindow: InfoWindow(title: currName, snippet: 'My Location'),
+      infoWindow: InfoWindow(title: currName, snippet: 'موقعي'),
     );
     Marker destMarker = Marker(
-      markerId: MarkerId("destination"),
+      markerId: MarkerId('Final_Destination'),
       position: destltlg,
       icon: BitmapDescriptor.defaultMarkerWithHue(90),
-      infoWindow: InfoWindow(title: destName, snippet: 'Destination'),
+      infoWindow: InfoWindow(title: destName, snippet: "الوجهة"),
     );
+
     gMarkers.add(currMarker);
     gMarkers.add(destMarker);
-
     Circle currCircle = Circle(
       circleId: CircleId('current'),
       strokeColor: Colors.green,
       strokeWidth: 3,
-      radius: 40,
+      radius: 10,
       center: currltlg,
       fillColor: Colors.green,
     );
@@ -226,7 +235,7 @@ class DriverMapState extends State<DriverMap> {
       circleId: CircleId('destination'),
       strokeColor: Colors.green,
       strokeWidth: 3,
-      radius: 40,
+      radius: 10,
       center: destltlg,
       fillColor: Colors.green,
     );
@@ -238,9 +247,9 @@ class DriverMapState extends State<DriverMap> {
       bounds = LatLngBounds(southwest: destltlg, northeast: currltlg);
     } else if (currltlg.longitude > destltlg.longitude) {
       bounds = LatLngBounds(
-          southwest: LatLng(currltlg.latitude, destLongitude),
-          northeast: LatLng(destLatitude, destltlg.longitude));
-    } else if (currltlg.longitude > destltlg.latitude) {
+          southwest: LatLng(currltlg.latitude, destltlg.longitude),
+          northeast: LatLng(destltlg.latitude, currltlg.longitude));
+    } else if (currltlg.latitude > destltlg.latitude) {
       bounds = LatLngBounds(
           southwest: LatLng(destltlg.latitude, currltlg.longitude),
           northeast: LatLng(currltlg.latitude, destltlg.longitude));
@@ -248,7 +257,7 @@ class DriverMapState extends State<DriverMap> {
       bounds = LatLngBounds(southwest: currltlg, northeast: destltlg);
     }
     newGoogleMapController
-        .animateCamera(CameraUpdate.newLatLngBounds(bounds, 70));
+        .animateCamera(CameraUpdate.newLatLngBounds(bounds, 160));
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -598,7 +607,6 @@ class DriverMapState extends State<DriverMap> {
                 await setupPositionLocator();
                 currltlg =
                     LatLng(currentPosition.latitude, currentPosition.longitude);
-                pickUpLatLng = tripInfo.pickUp;
               },
             ),
             Padding(
@@ -637,10 +645,13 @@ class DriverMapState extends State<DriverMap> {
                                                 whereTo.set(toMap);
 
                                                 setState(() {
-                                                  destLatitude =
-                                                      driverT.latitude;
-                                                  destLongitude =
-                                                      driverT.longitude;
+                                                  driverT = thisDriver.endLoc;
+                                                  destName = thisDriver.endN;
+                                                  destltlg = thisDriver.endLoc;
+
+                                                  putMarker();
+                                                  getPolyline();
+
                                                   backOn = false;
                                                 });
                                               },
@@ -677,10 +688,13 @@ class DriverMapState extends State<DriverMap> {
                                                 whereTo.set(toMap);
 /////مشكوك في أمرها  تزكريييييهههههههاااااا
                                                 setState(() {
-                                                  destLatitude =
-                                                      driverF.latitude;
-                                                  destLongitude =
-                                                      driverF.longitude;
+                                                  destName = thisDriver.begN;
+                                                  driverT = thisDriver.begLoc;
+
+                                                  destltlg = thisDriver.begLoc;
+                                                  putMarker();
+                                                  getPolyline();
+
                                                   backOn = true;
                                                 });
                                               },
@@ -785,24 +799,81 @@ class DriverMapState extends State<DriverMap> {
                                   List item = [];
                                   data.forEach((index, data) {
                                     item.add({"key": index, ...data});
-                                  //  double distanceInMeters = Geolocator.distanceBetween(double.parse(item[index]['pickUpLat'].toString()),double.parse(item[index]['pickUpLng'].toString()), currentPosition.latitude, currentPosition.longitude);
-
-                              //      print(distanceInMeters.toString());
                                   });
+                                  /*    for (int i = 0; i < item.length; i++) {
+                                    gMarkers.add(Marker(
+                                      markerId: MarkerId(item[i]['ridrReqId']),
+                                      position: LatLng(
+                                          double.parse(item[i]['pickUpLat']),
+                                          double.parse(item[i]['pickUpLng'])),
+                                      icon:
+                                          BitmapDescriptor.defaultMarkerWithHue(
+                                              90),
+                                      infoWindow: InfoWindow(
+                                          title: destName,
+                                          snippet: 'passenger' + i.toString()),
+                                    ));
+                                  } */
 
                                   return ListView.builder(
                                     shrinkWrap: true,
                                     itemCount: item.length,
                                     itemBuilder: (context, index) {
+                                      /*              return ListTile(
+      contentPadding: EdgeInsets.all(10.0),
+      leading: _thumbnail(item),
+      title: _title(
+          item.title, TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)),
+      subtitle: _title(item.subtitle, TextStyle(fontSize: 14.0)),
+      onTap: () {
+        Scaffold.of(context).showSnackBar(SnackBar(
+          content: Text("Tile ${item.title} clicked"),
+        )); */
                                       return ListTile(
-                                        title: Text(item[index]['destAdd']),
-                                        trailing:
-                                            Text(item[index]['pickUpAdd']),
-
-                                        /*   onTap: () =>
-                          updateTimeStamp(item[index]['key']),
-                      onLongPress: () =>
-                          deleteMessage(item[index]['key']), */
+                                        contentPadding: EdgeInsets.only(
+                                            left: 90, right: 60),
+                                        title: Text(
+                                            getFstWord(item[index]['destAdd'])),
+                                        trailing: Text(getSndWord(
+                                            item[index]['pickUpAdd'])),
+                                        onTap: () {
+                                          DatabaseReference reqq = FirebaseDatabase
+                                              .instance
+                                              .reference()
+                                              .child(
+                                                  'rideRequest/${item[index]['ridrReqId']}');
+                                          reqq
+                                              .once()
+                                              .then((DataSnapshot snapshot) {
+                                            if (snapshot.value != null) {
+                                              String ss = snapshot
+                                                  .value['status']
+                                                  .toString();
+                                              if (ss == 'accepted') {
+                                                reqq
+                                                    .child('status')
+                                                    .set('arrived');
+                                                setState(() {
+                                                  getPolyline();
+                                                  //updMark();
+                                                });
+                                              } else if (ss == 'arrived') {
+                                                reqq
+                                                    .child('status')
+                                                    .set('onTrip');
+                                                gMarkers.removeWhere((marker) =>
+                                                    marker.markerId.value ==
+                                                    item[index]['ridrReqId']);
+                                              } else if (ss == 'onTrip') {
+                                                reqq
+                                                    .child('status')
+                                                    .set('ended');
+                                                deletePassenger(item[index]['key'].toString());
+                                                Funcs.enableLocUpdate();
+                                              }
+                                            }
+                                          });
+                                        },
                                       );
                                     },
                                   );
@@ -825,6 +896,28 @@ class DriverMapState extends State<DriverMap> {
                 ),
               ),
             ),
+            accHeight != 0
+                ? Positioned(
+                    bottom: 0,
+                    left: MediaQuery.of(context).size.width / 2 - 40,
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(60.0),
+                            ),
+                            primary: apBcolor,
+                            padding:
+                                EdgeInsets.only(top: 5, left: 10, right: 10),
+                            textStyle: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          endTrip();
+                        },
+                        child: Text('إنهاء الرحلة')),
+                  )
+                : Container(
+                    height: 0,
+                  ),
           ]),
           bottomNavigationBar: GradientBottomNavigationBar(
             backgroundColorStart: Color(0xFF64726f),
@@ -931,10 +1024,20 @@ class DriverMapState extends State<DriverMap> {
   void getPolyline() async {
     List<LatLng> polylineCoordinates = [];
 
+    /*  for (int i = 0; i < picks.length; i++) {
+      print(picks[i].latitude.toString() + ' ' + picks[i].longitude.toString());
+    } */
+    /*  double distanceInMeters = Geolocator.distanceBetween(
+        tripInfo.pickUp.latitude,
+        tripInfo.pickUp.longitude,
+        currentPosition.latitude,
+        currentPosition.longitude);
+    print(distanceInMeters.toString()); */
+
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4",
       PointLatLng(currltlg.latitude, currltlg.longitude),
-      PointLatLng(destLatitude, destLongitude),
+      PointLatLng(destltlg.latitude, destltlg.longitude),
       travelMode: TravelMode.driving,
     );
     if (result.points.isNotEmpty) {
@@ -974,6 +1077,12 @@ class DriverMapState extends State<DriverMap> {
     firebaseRef = FirebaseDatabase()
         .reference()
         .child('Drivers/${currUser.uid}/acceptedReqs');
+    setState(() {
+      destName = thisDriver.endN;
+      destltlg = thisDriver.endLoc;
+      putMarker();
+      getPolyline();
+    });
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1023,26 +1132,6 @@ class DriverMapState extends State<DriverMap> {
         icon: movingMarkerIcon,
         rotation: rotate,
         infoWindow: InfoWindow(title: 'الموقع الحالي'),
-        onTap: () {
-          if (state == 'accepted') {
-            state = 'arrived';
-            ridRef.child('status').set('arrived');
-            setState(() {
-              destLatitude = driverT.latitude;
-              destLongitude = driverT.longitude;
-              destltlg = LatLng(destLatitude, destLongitude);
-              getPolyline();
-              updMark();
-            });
-          } else if (state == 'arrived') {
-            state = 'onTrip';
-            ridRef.child('status').set('onTrip');
-          } else if (state == 'onTrip') {
-            endTrip();
-
-            Funcs.enableLocUpdate();
-          }
-        },
       );
       setState(() {
         CameraPosition cp = new CameraPosition(target: pos, zoom: 17);
@@ -1081,7 +1170,7 @@ class DriverMapState extends State<DriverMap> {
     ridRef = FirebaseDatabase.instance.reference().child('rideRequest/$rideId');
     ridRef.child('status').set('accepted');
     setState(() {
-      accHeight = 222;
+      accHeight = 200;
     });
     Map locationMap = {
       'latitude': currentPosition.latitude.toString(),
@@ -1125,4 +1214,19 @@ deletePassenger(key) {
   firebaseRef.child(key).remove();
 }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+String getSndWord(String input) {
+  int i = input.indexOf(',');
+  String rest = input.substring(i + 1, input.length - 1);
+  i = rest.indexOf(',');
+  String word = rest.substring(0, i);
+  return word;
+}
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+String getFstWord(String input) {
+  int i = input.indexOf(',');
+  String word = input.substring(0, i);
+  return word;
+}
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

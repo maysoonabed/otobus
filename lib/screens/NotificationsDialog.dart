@@ -54,23 +54,8 @@ class NotificationsDialog extends StatelessWidget {
                     children: [
                       Expanded(
                           child: Container(
-                              child: Text(trip.pickUpAdd,textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 18)))),
-                      SizedBox(height: 18),
-                      Icon(
-                        Icons.location_on_outlined,
-                        color: apBcolor,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 15),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Expanded(
-                          child: Container(
-                              child: Text(trip.destAdd,textAlign: TextAlign.center,
+                              child: Text(trip.pickUpAdd,
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(fontSize: 18)))),
                       SizedBox(height: 18),
                       Icon(
@@ -82,11 +67,29 @@ class NotificationsDialog extends StatelessWidget {
                   SizedBox(height: 15),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                          child: Container(
+                              child: Text(trip.destAdd,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 18)))),
+                      SizedBox(height: 18),
+                      Icon(
+                        Icons.location_on_outlined,
+                        color: apBcolor,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Expanded(
                           child: Container(
-                              child: Text(trip.numb.toString(),textAlign: TextAlign.center,
+                              child: Text(trip.numb.toString(),
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(fontSize: 18)))),
                       SizedBox(height: 18),
                       Icon(
@@ -219,12 +222,12 @@ class NotificationsDialog extends StatelessWidget {
           'destAdd': trip.destAdd,
           'pickUpAdd': trip.pickUpAdd
         });
-
-        globalState.setState(() {
+        if (trip.numb == driverNum) {
           Funcs.disbleLocUpdate();
-          globalState.putMarker();
-          globalState.getPolyline();
-          globalState.acceptTrip();
+        }
+        globalState.acceptTrip();
+        globalState.setState(() {
+          globalState.reqMarker();
           globalState.creatMarker();
           globalState.updateRideLocation();
         });
