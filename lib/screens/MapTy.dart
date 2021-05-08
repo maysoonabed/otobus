@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'PassMap.dart';
 import 'PassengerPage.dart';
 import '../main.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class MapTy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Firebase.initializeApp();
     return Material(
         // debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         type: MaterialType.transparency,

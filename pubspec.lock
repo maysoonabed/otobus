@@ -335,6 +335,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.4"
+  flutter_ringtone_player:
+    dependency: "direct main"
+    description:
+      name: flutter_ringtone_player
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   flutter_session:
     dependency: "direct main"
     description:
@@ -568,9 +575,6 @@ packages:
       name: overlay_support
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
-    version: "1.2.1"
-=======
     version: "1.0.5"
   page_transition:
     dependency: "direct main"
@@ -579,7 +583,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.7+6"
->>>>>>> ad086bbed7aacc38754f1a27bf4a87ed0ce6f36f
   path:
     dependency: transitive
     description:
@@ -957,5 +960,5 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=2.12.0 <3.0.0"
-  flutter: ">=1.22.2"
+  dart: ">=2.10.2 <2.11.0"
+  flutter: ">=1.22.2 <2.0.0"

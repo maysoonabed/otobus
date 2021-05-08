@@ -6,8 +6,10 @@ import 'package:intl/intl.dart';
 import 'PasschatMessageModel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:random_string/random_string.dart';
-
 import 'globalFunctions.dart';
+import '../configMaps.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 //******************************************************/
 var mesg = TextEditingController();
@@ -16,7 +18,6 @@ String messageId = "";
 String chatRoomId = "";
 AssetImage img;
 String myusName;
-//ScrollController listScrollController;
 //******************************************************/
 Future addmsgToDatabase(String chatRoomId, String msgId, Map msgInfoMap) async {
   return FirebaseFirestore.instance
@@ -87,6 +88,32 @@ class PassChatDetailes extends StatefulWidget {
 }
 
 //******************************************************/
+var tokken = "";
+var usiidd = "";
+
+void sendNotifToUser(String token, String msg, String usname) async {
+  Map<String, String> headerMap = {
+    'Content-Type': 'application/json',
+    'Authorization': serverToken,
+  };
+  Map notificationMap = {'body': msg, 'title': usname};
+  Map dataMap = {
+    'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+    'id': '1',
+    'status': 'done',
+  };
+  Map sendNotificationMao = {
+    "notification": notificationMap,
+    "data": dataMap,
+    'priority': 'high',
+    'to': token,
+  };
+  var respon = await http.post(
+    'https://fcm.googleapis.com/fcm/send',
+    headers: headerMap,
+    body: jsonEncode(sendNotificationMao),
+  );
+}
 
 class _PassChatDetailesState extends State<PassChatDetailes> {
   @override
@@ -96,6 +123,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
       myusName = widget.sendername;
       img = AssetImage(widget.imageURL);
     });
+    var sStream = globalFunctions().getUserByEmail(widget.useremail);
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
@@ -156,6 +184,20 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
         ),
         /******************************************************/
         body: Stack(children: <Widget>[
+          StreamBuilder(
+              stream: sStream,
+              builder: (context, snapshot) {
+                return snapshot.hasData
+                    ? ListView.builder(
+                        itemCount: snapshot.data.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot ds = snapshot.data.docs[index];
+                          usiidd = ds.id;
+                          tokken = ds["token"];
+                          return Container();
+                        })
+                    : Container();
+              }),
           Container(
             padding: EdgeInsets.only(bottom: 65),
             child: StreamBuilder<QuerySnapshot>(
@@ -207,7 +249,10 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                 child: Row(
                   children: <Widget>[
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        print(usiidd);
+                        print(tokken);
+                      },
                       child: Container(
                         height: 30,
                         width: 30,
@@ -235,7 +280,6 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                           setState(() {
                             mes = value;
                           });
-                          //notify(widget.useremail,widget.username,mes);
                         },
                         decoration: InputDecoration(
                             hintText: "Write message...",
@@ -249,7 +293,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
                     FloatingActionButton(
                       onPressed: () {
                         addMessage(true);
-                        //notify(user);
+                        sendNotifToUser(tokken, mes, widget.sendername);
                         //SystemChannels.textInput.invokeMethod('TextInput.hide'),
                         /*  listScrollController.animateTo(0.0,
                             duration: Duration(milliseconds: 300),
@@ -276,4 +320,7 @@ class _PassChatDetailesState extends State<PassChatDetailes> {
               ))
         ]));
   }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 }

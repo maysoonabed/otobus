@@ -14,11 +14,10 @@ import 'package:OtoBus/configMaps.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'MapTy.dart';
-import 'package:cube_transition/cube_transition.dart';
 import 'package:page_transition/page_transition.dart';
 
 int id = 1;
-final FirebaseAuth _auth = FirebaseAuth.instance;
+final FirebaseAuth auth = FirebaseAuth.instance;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -33,16 +32,23 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _password = TextEditingController();
   TextEditingController _email = TextEditingController();
   bool _obscureText = true;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   void logFire() async {
-    final User user = (await _auth.signInWithEmailAndPassword(
+    final User user = (await auth.signInWithEmailAndPassword(
       email: email,
       password: password,
     ))
         .user;
     if (user != null) {
-      currUser = await FirebaseAuth.instance.currentUser;
-
+      currUser = FirebaseAuth.instance.currentUser; //await
+      firebaseMessaging.getToken().then((token) {
+        print('token: $token');
+        print(currUser.uid);
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(currUser.uid)
+            .update({'token': token});
+      });
       print('logFFFire');
     } else
       print('logFFFFAAAAAAIIIILLL');

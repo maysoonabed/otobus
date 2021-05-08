@@ -45,8 +45,6 @@ class _PassChatState extends State<PassChat> {
       chatRoomStream = globalFunctions().getChatRooms();
     });
     //###########################################################
-    globalFunctions().registerNotification();
-    //###########################################################
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(

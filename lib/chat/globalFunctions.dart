@@ -35,17 +35,12 @@ class globalFunctions {
   }
 
   //*********************************//
-  Future<Stream<QuerySnapshot>> getUserByEmail(String userEm) {
-    FirebaseFirestore.instance
+  getUserByEmail(String userEm) {
+    //Future<Stream<QuerySnapshot>>
+    return FirebaseFirestore.instance
         .collection("users")
         .where("email", isEqualTo: userEm)
         .snapshots();
-  }
-
-//*********************************//
-  getUserEmail(String email) async {
-    Stream usersStream = await getUserByEmail(email);
-    return usersStream;
   }
 
 //*********************************//

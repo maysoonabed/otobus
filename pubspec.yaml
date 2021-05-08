@@ -58,6 +58,7 @@ dependencies:
   flutter_local_notifications: 1.4.4+4
   cube_transition: ^1.0.2
   page_transition: ^1.1.7+6
+  flutter_ringtone_player: 
   overlay_support: 
   random_string: 
   

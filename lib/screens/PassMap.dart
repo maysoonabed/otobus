@@ -5,7 +5,7 @@ import 'dart:io' as Io;
 import 'package:OtoBus/chat/PassChatDetailes.dart';
 import 'package:OtoBus/chat/globalFunctions.dart';
 import 'package:cube_transition/cube_transition.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
@@ -27,8 +27,9 @@ import 'dart:math' show cos, sqrt, asin;
 import '../chat/passchat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:OtoBus/chat/NotificChat.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../chat/Notifi.dart';
+import 'package:page_transition/page_transition.dart';
 
 class PassMap extends StatefulWidget {
   @override
@@ -84,6 +85,7 @@ String drivName = "";
 String drivImgPath = "lib/Images/Defultprof.jpg";
 String drivPhone = "";
 String path;
+String oneNamePlace;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
@@ -97,14 +99,15 @@ class _PassMapState extends State<PassMap> {
   bool reqbook = true;
   bool unbook = true;
   Adress destprv = new Adress();
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(31.947351, 35.227163),
     zoom: 9.4746,
   );
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
   void initState() {
-    //if (Firebase.initializeApp() == null) Firebase.initializeApp();
     name = ""; //thisUser.name != null ? thisUser.name :
     phone = ""; //thisUser.phone != null ? thisUser.phone :
     email = ""; //thisUser.email != null ? thisUser.email :
@@ -192,6 +195,7 @@ class _PassMapState extends State<PassMap> {
     thisUser.email = await FlutterSession().get('passemail');
     thisUser.name = await FlutterSession().get('name');
     var r = await FlutterSession().get('phone');
+
     thisUser.phone = r.toString();
     setState(() {
       _namecon.text = thisUser.name;
@@ -382,6 +386,68 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  favlist(String favname, double lattt, double longgg, context) {
+    return GestureDetector(
+        onTap: () {
+          _startPointController.text = favname;
+          _destLatitude = lattt;
+          _destLongitude = longgg;
+          _destName = favname;
+          destprv.placeName = _destName;
+          destprv.lat = _destLatitude;
+          destprv.long = _destLongitude;
+          Provider.of<AppData>(context, listen: false)
+              .updateDestAddress(destprv);
+          LatLng posd = LatLng(_destLatitude, _destLongitude);
+          CameraPosition cpd = new CameraPosition(target: posd, zoom: 14);
+          newGoogleMapController
+              .animateCamera(CameraUpdate.newCameraPosition(cpd));
+          _searchDialog();
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          color: Colors.transparent, //Color(0xFF01d5ab), //(0xFF548279)
+          child: Column(
+            children: [
+              Container(
+                color: Color(0xFF1fdeb9), //Color(0xFF4b8b7e), //
+                //padding: EdgeInsets.only(left: 40),
+                child: Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Icon(
+                        Icons.star_sharp,
+                        color: Colors.amber,
+                        size: 35,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Text(
+                          favname,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Lemonada'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
+        ));
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future<void> _searchDialog() async {
     return showDialog<void>(
       builder: (context) => new AlertDialog(
@@ -391,58 +457,125 @@ class _PassMapState extends State<PassMap> {
             height: 200.0,
             child: Column(
               children: <Widget>[
-                new Expanded(
-                  child: new TextField(
-                    controller: src_loc,
-                    readOnly: true,
-                    minLines: 1,
-                    maxLines: null,
-                    autofocus: false,
-                    decoration: new InputDecoration(labelText: 'مكانك الحالي'),
+                Expanded(
+                  child: Theme(
+                    data: Theme.of(context).copyWith(primaryColor: apcolor),
+                    child: TextField(
+                      textAlign: TextAlign.end,
+                      controller: src_loc,
+                      readOnly: true,
+                      minLines: 1,
+                      maxLines: null,
+                      autofocus: false,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.location_on),
+                        hintText: 'الموقع',
+                      ),
+                    ),
                   ),
                 ),
-                new Expanded(
-                  child: CustomTextField(
-                    readOnly: true,
-                    hintText: "اختر المكان الذي ترغب بالذهاب إليه",
-                    textController: _startPointController,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MapBoxAutoCompleteWidget(
-                            apiKey: tokenkey,
-                            hint: "ادخل اسم المدينة أو القرية",
-                            closeOnSelect: true,
-                            onSelect: (place) {
-                              var str = place.placeName.toString();
-                              var ss = str.split(',');
-                              _startPointController.text = ss[0];
-                              setState(() {
-                                _destLatitude = place.center[1];
-                                _destLongitude = place.center[0];
-                                _destName = place.placeName;
-                                destprv.placeName = _destName;
-                                destprv.lat = _destLatitude;
-                                destprv.long = _destLongitude;
-                                Provider.of<AppData>(context, listen: false)
-                                    .updateDestAddress(destprv);
-                                LatLng posd =
-                                    LatLng(_destLatitude, _destLongitude);
-                                CameraPosition cpd =
-                                    new CameraPosition(target: posd, zoom: 14);
-                                newGoogleMapController.animateCamera(
-                                    CameraUpdate.newCameraPosition(cpd));
-                              });
-                            },
-                            limit: 30,
-                            country: 'Ps',
-                            language: 'ar',
+                Row(
+                  children: [
+                    Expanded(
+                      child: Theme(
+                        data: Theme.of(context).copyWith(primaryColor: apcolor),
+                        child: TextField(
+                          minLines: 1,
+                          maxLines: null,
+                          readOnly: true,
+                          textAlign: TextAlign.end,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.location_on_outlined),
+                            hintText: 'الوجهة',
                           ),
+                          controller: _startPointController,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MapBoxAutoCompleteWidget(
+                                  apiKey: tokenkey,
+                                  hint: "حدد وجهتك",
+                                  closeOnSelect: true,
+                                  onSelect: (place) {
+                                    var str = place.placeName.toString();
+                                    var ss = str.split(',');
+                                    setState(() {
+                                      oneNamePlace = ss[0];
+                                      _startPointController.text = oneNamePlace;
+                                      _destLatitude = place.center[1];
+                                      _destLongitude = place.center[0];
+                                      _destName = place.placeName;
+                                      destprv.placeName = _destName;
+                                      destprv.lat = _destLatitude;
+                                      destprv.long = _destLongitude;
+                                      Provider.of<AppData>(context,
+                                              listen: false)
+                                          .updateDestAddress(destprv);
+                                      LatLng posd =
+                                          LatLng(_destLatitude, _destLongitude);
+                                      CameraPosition cpd = new CameraPosition(
+                                          target: posd, zoom: 14);
+                                      newGoogleMapController.animateCamera(
+                                          CameraUpdate.newCameraPosition(cpd));
+                                    });
+                                  },
+                                  limit: 30,
+                                  country: 'Ps',
+                                  language: 'ar',
+                                ),
+                              ),
+                            );
+                          },
+                          enabled: true,
                         ),
-                      );
-                    },
-                    enabled: true,
+                      ),
+                    ),
+                    (_startPointController.text == "")
+                        ? Container()
+                        : IconButton(
+                            icon: Icon(
+                              Icons.star_sharp,
+                              color: Colors.amber,
+                            ),
+                            onPressed: () {
+                              Map<String, dynamic> newFav = {
+                                "FavPlaceName": oneNamePlace,
+                                "lattitude": _destLatitude,
+                                "longitude": _destLongitude
+                              };
+                              Future addnewplace(
+                                  Map newplace, String oneNamePlace) async {
+                                return FirebaseFirestore.instance
+                                    .collection("users")
+                                    .doc(currUser.uid)
+                                    .collection("favorit")
+                                    .doc(oneNamePlace)
+                                    .set(newplace);
+                              }
+
+                              addnewplace(newFav, oneNamePlace);
+                              Navigator.pop(context);
+                              _scaffoldkey.currentState.openDrawer();
+                            },
+                          ),
+                  ],
+                ),
+                Expanded(
+                  child: Theme(
+                    data: Theme.of(context).copyWith(primaryColor: apcolor),
+                    child: TextField(
+                      textAlign: TextAlign.end,
+                      onChanged: (v) {
+                        numCont = int.parse(v);
+                      },
+                      keyboardType: TextInputType.number,
+                      autofocus: false,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.person),
+                        hintText: 'عدد الركاب',
+                      ),
+                    ),
                   ),
                 ),
                 /*  new Expanded(
@@ -480,14 +613,20 @@ class _PassMapState extends State<PassMap> {
   }
 
   int msgsCount = 0;
-  //Notifi notif;
   String messageTitle = "Empty";
   String notificationAlert = "alert";
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  void logFire() async {
+    currUser = await FirebaseAuth.instance.currentUser;
+    NotificChat pushNot = NotificChat();
+    pushNot.initialize(context);
+  }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
-    Firebase.initializeApp();
+    logFire();
     final Size size = MediaQuery.of(context).size;
     numUnredMsgs() {
       int count = 0;
@@ -573,7 +712,45 @@ class _PassMapState extends State<PassMap> {
             backgroundColor: apcolor,
           ),
           //######################################
+          drawer: Drawer(
+              child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                (currUser.uid != null)
+                    ? StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection("users")
+                            .doc(currUser.uid)
+                            .collection("favorit")
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          return snapshot.hasData
+                              ? ListView.builder(
+                                  itemCount: snapshot.data.docs.length,
+                                  shrinkWrap: true,
+                                  padding: EdgeInsets.only(top: 16),
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    if (!snapshot.hasData) {
+                                      return Container();
+                                    }
+                                    DocumentSnapshot favp =
+                                        snapshot.data.docs[index];
+                                    var fpname = favp['FavPlaceName'];
+                                    var ltt = favp['lattitude'];
+                                    var lgg = favp['longitude'];
+                                    return favlist(fpname, ltt, lgg, context);
+                                  })
+                              : Center(child: CircularProgressIndicator());
+                        })
+                    : Container(),
+              ],
+            ),
+          )),
           endDrawer: Drawer(
+              child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
                 Stack(
@@ -612,55 +789,8 @@ class _PassMapState extends State<PassMap> {
                   ],
                 ),
                 SizedBox(
-                  height: 70,
+                  height: 60,
                 ),
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(
-                    "",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    "",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                ]),
-                /* notif != null
-                    ? notif.notificationInfo != null
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'TITLE: ${notif.notificationInfo.title}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
-                                ),
-                              ),
-                              SizedBox(height: 8.0),
-                              Text(
-                                'BODY: ${notif.notificationInfo.body}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
-                                ),
-                              ),
-                              Text(
-                                'TITLE: ${notif.notificationInfo.title ?? notif.notificationInfo.dataTitle}',
-                              ),
-                              Text(
-                                'BODY: ${notif.notificationInfo.body ?? notif.notificationInfo.dataBody}',
-                              ),
-                            ],
-                          )
-                        : Container()
-                    : Container(), */
                 Container(
                     child: TextField(
                   controller: _namecon,
@@ -677,7 +807,7 @@ class _PassMapState extends State<PassMap> {
                   ),
                 )),
                 SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 Container(
                   child: TextField(
@@ -696,7 +826,7 @@ class _PassMapState extends State<PassMap> {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 Container(
                   child: TextField(
@@ -715,45 +845,110 @@ class _PassMapState extends State<PassMap> {
                   ),
                 ),
                 SizedBox(
-                  height: 50,
+                  height: 20,
                 ),
-                MaterialButton(
-                  color: apBcolor,
-                  height: 30,
-                  minWidth: 150.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  onPressed: () {
-                    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                    setState(() {
-                      markers.clear();
-                      markers.clear();
-                      polylines.clear();
-                      homeispress = false;
-                      msgispress = false;
-                      notispress = false;
-                      proispress = false;
-                      _destName = "";
-                      _startPointController.text = "";
-                      //box.remove('Email');
-                      //auth.signOut();
-                      FlutterSession().set('passemail', '');
-                      FlutterSession().set('name', '');
-                      FlutterSession().set('phone', '');
-                      FlutterSession().set('profpic', '');
-                    });
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MyApp()));
-                  },
-                  child: Text('تسجيل الخروج',
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontFamily: "Lemonada",
-                          color: Colors.white)),
+                Align(
+                  alignment: Alignment.center,
+                  child: FloatingActionButton.extended(
+                      backgroundColor: Colors.amber,
+                      isExtended: true,
+                      onPressed: () {
+                        _scaffoldkey.currentState.openDrawer();
+                      },
+                      label: Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(Icons.star_sharp),
+                          ),
+                          Text("الأماكن المفضلة",
+                              style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: "Lemonada",
+                                  color: Colors.white)),
+                        ],
+                      )),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: FloatingActionButton.extended(
+                      backgroundColor: apBcolor,
+                      isExtended: true,
+                      onPressed: () {},
+                      label: Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.update,
+                              size: 20,
+                            ),
+                          ),
+                          Text("تحديث المعلومات",
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: "Lemonada",
+                                  color: Colors.white)),
+                        ],
+                      )),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: FloatingActionButton.extended(
+                      backgroundColor: apBcolor,
+                      isExtended: true,
+                      onPressed: () {
+                        //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                        setState(() {
+                          markers.clear();
+                          markers.clear();
+                          polylines.clear();
+                          homeispress = false;
+                          msgispress = false;
+                          notispress = false;
+                          proispress = false;
+                          _destName = "";
+                          _startPointController.text = "";
+                          //box.remove('Email');
+                          //auth.signOut();
+                          FlutterSession().set('passemail', '');
+                          FlutterSession().set('name', '');
+                          FlutterSession().set('phone', '');
+                          FlutterSession().set('password', '');
+                          FlutterSession().set('profpic', '');
+                        });
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => MyApp()));
+                      },
+                      label: Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.logout,
+                              size: 20,
+                            ),
+                          ),
+                          Text("تسجيل الخروج",
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: "Lemonada",
+                                  color: Colors.white)),
+                        ],
+                      )),
+                ),
+                SizedBox(
+                  height: 20,
                 ),
               ],
             ),
-          ),
+          )),
           //#######################################
           body: Stack(
             children: [
@@ -969,7 +1164,6 @@ class _PassMapState extends State<PassMap> {
                                               milliseconds: 1200),
                                         ),
                                       );
-                                      //_scaffoldkey.currentState.openDrawer();
                                     }),
                               ),
                               Container(
