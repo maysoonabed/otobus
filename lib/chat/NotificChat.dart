@@ -12,16 +12,18 @@ class NotificChat {
       },
       onLaunch: (Map<String, dynamic> message) async {
         //print("onLaunch: $message");
-        fetchInfo(message, context);
+        // fetchInfo(message, context);
       },
       onResume: (Map<String, dynamic> message) async {
         //print("onResume: $message");
         fetchInfo(message, context);
       },
     );
-    fireMess.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
+    /*  fireMess.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true)); */
+  }
 
+  void fetchInfo(Map<String, dynamic> message, context) {
     FlutterRingtonePlayer.play(
       android: AndroidSounds.notification,
       ios: IosSounds.glass,
@@ -29,9 +31,6 @@ class NotificChat {
       volume: 0.1, // Android only - API >= 28
       asAlarm: false, // Android only - all APIs
     );
-  }
-
-  void fetchInfo(Map<String, dynamic> message, context) {
     /* showDialog(
       context: context,
       builder: (BuildContext context) => Column(
