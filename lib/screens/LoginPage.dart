@@ -113,9 +113,9 @@ class _LoginPageState extends State<LoginPage> {
 
             var indate = jsondata["insdate"];
             await FlutterSession().set('insdate', indate);
-            thisDriver.begN = jsondata["begN"];
-            thisDriver.endN = jsondata["endN"];
-            thisDriver.busType = jsondata["busType"];
+            thisDriver.begN = jsondata["begN"].toString();
+            thisDriver.endN = jsondata["endN"].toString();
+            thisDriver.busType = jsondata["busType"].toString();
             thisDriver.numOfPass = int.parse(jsondata["numOfPass"]);
             var bLa = jsondata["begLat"];
             var bLo = jsondata["begLng"];
