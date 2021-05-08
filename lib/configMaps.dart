@@ -19,6 +19,8 @@ CurrDriverInfo thisDriver = new CurrDriverInfo();
 CurrDriverInfo theDriver = CurrDriverInfo();
 DatabaseReference tripReq;
 DatabaseReference ridRef;
+DatabaseReference accepted;
+
 DatabaseReference nnum;
 DatabaseReference whereTo;
 var firebaseRef;
@@ -45,3 +47,4 @@ String statusRide = '';
 String arrivalStatus = ' الباص على الطريق ';
 double driversDetailes = 0;
 double accHeight = 0;
+List<LatLng> picks;

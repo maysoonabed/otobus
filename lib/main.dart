@@ -233,7 +233,18 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ),*/
                         //*********************************
-
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0, right: 20),
+                          child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DriverMap()),
+                                );
+                              },
+                              child: Text('driver')),
+                        ),
                         Center(
                           child: Builder(builder: (BuildContext mContext) {
                             return Padding(
