@@ -82,7 +82,7 @@ final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
 final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
 DateTime displayDate;
 String formatted;
-
+bool reqData = false;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 //////////////////////////////////////////////////////////////////
@@ -178,15 +178,22 @@ class DriverMapState extends State<DriverMap> {
 
   //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void endTrip() {
-    accepted = FirebaseDatabase.instance.reference().child('rideRequest');
+    for (int i = 0; i < item.length; i++) {
+      DatabaseReference reqq = FirebaseDatabase.instance
+          .reference()
+          .child('rideRequest/${item[i]['ridrReqId']}');
+      reqq.child('status').set('ended');
+      deletePassenger(item[i]['key'].toString());
+      driverNum = driverNum + int.parse(item[i]['numb']);
+      Funcs.enableLocUpdate();
+      gMarkers.removeWhere(
+          (marker) => marker.markerId.value == item[i]['ridrReqId']);
+    }
+    nnum.set(driverNum);
 
-    ridRef.child('status').set('ended');
     ridePosStream.cancel();
 
-    gMarkers.removeWhere((marker) => marker.markerId.value == 'destination');
-    gMarkers.removeWhere((marker) => marker.markerId.value == 'current');
     gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
-    polylines.clear();
     setState(() {});
   }
 
@@ -795,8 +802,9 @@ class DriverMapState extends State<DriverMap> {
                                 if (snap.hasData &&
                                     !snap.hasError &&
                                     snap.data.snapshot.value != null) {
+                                  reqData = true;
                                   Map data = snap.data.snapshot.value;
-                                  List item = [];
+                                  item = [];
                                   data.forEach((index, data) {
                                     item.add({"key": index, ...data});
                                   });
@@ -868,7 +876,13 @@ class DriverMapState extends State<DriverMap> {
                                                 reqq
                                                     .child('status')
                                                     .set('ended');
-                                                deletePassenger(item[index]['key'].toString());
+                                                deletePassenger(item[index]
+                                                        ['key']
+                                                    .toString());
+                                                driverNum = driverNum +
+                                                    int.parse(
+                                                        item[index]['numb']);
+                                                nnum.set(driverNum);
                                                 Funcs.enableLocUpdate();
                                               }
                                             }
@@ -877,7 +891,8 @@ class DriverMapState extends State<DriverMap> {
                                       );
                                     },
                                   );
-                                } else
+                                } else {
+                                  reqData = false;
                                   return Center(
                                       child: Text(
                                     "لا يوجد ركاب حاليًا",
@@ -886,6 +901,7 @@ class DriverMapState extends State<DriverMap> {
                                       fontFamily: "Lemonada",
                                     ),
                                   ));
+                                }
                               },
                             )
                           : Container(
@@ -896,7 +912,7 @@ class DriverMapState extends State<DriverMap> {
                 ),
               ),
             ),
-            accHeight != 0
+            accHeight != 0 && reqData == true
                 ? Positioned(
                     bottom: 0,
                     left: MediaQuery.of(context).size.width / 2 - 40,
@@ -1097,6 +1113,11 @@ class DriverMapState extends State<DriverMap> {
     whereTo.onDisconnect();
     whereTo.remove();
     whereTo = null;
+    gMarkers
+        .removeWhere((marker) => marker.markerId.value == 'Final_Destination');
+    gMarkers.removeWhere((marker) => marker.markerId.value == 'Current');
+    gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
+    polylines.clear();
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
