@@ -184,15 +184,15 @@ class DriverMapState extends State<DriverMap> {
           .child('rideRequest/${item[i]['ridrReqId']}');
       reqq.child('status').set('ended');
       deletePassenger(item[i]['key'].toString());
-      driverNum = driverNum + int.parse(item[i]['numb']);
       Funcs.enableLocUpdate();
       gMarkers.removeWhere(
           (marker) => marker.markerId.value == item[i]['ridrReqId']);
     }
-    nnum.set(driverNum);
-
+    nnum.set(thisDriver.numOfPass);
+    setState(() {
+      accHeight = 0;
+    });
     ridePosStream.cancel();
-
     gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
     setState(() {});
   }
