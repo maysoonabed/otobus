@@ -354,17 +354,13 @@ class _PassengerMapState extends State<PassengerMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void startGeoListen() {
+  void startGeoListen() async {
     Geofire.initialize('availableDrivers');
-    Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
+    await Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
         .listen((map) {
-      print(map);
+        print(map);
       if (map != null) {
         var callBack = map['callBack'];
-
-        //latitude will be retrieved from map['latitude']
-        //longitude will be retrieved from map['longitude']
-
         switch (callBack) {
           case Geofire.onKeyEntered:
             NearDrivers nDriver = NearDrivers();
@@ -384,11 +380,12 @@ class _PassengerMapState extends State<PassengerMap> {
                     snapshot.value['whereTo']['longitude'].toString());
                 Funcs.checkPoint(wLat, wLng, nDriver.lat, nDriver.long,
                     destinationAdd.lat, destinationAdd.long);
-                print(chP.toString());
                 if (dNum >= numCont && chP == true) {
                   FireDrivers.nDrivers.add(nDriver);
                   if (nearLoaded) {
-                    driversMarkers();
+                    setState(() {
+                      driversMarkers();
+                    });
                   }
                 }
               }
@@ -397,7 +394,9 @@ class _PassengerMapState extends State<PassengerMap> {
 
           case Geofire.onKeyExited:
             FireDrivers.removeDriver(map['key']);
-            driversMarkers();
+            setState(() {
+              driversMarkers();
+            });
 
             break;
 
@@ -409,14 +408,20 @@ class _PassengerMapState extends State<PassengerMap> {
             nDriver.long = map['longitude'];
 
             FireDrivers.updateDriver(nDriver);
-            driversMarkers();
+
+            setState(() {
+              driversMarkers();
+            });
 
             break;
 
           case Geofire.onGeoQueryReady:
             // All Intial Data is loaded
-            nearLoaded = true;
-            driversMarkers();
+            setState(() {
+              nearLoaded = true;
+              driversMarkers();
+            });
+
             //  print(map['result']);
 
             break;
@@ -531,10 +536,12 @@ class _PassengerMapState extends State<PassengerMap> {
                 child: FloatingActionButton.extended(
                   backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
                   isExtended: isExtended > 0 ? true : false,
-                  onPressed: () {
+                  onPressed: () async {
                     if (isExtended == 1) {
                       createRequest();
-                      startGeoListen();
+                      await startGeoListen();
+                      await Future.delayed(const Duration(seconds: 2), () {});
+
                       availableDrivers = FireDrivers.nDrivers;
                       searchNearestDriver();
                     } else if (isExtended == 2) {

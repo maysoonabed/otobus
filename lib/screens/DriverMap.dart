@@ -142,7 +142,7 @@ class DriverMapState extends State<DriverMap> {
       String data = response.body;
       setState(() {
         Adress pickUp = new Adress();
-        pickUp.placeName = jsonDecode(data)['data'][0]['label'];
+        pickUp.placeName = jsonDecode(data)['data'][0]['label'].toString();
         //  pickUp.placeName = jsonDecode(data)['data'][0]['county'];
         currName = pickUp.placeName;
         //src_loc.text = _currName;
