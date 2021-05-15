@@ -29,6 +29,8 @@ import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:OtoBus/dataProvider/pushNoteficationsFire.dart';
 import 'package:OtoBus/dataProvider/mapKit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:OtoBus/chat/NotificChat.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 DriverMapState globalState = new DriverMapState();
 
@@ -68,6 +70,7 @@ String name, email, phone;
 var _namecon = TextEditingController();
 var _emailcon = TextEditingController();
 var _phonecon = TextEditingController();
+var _insalert = TextEditingController();
 String roomId = "";
 String passEmail = "";
 String passName = "";
@@ -83,6 +86,10 @@ final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
 DateTime displayDate;
 String formatted;
 bool reqData = false;
+File _insimg;
+String _insname;
+var insur;
+String base64insu;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 //////////////////////////////////////////////////////////////////
@@ -273,6 +280,8 @@ class DriverMapState extends State<DriverMap> {
     PushNotifications pushNot = PushNotifications();
     pushNot.initialize(context);
     pushNot.getToken();
+    /* NotificChat pushNotifc = NotificChat();
+    pushNotifc.initialize(context); */
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -333,6 +342,30 @@ class DriverMapState extends State<DriverMap> {
     }
   }
 
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future upinspic(File img, String imgname) async {
+    insur = Io.File(img.path).readAsBytesSync();
+    base64insu = base64Encode(insur);
+    String url =
+        "http://192.168.1.108:8089/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
+    var response = await http.post(url, body: {
+      'insimg': base64insu,
+      'insname': imgname,
+      'email': email,
+    });
+    if (response.statusCode == 200) {
+      //print(response.body);
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  uupplloodd() async {
+    var picked = await picker.getImage(source: ImageSource.gallery);
+    _insimg = File(picked.path);
+    _insname = _insimg.path.split('/').last;
+    upinspic(_insimg, _insname);
+  }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future updateinsdate(String formatted) async {
     String url =
@@ -341,6 +374,25 @@ class DriverMapState extends State<DriverMap> {
         await http.post(url, body: {'endate': formatted, 'email': email});
     if (response.statusCode == 200) {
       //print(jsonDecode(response.body));
+    }
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  var driverInsDate = 0;
+  var onoff;
+  Future insphp() async {
+    String url =
+        "http://192.168.1.108:8089/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
+    var response = await http.post(url, body: {'email': email});
+    //print(response.body);
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body);
+      driverInsDate = jsondata["insdate"];
+      _insalert.text = (onoff == 0)
+          ? "لم يتبقى سوى $driverInsDate يوم على انتهاءالتأمين"
+          : "لقد انتهى تأمينك يُرجى تجديده للعودة ";
+      onoff = jsondata["onofflag"];
+      //print(driverInsDate);
     }
   }
 
@@ -366,6 +418,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
+    //Firebase.initializeApp();
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     numUnredMsgs() {
       int count = 0;
@@ -395,6 +448,8 @@ class DriverMapState extends State<DriverMap> {
     putvalues();
     pic();
     numUnredMsgs();
+    insphp();
+    //driverInsDate <= 15 ? print(driverInsDate) : print("No");
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
@@ -416,67 +471,51 @@ class DriverMapState extends State<DriverMap> {
             backgroundColor: apcolor,
           ),
           endDrawer: Drawer(
-            child: Column(
-              children: <Widget>[
-                Stack(
-                  overflow: Overflow.visible,
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    Image(image: AssetImage('lib/Images/passengercover.jpg')),
-                    Positioned(
-                        key: _photopickey,
-                        bottom: -50.0,
-                        child: CircleAvatar(
-                          radius: 80,
-                          backgroundColor: Colors.white,
-                          backgroundImage: (_prof != null)
-                              ? FileImage(_prof)
-                              : (_profname != null
-                                  ? img
-                                  : AssetImage('lib/Images/Defultprof.jpg')),
-                          child: MaterialButton(
-                            height: 170,
-                            minWidth: 170.0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(80)),
-                            onPressed: () async {
-                              var picked = await picker.getImage(
-                                  source: ImageSource.gallery);
-                              _prof = File(picked.path);
-                              _profname = _prof.path.split('/').last;
-                              upload(_prof, _profname);
-                              setState(() {
-                                img = AssetImage('phpfiles/cardlic/$_profname');
-                              });
-                            },
-                          ),
-                        )),
-                  ],
-                ),
-                SizedBox(
-                  height: 70,
-                ),
-                Container(
-                    child: TextField(
-                  controller: _namecon,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontFamily: "Lemonada",
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Stack(
+                    overflow: Overflow.visible,
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      Image(image: AssetImage('lib/Images/passengercover.jpg')),
+                      Positioned(
+                          key: _photopickey,
+                          bottom: -20.0,
+                          child: CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.white,
+                            backgroundImage: (_prof != null)
+                                ? FileImage(_prof)
+                                : (_profname != null
+                                    ? img
+                                    : AssetImage('lib/Images/Defultprof.jpg')),
+                            child: MaterialButton(
+                              height: 170,
+                              minWidth: 170.0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(80)),
+                              onPressed: () async {
+                                var picked = await picker.getImage(
+                                    source: ImageSource.gallery);
+                                _prof = File(picked.path);
+                                _profname = _prof.path.split('/').last;
+                                upload(_prof, _profname);
+                                setState(() {
+                                  img =
+                                      AssetImage('phpfiles/cardlic/$_profname');
+                                });
+                              },
+                            ),
+                          )),
+                    ],
                   ),
-                  readOnly: true,
-                  autofocus: false,
-                  decoration: myInputDecoration(
-                    label: " ",
-                    icon: Icons.person,
+                  SizedBox(
+                    height: 30,
                   ),
-                )),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  child: TextField(
-                    controller: _emailcon,
+                  Container(
+                      child: TextField(
+                    controller: _namecon,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 15,
@@ -486,111 +525,210 @@ class DriverMapState extends State<DriverMap> {
                     autofocus: false,
                     decoration: myInputDecoration(
                       label: " ",
-                      icon: Icons.email,
+                      icon: Icons.person,
                     ),
+                  )),
+                  SizedBox(
+                    height: 10,
                   ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  child: TextField(
-                    controller: _phonecon,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontFamily: "Lemonada",
-                    ),
-                    readOnly: true,
-                    autofocus: false,
-                    decoration: myInputDecoration(
-                      label: " ",
-                      icon: Icons.phone_android,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
+                  Container(
                     child: TextField(
-                  readOnly: true,
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.datetime,
-                  controller: _insdate, //set username controller
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontFamily: "Lemonada"),
-                  decoration: myInputDecoration(
-                      label: "تحديث تاريخ انتهاء التأمين",
-                      icon: Icons.date_range_rounded),
-                  onTap: () {
-                    showDatePicker(
-                            builder: (BuildContext context, Widget child) {
-                              return Theme(
-                                data: ThemeData.light().copyWith(
-                                  colorScheme: ColorScheme.light(
-                                      primary: apcolor,
-                                      onPrimary: Colors.white,
-                                      surface: apBcolor,
-                                      onSurface: Colors.black),
-                                  dialogBackgroundColor: Colors.white,
-                                ),
-                                child: child,
-                              );
-                            },
-                            context: context,
-                            initialDate: _insT == null ? DateTime.now() : _insT,
-                            firstDate: DateTime(DateTime.now().year,
-                                DateTime.now().month, DateTime.now().day),
-                            lastDate: DateTime(2100))
-                        .then((value) {
-                      setState(() {
-                        _insT = value;
-                        date = _insT.toString();
-                        _insdate.text = DateFormat.yMMMd().format(value);
-                        displayDate = displayFormater.parse(date);
-                        formatted = serverFormater.format(displayDate);
-                        updateinsdate(formatted);
-                        //updateDate();
-                      });
-                      //print(formatted);
-                    });
-                  },
-                )),
-                SizedBox(
-                  height: 20,
-                ),
-                MaterialButton(
-                  color: apBcolor,
-                  height: 30,
-                  minWidth: 150.0,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  onPressed: () {
-                    //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                    setState(() {
-                      //box.remove('Email');
-                      //auth.signOut();
-                      //_prof = null;
-                      //_profname = null;
-                      globalState;
-                      FlutterSession().set('driveremail', '');
-                      FlutterSession().set('name', '');
-                      FlutterSession().set('phone', '');
-                      FlutterSession().set('profpic', '');
-                    });
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => MyApp()));
-                  },
-                  child: Text('تسجيل الخروج',
+                      controller: _emailcon,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 15,
-                          fontFamily: "Lemonada",
-                          color: Colors.white)),
-                ),
-              ],
+                        fontSize: 15,
+                        fontFamily: "Lemonada",
+                      ),
+                      readOnly: true,
+                      autofocus: false,
+                      decoration: myInputDecoration(
+                        label: " ",
+                        icon: Icons.email,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    child: TextField(
+                      controller: _phonecon,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontFamily: "Lemonada",
+                      ),
+                      readOnly: true,
+                      autofocus: false,
+                      decoration: myInputDecoration(
+                        label: " ",
+                        icon: Icons.phone_android,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                      child: TextField(
+                    readOnly: true,
+                    textAlign: TextAlign.center,
+                    keyboardType: TextInputType.datetime,
+                    controller: _insdate, //set username controller
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontFamily: "Lemonada"),
+                    decoration: myInputDecoration(
+                        label: "تحديث تاريخ انتهاء التأمين",
+                        icon: Icons.date_range_rounded),
+                    onTap: () {
+                      showDatePicker(
+                              builder: (BuildContext context, Widget child) {
+                                return Theme(
+                                  data: ThemeData.light().copyWith(
+                                    colorScheme: ColorScheme.light(
+                                        primary: apcolor,
+                                        onPrimary: Colors.white,
+                                        surface: apBcolor,
+                                        onSurface: Colors.black),
+                                    dialogBackgroundColor: Colors.white,
+                                  ),
+                                  child: child,
+                                );
+                              },
+                              context: context,
+                              initialDate:
+                                  _insT == null ? DateTime.now() : _insT,
+                              firstDate: DateTime(DateTime.now().year,
+                                  DateTime.now().month, DateTime.now().day),
+                              lastDate: DateTime(2100))
+                          .then((value) {
+                        setState(() {
+                          _insT = value;
+                          date = _insT.toString();
+                          _insdate.text = DateFormat.yMMMd().format(value);
+                          displayDate = displayFormater.parse(date);
+                          formatted = serverFormater.format(displayDate);
+                          updateinsdate(formatted);
+                          uupplloodd();
+                          //updateDate();
+                        });
+                        //print(formatted);
+                      });
+                    },
+                  )),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  driverInsDate <= 15
+                      ? Container(
+                          child: TextField(
+                              controller: _insalert,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontFamily: "Lemonada",
+                              ),
+                              readOnly: true,
+                              autofocus: false,
+                              decoration: InputDecoration(
+                                suffixIcon: Padding(
+                                    padding:
+                                        EdgeInsets.only(left: 10, right: 10),
+                                    child: Icon(
+                                      Icons.bus_alert,
+                                      color: Colors.white,
+                                    )),
+                                contentPadding:
+                                    EdgeInsets.fromLTRB(10, 10, 0, 10),
+                                enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.red,
+                                        width: 1)), //default border of input
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(40),
+                                    borderSide:
+                                        BorderSide(color: apBcolor, width: 1)),
+                                fillColor: Colors.red,
+                                filled:
+                                    true, //set true if you want to show input background
+                              )),
+                        )
+                      : Container(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: FloatingActionButton.extended(
+                        backgroundColor: apBcolor,
+                        isExtended: true,
+                        onPressed: () {},
+                        label: Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(
+                                Icons.update,
+                                size: 20,
+                              ),
+                            ),
+                            Text("تحديث المعلومات",
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: "Lemonada",
+                                    color: Colors.white)),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: FloatingActionButton.extended(
+                        backgroundColor: apBcolor,
+                        isExtended: true,
+                        onPressed: () {
+                          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                          setState(() {
+                            //box.remove('Email');
+                            //auth.signOut();
+                            //_prof = null;
+                            //_profname = null;
+                            //globalState;
+                            FlutterSession().set('driveremail', '');
+                            FlutterSession().set('name', '');
+                            FlutterSession().set('phone', '');
+                            FlutterSession().set('profpic', '');
+                          });
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => MyApp()));
+                        },
+                        label: Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(
+                                Icons.logout,
+                                size: 20,
+                              ),
+                            ),
+                            Text("تسجيل الخروج",
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: "Lemonada",
+                                    color: Colors.white)),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ),
+                ],
+              ),
             ),
           ),
           //#######################################
@@ -616,140 +754,166 @@ class DriverMapState extends State<DriverMap> {
                     LatLng(currentPosition.latitude, currentPosition.longitude);
               },
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 10, left: 5),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Column(
-                  /*        mainAxisAlignment: MainAxisAlignment
+            (driverInsDate > 0)
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 10, left: 5),
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Column(
+                        /*        mainAxisAlignment: MainAxisAlignment
                       .center, */
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    status
-                        ? Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Container(
-                              child: Container(
-                                  height: 35,
-                                  padding: EdgeInsets.all(3.5),
-                                  width: 90,
-                                  decoration: BoxDecoration(
-                                    color: iconBack,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(15)),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          status
+                              ? Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Container(
+                                    child: Container(
+                                      height: 35,
+                                      padding: EdgeInsets.all(3.5),
+                                      width: 90,
+                                      decoration: BoxDecoration(
+                                        color: iconBack,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(15)),
+                                      ),
+                                      child: driverInsDate != 0
+                                          ? Row(
+                                              children: <Widget>[
+                                                Expanded(
+                                                    child: InkWell(
+                                                        onTap: () {
+                                                          Map toMap = {
+                                                            'latitude':
+                                                                thisDriver
+                                                                    .endLoc
+                                                                    .latitude,
+                                                            'longitude':
+                                                                thisDriver
+                                                                    .endLoc
+                                                                    .longitude
+                                                          };
+                                                          whereTo.set(toMap);
+
+                                                          setState(() {
+                                                            driverT = thisDriver
+                                                                .endLoc;
+                                                            destName =
+                                                                thisDriver.endN;
+                                                            destltlg =
+                                                                thisDriver
+                                                                    .endLoc;
+
+                                                            putMarker();
+                                                            getPolyline();
+
+                                                            backOn = false;
+                                                          });
+                                                        },
+                                                        child: Container(
+                                                          alignment:
+                                                              Alignment.center,
+                                                          decoration: BoxDecoration(
+                                                              color: backOn
+                                                                  ? Colors.white
+                                                                  : iconBack,
+                                                              borderRadius: BorderRadius.only(
+                                                                  bottomLeft: Radius
+                                                                      .circular(
+                                                                          12),
+                                                                  topLeft: Radius
+                                                                      .circular(
+                                                                          12))),
+                                                          child: Text("ذهاب",
+                                                              style: TextStyle(
+                                                                color: backOn
+                                                                    ? iconBack
+                                                                    : Colors
+                                                                        .white,
+                                                                fontSize: 12,
+                                                              )),
+                                                        ))),
+                                                Expanded(
+                                                    child: InkWell(
+                                                        onTap: () {
+                                                          Map toMap = {
+                                                            'latitude':
+                                                                thisDriver
+                                                                    .begLoc
+                                                                    .latitude,
+                                                            'longitude':
+                                                                thisDriver
+                                                                    .begLoc
+                                                                    .longitude
+                                                          };
+                                                          whereTo.set(toMap);
+                                                          /////مشكوك في أمرها  تزكريييييهههههههاااااا
+                                                          setState(() {
+                                                            destName =
+                                                                thisDriver.begN;
+                                                            driverT = thisDriver
+                                                                .begLoc;
+
+                                                            destltlg =
+                                                                thisDriver
+                                                                    .begLoc;
+                                                            putMarker();
+                                                            getPolyline();
+
+                                                            backOn = true;
+                                                          });
+                                                        },
+                                                        child: Container(
+                                                          alignment:
+                                                              Alignment.center,
+                                                          decoration: BoxDecoration(
+                                                              color: backOn
+                                                                  ? iconBack
+                                                                  : Colors
+                                                                      .white,
+                                                              borderRadius: BorderRadius.only(
+                                                                  bottomRight: Radius
+                                                                      .circular(
+                                                                          12),
+                                                                  topRight: Radius
+                                                                      .circular(
+                                                                          12))),
+                                                          child: Text("عودة",
+                                                              style: TextStyle(
+                                                                color: backOn
+                                                                    ? Colors
+                                                                        .white
+                                                                    : iconBack,
+                                                                fontSize: 12,
+                                                              )),
+                                                        ))),
+                                              ],
+                                            )
+                                          : Container(),
+                                    ),
                                   ),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Expanded(
-                                          child: InkWell(
-                                              onTap: () {
-                                                Map toMap = {
-                                                  'latitude': thisDriver
-                                                      .endLoc.latitude,
-                                                  'longitude': thisDriver
-                                                      .endLoc.longitude
-                                                };
-                                                whereTo.set(toMap);
-
-                                                setState(() {
-                                                  driverT = thisDriver.endLoc;
-                                                  destName = thisDriver.endN;
-                                                  destltlg = thisDriver.endLoc;
-
-                                                  putMarker();
-                                                  getPolyline();
-
-                                                  backOn = false;
-                                                });
-                                              },
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                    color: backOn
-                                                        ? Colors.white
-                                                        : iconBack,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            bottomLeft: Radius
-                                                                .circular(12),
-                                                            topLeft:
-                                                                Radius.circular(
-                                                                    12))),
-                                                child: Text("ذهاب",
-                                                    style: TextStyle(
-                                                      color: backOn
-                                                          ? iconBack
-                                                          : Colors.white,
-                                                      fontSize: 12,
-                                                    )),
-                                              ))),
-                                      Expanded(
-                                          child: InkWell(
-                                              onTap: () {
-                                                Map toMap = {
-                                                  'latitude': thisDriver
-                                                      .begLoc.latitude,
-                                                  'longitude': thisDriver
-                                                      .begLoc.longitude
-                                                };
-                                                whereTo.set(toMap);
-/////مشكوك في أمرها  تزكريييييهههههههاااااا
-                                                setState(() {
-                                                  destName = thisDriver.begN;
-                                                  driverT = thisDriver.begLoc;
-
-                                                  destltlg = thisDriver.begLoc;
-                                                  putMarker();
-                                                  getPolyline();
-
-                                                  backOn = true;
-                                                });
-                                              },
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                    color: backOn
-                                                        ? iconBack
-                                                        : Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            bottomRight: Radius
-                                                                .circular(12),
-                                                            topRight:
-                                                                Radius.circular(
-                                                                    12))),
-                                                child: Text("عودة",
-                                                    style: TextStyle(
-                                                      color: backOn
-                                                          ? Colors.white
-                                                          : iconBack,
-                                                      fontSize: 12,
-                                                    )),
-                                              ))),
-                                    ],
-                                  )),
-                            ),
-                          )
-                        : Container(
-                            height: 0.1,
-                            width: 0.1,
+                                )
+                              : Container(
+                                  height: 0.1,
+                                  width: 0.1,
+                                ),
+                          CustomSwitch(
+                            activeColor: iconBack,
+                            value: status,
+                            onChanged: (value) {
+                              value ? GoOnline() : GoOffline();
+                              value ? updateLocation() : null;
+                              print("VALUE : $value");
+                              setState(() {
+                                status = value;
+                              });
+                            },
                           ),
-                    CustomSwitch(
-                      activeColor: iconBack,
-                      value: status,
-                      onChanged: (value) {
-                        value ? GoOnline() : GoOffline();
-                        value ? updateLocation() : null;
-                        print("VALUE : $value");
-                        setState(() {
-                          status = value;
-                        });
-                      },
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  )
+                : Container(),
             //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             Positioned(
               bottom: 0,
@@ -979,7 +1143,29 @@ class DriverMapState extends State<DriverMap> {
                   ),
                   title: Text('الرسائل')),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.person), title: Text('الصفحة الشخصية')),
+                  icon: new Stack(
+                    children: <Widget>[
+                      Icon(
+                        Icons.person,
+                        size: 25,
+                        color: Colors.white,
+                      ), //Icons.message_outlined
+                      new Positioned(
+                        right: 0,
+                        child: new Container(
+                          padding: EdgeInsets.only(left: 15, bottom: 15),
+                          child: (driverInsDate <= 15)
+                              ? Icon(
+                                  Icons.sd_card_alert_sharp,
+                                  size: 15,
+                                  color: Colors.red,
+                                )
+                              : null,
+                        ),
+                      )
+                    ],
+                  ),
+                  title: Text('الصفحة الشخصية')),
             ],
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,

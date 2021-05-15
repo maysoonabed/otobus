@@ -109,12 +109,20 @@ Future<void> fire() async {
   );
 }
 
+/* var drivtoken;
+void tokkeenn() async {
+  passtoken = await FlutterSession().get('paasemail');
+  drivtoken = await FlutterSession().get('drivermail');
+  print(passtoken);
+  print(drivtoken);
+}
+tokkeenn(); */
 GetStorage box;
 void main() {
   //***********Session*************
   WidgetsFlutterBinding.ensureInitialized();
-  dynamic token = FlutterSession().get('paasemail');
-
+  dynamic passtoken = FlutterSession().get('paasemail');
+  dynamic drivtoken = FlutterSession().get('drivermail');
   //*******************************
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -125,8 +133,8 @@ void main() {
       create: (context) => AppData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home: MyApp(), //token != null ? MapTy() : MyApp(), //
-        // currUser != null? DriverMap(): MyApp(),
+        home:
+            MyApp(), // passtoken != ""? DriverMap() /* MapTy() */: MyApp(), //&& passtoken != null//
       )));
 }
 
