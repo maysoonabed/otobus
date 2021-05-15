@@ -61,8 +61,11 @@ dependencies:
   flutter_ringtone_player: 
   overlay_support: 
   random_string: 
+  table_calendar: ^2.2.1
+  shared_preferences: ^0.5.4+5
+  googleapis: ^0.55.0
+  googleapis_auth: ^0.2.12
   
-    
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -15,7 +15,7 @@ import 'package:flutter_map/flutter_map.dart';
 import "package:latlong/latlong.dart" as latLng;
 import 'NetworkHelper.dart';
 import 'LineString.dart';
-import 'CurrUserInfo.dart';
+import 'package:OtoBus/screens/calender.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/nearDriver.dart';
 
@@ -481,6 +481,12 @@ class _PassengerPageState extends State<PassengerPage> {
                                     msgispress = false;
                                     notispress = true;
                                     proispress = false;
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Calendar()),
+                                    );
                                   });
                                 }),
                           ),
