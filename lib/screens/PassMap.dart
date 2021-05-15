@@ -960,6 +960,7 @@ class _PassMapState extends State<PassMap> {
                 myLocationButtonEnabled: true,
                 tiltGesturesEnabled: true,
                 compassEnabled: true,
+                zoomControlsEnabled: false,
                 scrollGesturesEnabled: true,
                 zoomGesturesEnabled: true,
                 polylines: Set<Polyline>.of(polylines.values),
@@ -976,7 +977,7 @@ class _PassMapState extends State<PassMap> {
               ),
               markers.length > 1
                   ? Padding(
-                      padding: const EdgeInsets.only(bottom: 170, right: 60),
+                      padding: const EdgeInsets.only(bottom: 140, right: 5),
                       child: Align(
                         alignment: Alignment.bottomRight,
                         child: FloatingActionButton.extended(
@@ -1014,7 +1015,7 @@ class _PassMapState extends State<PassMap> {
                     ),
               markers.length > 1
                   ? Padding(
-                      padding: const EdgeInsets.only(bottom: 120, right: 60),
+                      padding: const EdgeInsets.only(bottom: 85, right: 5),
                       child: Align(
                         alignment: Alignment.bottomRight,
                         child: FloatingActionButton.extended(
