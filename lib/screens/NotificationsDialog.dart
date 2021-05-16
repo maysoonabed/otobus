@@ -29,10 +29,6 @@ class NotificationsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(height: 30),
-            /*   Image.asset(
-              'lib/Images/bus.jpg',
-              width: 100,
-            ), */
             Icon(
               Icons.directions_bus,
               color: myOrange,

@@ -65,7 +65,9 @@ dependencies:
   shared_preferences: ^0.5.4+5
   googleapis: ^0.55.0
   googleapis_auth: ^0.2.12
-  
+  flutter_datetime_picker: ^1.5.1
+  flutter_cupertino_date_picker: ^1.0.26+2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

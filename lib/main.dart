@@ -129,6 +129,8 @@ void main() {
     statusBarColor: Colors.transparent,
   ));
   //*******************************
+  
+    //*******************************
   runApp(ChangeNotifierProvider(
       create: (context) => AppData(),
       child: MaterialApp(

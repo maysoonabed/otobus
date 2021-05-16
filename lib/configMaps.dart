@@ -19,6 +19,8 @@ CurrDriverInfo thisDriver = new CurrDriverInfo();
 CurrDriverInfo theDriver = CurrDriverInfo();
 DatabaseReference tripReq;
 DatabaseReference ridRef;
+DatabaseReference bookRef;
+
 
 DatabaseReference nnum;
 DatabaseReference whereTo;
