@@ -692,18 +692,10 @@ class DriverMapState extends State<DriverMap> {
                         backgroundColor: apBcolor,
                         isExtended: true,
                         onPressed: () {
-                          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                          setState(() {
-                            //box.remove('Email');
-                            //auth.signOut();
-                            //_prof = null;
-                            //_profname = null;
-                            //globalState;
-                            FlutterSession().set('driveremail', '');
-                            FlutterSession().set('name', '');
-                            FlutterSession().set('phone', '');
-                            FlutterSession().set('profpic', '');
-                          });
+                          FlutterSession().set('driveremail', '');
+                          FlutterSession().set('name', '');
+                          FlutterSession().set('phone', '');
+                          FlutterSession().set('profpic', '');
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) => MyApp()));
                         },

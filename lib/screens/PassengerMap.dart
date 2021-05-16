@@ -140,7 +140,7 @@ class PassengerMapState extends State<PassengerMap> {
   getRatings() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://10.0.0.9/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': theDriver.phone, //get the username text
     });
@@ -177,7 +177,7 @@ class PassengerMapState extends State<PassengerMap> {
   Future<void> displayDriverDetails() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://10.0.0.9/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
+        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': driverPhone,
     });
@@ -463,9 +463,9 @@ class PassengerMapState extends State<PassengerMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void startGeoListen() async {
+  void startGeoListen() {
     Geofire.initialize('availableDrivers');
-    await Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
+    Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
         .listen((map) {
       print(map);
       if (map != null) {
@@ -659,12 +659,11 @@ class PassengerMapState extends State<PassengerMap> {
                     child: FloatingActionButton.extended(
                       backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
                       isExtended: isExtended > 0 ? true : false,
-                      onPressed: () async {
+                      onPressed: () {
                         if (isExtended == 1) {
                           createRequest();
-                          await startGeoListen();
-                          await Future.delayed(
-                              const Duration(seconds: 2), () {});
+                          startGeoListen();
+                          Future.delayed(const Duration(seconds: 2), () {});
 
                           availableDrivers = FireDrivers.nDrivers;
                           searchNearestDriver();

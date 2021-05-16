@@ -1226,12 +1226,11 @@ class _PassMapState extends State<PassMap> {
                           backgroundColor:
                               isExtended < 2 ? apBcolor : Colors.black,
                           isExtended: isExtended > 0 ? true : false,
-                          onPressed: () async {
+                          onPressed: () {
                             if (isExtended == 1) {
                               createRequest();
-                              await startGeoListen();
-                              await Future.delayed(
-                                  const Duration(seconds: 2), () {});
+                              startGeoListen();
+                              //Future.delayed(const Duration(seconds: 2), () {});
 
                               availableDrivers = FireDrivers.nDrivers;
                               searchNearestDriver();

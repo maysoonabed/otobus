@@ -141,48 +141,85 @@ class PassengerPageState extends State<PassengerPage> {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Theme(
-                    data: Theme.of(context).copyWith(primaryColor: apcolor),
-                    child: TextField(
-                      minLines: 1,
-                      maxLines: null,
-                      readOnly: true,
-                      textAlign: TextAlign.end,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.location_on_outlined),
-                        hintText: 'الوجهة',
-                      ),
-                      controller: startPointController,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MapBoxAutoCompleteWidget(
-                              apiKey: tokenkey,
-                              hint: "حدد وجهتك",
-                              onSelect: (place) {
-                                startPointController.text = place.placeName;
-                                setState(() {
-                                  destinationAdd.lat = place.center[1];
-                                  destinationAdd.long = place.center[0];
-                                  destinationAdd.placeName = place.placeName;
-                                  Provider.of<AppData>(context, listen: false)
-                                      .updateDestAddress(destinationAdd);
-                                });
-                                print(destinationAdd.lat.toString() +
-                                    destinationAdd.long.toString());
-                              },
-                              limit: 30,
-                              country: 'Ps',
-                              //language: 'ar',
-                            ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Theme(
+                        data: Theme.of(context).copyWith(primaryColor: apcolor),
+                        child: TextField(
+                          minLines: 1,
+                          maxLines: null,
+                          readOnly: true,
+                          textAlign: TextAlign.end,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.location_on_outlined),
+                            hintText: 'الوجهة',
                           ),
-                        );
-                      },
-                      enabled: true,
+                          controller: startPointController,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MapBoxAutoCompleteWidget(
+                                  apiKey: tokenkey,
+                                  hint: "حدد وجهتك",
+                                  onSelect: (place) {
+                                    var str = place.placeName.toString();
+                                    var ss = str.split(',');
+                                    setState(() {
+                                      oneNamePlace = ss[0];
+                                      startPointController.text = oneNamePlace;
+                                      destinationAdd.lat = place.center[1];
+                                      destinationAdd.long = place.center[0];
+                                      destinationAdd.placeName =
+                                          place.placeName;
+                                      Provider.of<AppData>(context,
+                                              listen: false)
+                                          .updateDestAddress(destinationAdd);
+                                    });
+                                    print(destinationAdd.lat.toString() +
+                                        destinationAdd.long.toString());
+                                  },
+                                  limit: 30,
+                                  country: 'Ps',
+                                  language: 'ar',
+                                ),
+                              ),
+                            );
+                          },
+                          enabled: true,
+                        ),
+                      ),
                     ),
-                  ),
+                    (startPointController.text == "")
+                        ? Container()
+                        : IconButton(
+                            icon: Icon(
+                              Icons.star_sharp,
+                              color: Colors.amber,
+                            ),
+                            onPressed: () {
+                              Map<String, dynamic> newFav = {
+                                "FavPlaceName": oneNamePlace,
+                                "lattitude": destinationAdd.lat,
+                                "longitude": destinationAdd.long
+                              };
+                              Future addnewplace(
+                                  Map newplace, String oneNamePlace) async {
+                                return FirebaseFirestore.instance
+                                    .collection("users")
+                                    .doc(currUser.uid)
+                                    .collection("favorit")
+                                    .doc(oneNamePlace)
+                                    .set(newplace);
+                              }
+
+                              addnewplace(newFav, oneNamePlace);
+                              Navigator.pop(context);
+                              _scafkey.currentState.openDrawer();
+                            },
+                          ),
+                  ],
                 ),
                 Expanded(
                   child: Theme(
