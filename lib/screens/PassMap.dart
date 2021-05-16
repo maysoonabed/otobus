@@ -4,8 +4,12 @@ import 'dart:io';
 import 'dart:io' as Io;
 import 'package:OtoBus/chat/PassChatDetailes.dart';
 import 'package:OtoBus/chat/globalFunctions.dart';
+import 'package:OtoBus/dataProvider/fUNCS.dart';
+import 'package:OtoBus/screens/rating.dart';
 import 'package:cube_transition/cube_transition.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
@@ -26,10 +30,10 @@ import '../main.dart';
 import 'dart:math' show cos, sqrt, asin;
 import '../chat/passchat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:OtoBus/chat/NotificChat.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:page_transition/page_transition.dart';
+import 'driverInfoBottomSheet.dart';
+import 'noDriversDialog.dart';
 
 class PassMap extends StatefulWidget {
   @override
@@ -70,12 +74,12 @@ BitmapDescriptor myIcon;
 final picker = ImagePicker();
 File _prof;
 String _profname;
-String st1, st2, st3;
 AssetImage img;
-bool showprogress = false;
 var profile;
 String base64prof = "";
 var fileImg;
+String st1, st2, st3;
+bool showprogress = false;
 var _namecon = TextEditingController();
 var _emailcon = TextEditingController();
 var _phonecon = TextEditingController();
@@ -86,6 +90,16 @@ String drivImgPath = "lib/Images/Defultprof.jpg";
 String drivPhone = "";
 String path;
 String oneNamePlace;
+
+StreamSubscription<Event> ridestreams;
+String driverPhone;
+String errmsg;
+bool reqPosDet = false;
+List<NearDrivers> availableDrivers;
+DatabaseReference rideReq;
+DatabaseReference driverRef =
+    FirebaseDatabase.instance.reference().child('Drivers');
+String stat = 'normal';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
@@ -113,11 +127,17 @@ class _PassMapState extends State<PassMap> {
     email = ""; //thisUser.email != null ? thisUser.email :
     errormsg = "";
     error = false;
-    homeispress = false;
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(size: Size(1, 1)), 'lib/Images/icon2.png')
+        .then((onValue) {
+      myIcon = onValue;
+    });
+    homeispress = true;
     msgispress = false;
     notispress = false;
     proispress = false;
     super.initState();
+    setupPositionLocator();
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -181,10 +201,12 @@ class _PassMapState extends State<PassMap> {
   void setupPositionLocator() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
-    currentPosition = position;
-    LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
-    CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
-    newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+    setState(() {
+      currentPosition = position;
+      LatLng pos = LatLng(currentPosition.latitude, currentPosition.longitude);
+      CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
+      newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+    });
     getData(currentPosition.latitude, currentPosition.longitude);
     _originLatitude = currentPosition.latitude;
     _originLongitude = currentPosition.longitude;
@@ -220,6 +242,127 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void updateDriTime(LatLng driverCurrLoc) async {
+    if (reqPosDet == false) {
+      reqPosDet = true;
+      var pos = LatLng(_originLatitude, _originLongitude);
+      String time = await calcTime(pos, driverCurrLoc);
+      setState(() {
+        arrivalStatus = ' سيصل الباص بحدود ' + time /* + " دقائق " */;
+      });
+      reqPosDet = false;
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void updateTripTime(LatLng driverCurrLoc) async {
+    if (reqPosDet == false) {
+      reqPosDet = true;
+      var posAdd =
+          Provider.of<AppData>(context, listen: false).destinationAddress;
+      var pos = LatLng(posAdd.lat, posAdd.long);
+      String time = await calcTime(pos, driverCurrLoc);
+      setState(() {
+        arrivalStatus = ' باقٍ على الوصول للوجهة ' + time /* + 'دقائق' */;
+      });
+      reqPosDet = false;
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future<String> calcTime(LatLng source, LatLng dest) async {
+    http.Response response = await http.get(
+        'https://maps.googleapis.com/maps/api/distancematrix/json?origins=${source.latitude},${source.longitude}&destinations=side_of_road:${dest.latitude},${dest.longitude}&key=$googlekey');
+    //rows[0].elements[0].duration.text
+    if (response.statusCode == 200) {
+      String data = response.body;
+      String input =
+          jsonDecode(data)['rows'][0]['elements'][0]['duration']['text'];
+      int i = input.indexOf(' ');
+      String word = input.substring(0, i);
+      return word + ' دقائق ';
+    }
+    return 'لم يحدد';
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  getRatings() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+    var response = await http.post(apiurl, body: {
+      'phone': theDriver.phone, //get the username text
+    });
+
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        errormsg = jsondata["message"];
+      } else {
+        if (jsondata["success"] == 1) {
+          print(jsondata['cou']);
+          rateCount = int.parse(jsondata['cou']);
+          s1 = int.parse(jsondata['cnt1']);
+          s2 = int.parse(jsondata['cnt2']);
+          s3 = int.parse(jsondata['cnt3']);
+          s4 = int.parse(jsondata['cnt4']);
+          s5 = int.parse(jsondata['cnt5']);
+
+          errormsg = jsondata["message"];
+        } else {
+          errormsg = "حدث خطأ";
+        }
+      }
+    } else {
+      errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
+    }
+    Fluttertoast.showToast(
+      context,
+      msg: errormsg,
+    );
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future<void> displayDriverDetails() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.9//
+    var response = await http.post(apiurl, body: {
+      'phone': driverPhone,
+    });
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        errmsg = jsondata["message"];
+      } else {
+        theDriver.phone = driverPhone;
+        theDriver.name = jsondata["name"];
+        theDriver.pic = jsondata['profpic'];
+        theDriver.begN = jsondata['begN'];
+        theDriver.endN = jsondata['endN'];
+        theDriver.busType = jsondata["busType"];
+
+        var x = jsondata["rate"];
+        theDriver.rate = double.parse(x);
+        var xx = jsondata["numOfPass"];
+        theDriver.numOfPass = int.parse(xx);
+        getRatings();
+        errmsg = jsondata["message"];
+      }
+    } else {
+      errmsg = "حدث خطأ أثناء الاتصال بالشبكة";
+    }
+    Fluttertoast.showToast(
+      context,
+      msg: errmsg != null ? errmsg : 'hi',
+    );
+
+    setState(() {
+      driversDetailes = 400;
+    });
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void createRequest() {
     //print(email);print(name);print(phone);
     rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
@@ -246,8 +389,63 @@ class _PassMapState extends State<PassMap> {
       'destination': destinationMap,
       'driver_id': 'waiting',
       'status': 'waiting',
+      'passengers': numCont != null ? numCont : 1,
     };
     rideReq.set(rideMap);
+    ridestreams = rideReq.onValue.listen((event) {
+      if (event.snapshot.value == null) {
+        return;
+      }
+      if (event.snapshot.value['status'] != null) {
+        statusRide = event.snapshot.value['status'].toString();
+      }
+      if (event.snapshot.value['driver_location'] != null) {
+        double driverLat = double.parse(
+            event.snapshot.value['driver_location']['latitude'].toString());
+        double driverLong = double.parse(
+            event.snapshot.value['driver_location']['longitude'].toString());
+        LatLng driverCurrLoc = LatLng(driverLat, driverLong);
+        driverPhone = '';
+        if (event.snapshot.value['driver_phone'] != null) {
+          driverPhone = event.snapshot.value['driver_phone'].toString();
+        }
+        if (statusRide == 'accepted') {
+          updateDriTime(driverCurrLoc);
+        } else if (statusRide == 'onTrip') {
+          updateTripTime(driverCurrLoc);
+        } else if (statusRide == 'arrived') {
+          setState(() {
+            arrivalStatus = 'وصل الباص';
+          });
+        }
+      }
+
+      if (statusRide == 'accepted') {
+        displayDriverDetails();
+        Geofire.stopListener();
+        //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
+      }
+      if (statusRide == 'ended') {
+        if (event.snapshot.value['driver_phone'] != null) {
+          driverPhone = event.snapshot.value['driver_phone'].toString();
+        }
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) =>
+                Rating(driverPhone: driverPhone));
+
+        rideReq.onDisconnect();
+        rideReq = null;
+        ridestreams.cancel();
+        ridestreams = null;
+        //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
+
+        driversDetailes = 0;
+        statusRide = '';
+        arrivalStatus = ' الباص على الطريق ';
+      }
+    });
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -322,6 +520,12 @@ class _PassMapState extends State<PassMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void driversMarkers() {
+    setState(() {
+      //markers.length > 1 ? markers.removeRange(1, markers.length) : null;//removeAll()
+      circles.clear();
+      polylines.clear();
+      markers.clear();
+    });
     for (NearDrivers driver in FireDrivers.nDrivers) {
       setState(() {
         driverltlg = LatLng(driver.lat, driver.long);
@@ -350,18 +554,44 @@ class _PassMapState extends State<PassMap> {
         switch (callBack) {
           case Geofire.onKeyEntered:
             NearDrivers nDriver = NearDrivers();
+            int dNum; //
             nDriver.key = map['key'];
             nDriver.lat = map['latitude'];
             nDriver.long = map['longitude'];
-            FireDrivers.nDrivers.add(nDriver);
+
+            /* FireDrivers.nDrivers.add(nDriver);
             if (nearLoaded) {
               driversMarkers();
-            }
+            } */
+            DatabaseReference nDrivers = FirebaseDatabase.instance
+                .reference()
+                .child('Drivers/${nDriver.key}');
+            nDrivers.once().then((DataSnapshot snapshot) {
+              if (snapshot.value != null) {
+                dNum = snapshot.value['passengers'];
+                double wLat = double.parse(
+                    snapshot.value['whereTo']['latitude'].toString());
+                double wLng = double.parse(
+                    snapshot.value['whereTo']['longitude'].toString());
+                Funcs.checkPoint(wLat, wLng, nDriver.lat, nDriver.long,
+                    _destLatitude, _destLongitude);
+                if (dNum >= numCont && chP == true) {
+                  FireDrivers.nDrivers.add(nDriver);
+                  if (nearLoaded) {
+                    setState(() {
+                      driversMarkers();
+                    });
+                  }
+                }
+              }
+            });
             break;
 
           case Geofire.onKeyExited:
             FireDrivers.removeDriver(map['key']);
-            driversMarkers();
+            setState(() {
+              driversMarkers();
+            });
             break;
 
           case Geofire.onKeyMoved:
@@ -371,12 +601,17 @@ class _PassMapState extends State<PassMap> {
             nDriver.lat = map['latitude'];
             nDriver.long = map['longitude'];
             FireDrivers.updateDriver(nDriver);
-            driversMarkers();
+            setState(() {
+              driversMarkers();
+            });
             break;
+
           case Geofire.onGeoQueryReady:
             // All Intial Data is loaded
-            nearLoaded = true;
-            driversMarkers();
+            setState(() {
+              nearLoaded = true;
+              driversMarkers();
+            });
             //  print(map['result']);
 
             break;
@@ -612,17 +847,61 @@ class _PassMapState extends State<PassMap> {
     );
   }
 
-  int msgsCount = 0;
-  String messageTitle = "Empty";
-  String notificationAlert = "alert";
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Widget getWidget() {
+    switch (isExtended) {
+      case 0:
+        {
+          return Icon(Icons.directions_bus);
+        }
+        break;
 
+      case 1:
+        {
+          return Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Icon(Icons.check),
+              ),
+              Text(" طلب توصيلة"),
+            ],
+          );
+        }
+        break;
+      case 2:
+        {
+          return Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Icon(Icons.cancel),
+              ),
+              Text("إلغاء الأمر"),
+            ],
+          );
+        }
+        break;
+
+      default:
+        {
+          Icon(Icons.directions_bus);
+        }
+        break;
+    }
+  }
+
+  int isExtended = 0;
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void logFire() async {
     currUser = await FirebaseAuth.instance.currentUser;
     NotificChat pushNot = NotificChat();
     pushNot.initialize(context);
   }
 
+  int msgsCount = 0;
+  int busflaf = 0;
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   @override
   Widget build(BuildContext context) {
@@ -651,42 +930,7 @@ class _PassMapState extends State<PassMap> {
     }
 
     //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    @override
-    void initState() {
-      BitmapDescriptor.fromAssetImage(
-              ImageConfiguration(size: Size(1, 1)), 'lib/Images/icon2.png')
-          .then((onValue) {
-        myIcon = onValue;
-      });
-
-      _firebaseMessaging.configure(
-        onMessage: (message) async {
-          setState(() {
-            messageTitle = message["notification"]["title"];
-            notificationAlert = "New Notification Alert";
-          });
-        },
-        onResume: (message) async {
-          setState(() {
-            messageTitle = message["data"]["title"];
-            notificationAlert = "Application opened from Notification";
-          });
-        },
-      );
-      /*  print("messageTitle  :::: " +
-          messageTitle +
-          "  notificationAlert  ::::  " +
-          notificationAlert); */
-
-      homeispress = true;
-      msgispress = false;
-      notispress = false;
-      proispress = false;
-    }
-
     pic();
-    initState();
     putvalues();
     numUnredMsgs();
     return MaterialApp(
@@ -749,6 +993,7 @@ class _PassMapState extends State<PassMap> {
               ],
             ),
           )),
+          //######################################
           endDrawer: Drawer(
               child: SingleChildScrollView(
             child: Column(
@@ -907,7 +1152,6 @@ class _PassMapState extends State<PassMap> {
                         //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                         setState(() {
                           markers.clear();
-                          markers.clear();
                           polylines.clear();
                           homeispress = false;
                           msgispress = false;
@@ -915,8 +1159,7 @@ class _PassMapState extends State<PassMap> {
                           proispress = false;
                           _destName = "";
                           _startPointController.text = "";
-                          //box.remove('Email');
-                          //auth.signOut();
+                          FirebaseAuth.instance.signOut();
                           FlutterSession().set('passemail', '');
                           FlutterSession().set('name', '');
                           FlutterSession().set('phone', '');
@@ -971,82 +1214,221 @@ class _PassMapState extends State<PassMap> {
                   newGoogleMapController = controller;
                   //setState(() {});
                   mapBottomPadding = 65;
-
                   setupPositionLocator();
                 },
               ),
               markers.length > 1
                   ? Padding(
-                      padding: const EdgeInsets.only(bottom: 140, right: 5),
+                      padding: const EdgeInsets.only(bottom: 90, right: 10),
                       child: Align(
                         alignment: Alignment.bottomRight,
                         child: FloatingActionButton.extended(
-                          backgroundColor: apBcolor,
-                          isExtended: reqbook,
-                          onPressed: () {
-                            if (reqbook) {
+                          backgroundColor:
+                              isExtended < 2 ? apBcolor : Colors.black,
+                          isExtended: isExtended > 0 ? true : false,
+                          onPressed: () async {
+                            if (isExtended == 1) {
                               createRequest();
-                              startGeoListen();
+                              await startGeoListen();
+                              await Future.delayed(
+                                  const Duration(seconds: 2), () {});
+
+                              availableDrivers = FireDrivers.nDrivers;
+                              searchNearestDriver();
+                            } else if (isExtended == 2) {
+                              cancelReq();
                             }
                             setState(
                               () {
-                                reqbook = false;
+                                if (isExtended < 2) {
+                                  isExtended++;
+                                  isExtended == 1 ? stat = 'requesting' : null;
+                                } else {
+                                  isExtended = 0;
+                                }
                               },
                             );
                           },
-                          label: reqbook
-                              ? Row(
-                                  children: <Widget>[
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 8.0),
-                                      child: Icon(Icons.directions_bus),
+                          label: getWidget(),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      height: 0.1,
+                      width: 0.1,
+                    ),
+              //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              //Display driver's info
+              //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              Positioned(
+                bottom: 10,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(16),
+                          topLeft: Radius.circular(16)),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                            spreadRadius: 0.5,
+                            blurRadius: 16,
+                            color: Colors.black54,
+                            offset: Offset(0.7, 0.7)),
+                      ]),
+                  height: driversDetailes,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          height: 6,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              arrivalStatus,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 22,
+                        ),
+                        Divider(),
+                        Text(
+                          theDriver.busType != null
+                              ? theDriver.busType
+                              : ' نوع الباص',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        Text(
+                          theDriver.name != null
+                              ? theDriver.name
+                              : 'اسم السائق',
+                          textAlign: TextAlign.center,
+                          style:
+                              TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                        ),
+                        SizedBox(
+                          height: 22,
+                        ),
+                        Divider(),
+                        SizedBox(
+                          height: 22,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 55,
+                                  width: 55,
+                                  decoration: BoxDecoration(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(26)),
+                                    border: Border.all(
+                                        width: 2, color: Colors.grey),
+                                  ),
+                                  child: Icon(Icons.cancel),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text('إلغاء طلب الرحلة'),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    drivPhone = theDriver.phone;
+                                    getInfoForChat(drivPhone);
+                                    roomId = globalFunctions()
+                                        .creatChatRoomInfo(
+                                            thisUser.email, drivEmail);
+                                    //print(roomId);
+                                    Navigator.of(context).push(
+                                      CubePageRoute(
+                                        enterPage: PassChatDetailes(
+                                          username: drivName,
+                                          imageURL: drivImgPath,
+                                          useremail: drivEmail,
+                                          roomID: roomId,
+                                          sendername: thisUser.name,
+                                        ),
+                                        exitPage: PassMap(),
+                                        duration:
+                                            const Duration(milliseconds: 1200),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    height: 55,
+                                    width: 55,
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(26)),
+                                      border: Border.all(
+                                          width: 2, color: Colors.grey),
                                     ),
-                                    Text("اظهار الباصات"),
-                                  ],
-                                )
-                              : Icon(Icons.directions_bus),
+                                    child: Icon(Icons.message),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text('تواصل مع السائق'),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    showBottomSheet(
+                                        context: context,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (BuildContext context) {
+                                          return DriverInfoBottom(); // returns your BottomSheet widget
+                                        });
+                                  },
+                                  child: Container(
+                                    height: 55,
+                                    width: 55,
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(26)),
+                                      border: Border.all(
+                                          width: 2, color: Colors.grey),
+                                    ),
+                                    child: Icon(Icons.list),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(' معلومات السائق'),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
-                    )
-                  : Container(
-                      height: 0.1,
-                      width: 0.1,
+                      ],
                     ),
-              markers.length > 1
-                  ? Padding(
-                      padding: const EdgeInsets.only(bottom: 85, right: 5),
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: FloatingActionButton.extended(
-                          backgroundColor: Colors.red,
-                          isExtended: unbook,
-                          onPressed: () {
-                            setState(
-                              () {
-                                unbook = !unbook;
-                              },
-                            );
-                            cancelReq();
-                          },
-                          label: unbook
-                              ? Row(
-                                  children: <Widget>[
-                                    Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 8.0),
-                                        child: Icon(Icons.remove)),
-                                    Text("إخفاء الباصات"),
-                                  ],
-                                )
-                              : Icon(Icons.bus_alert),
-                        ),
-                      ),
-                    )
-                  : Container(
-                      height: 0.1,
-                      width: 0.1,
-                    ),
+                  ),
+                ),
+              ),
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -1084,7 +1466,6 @@ class _PassMapState extends State<PassMap> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
                                 .spaceEvenly, //Center Row contents vertically,
-
                             children: [
                               Material(
                                 color:
@@ -1092,9 +1473,7 @@ class _PassMapState extends State<PassMap> {
                                 shape: CircleBorder(),
                                 clipBehavior: Clip.hardEdge,
                                 child: IconButton(
-                                    icon: (homeispress)
-                                        ? Icon(Icons.home)
-                                        : Icon(Icons.home_outlined),
+                                    icon: Icon(Icons.home),
                                     color:
                                         (homeispress) ? mypink : Colors.white,
                                     // iconBack, //mypink, //apcolor,
@@ -1115,10 +1494,8 @@ class _PassMapState extends State<PassMap> {
                                 child: IconButton(
                                     icon: new Stack(
                                       children: <Widget>[
-                                        (msgispress)
-                                            ? Icon(Icons.message) //
-                                            : Icon(Icons
-                                                .chat_bubble_outlined), //Icons.message_outlined
+                                        Icon(Icons
+                                            .chat_bubble_outlined), //Icons.message_outlined
                                         new Positioned(
                                           right: 0,
                                           child: new Container(
@@ -1176,32 +1553,9 @@ class _PassMapState extends State<PassMap> {
                                 shape: CircleBorder(),
                                 clipBehavior: Clip.hardEdge,
                                 child: IconButton(
-                                    icon: (notispress)
-                                        ? Icon(Icons.notifications_outlined)
-                                        : Icon(Icons.notifications),
+                                    icon: Icon(Icons.notifications),
                                     color: (notispress) ? mypink : Colors.white,
                                     onPressed: () {
-                                      drivPhone = "87";
-                                      getInfoForChat(drivPhone);
-                                      roomId = globalFunctions()
-                                          .creatChatRoomInfo(
-                                              thisUser.email, drivEmail);
-                                      //print(roomId);
-                                      Navigator.of(context).push(
-                                        CubePageRoute(
-                                          enterPage: PassChatDetailes(
-                                            username: drivName,
-                                            imageURL: drivImgPath,
-                                            useremail: drivEmail,
-                                            roomID: roomId,
-                                            sendername: thisUser.name,
-                                          ),
-                                          exitPage: PassMap(),
-                                          duration: const Duration(
-                                              milliseconds: 1200),
-                                        ),
-                                      );
-
                                       setState(() {
                                         homeispress = false;
                                         msgispress = false;
@@ -1216,9 +1570,7 @@ class _PassMapState extends State<PassMap> {
                                 shape: CircleBorder(),
                                 clipBehavior: Clip.hardEdge,
                                 child: IconButton(
-                                    icon: (proispress)
-                                        ? Icon(Icons.person_outline_rounded)
-                                        : Icon(Icons.person),
+                                    icon: Icon(Icons.person),
                                     color: (proispress) ? mypink : Colors.white,
                                     onPressed: () {
                                       setState(() {
@@ -1240,6 +1592,98 @@ class _PassMapState extends State<PassMap> {
             ],
           ),
         ));
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void searchNearestDriver() {
+    if (availableDrivers.length == 0) {
+      cancelReq();
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => NoDriverDialog(),
+      );
+    } else {
+      setState(() {
+        //markers.length > 1 ? markers.removeRange(1, markers.length) : null;
+        markers.clear();
+        polylines.clear();
+      });
+      var driver = availableDrivers[0];
+
+      print(driver.key);
+      availableDrivers.removeAt(0);
+      notifyDriver(driver);
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void notifyDriver(NearDrivers driver) {
+    driverRef.child(driver.key).child('newTrip').set(rideReq.key);
+    driverRef.child(driver.key).child('token').once().then((DataSnapshot snap) {
+      if (snap.value != null) {
+        String token = snap.value.toString();
+        sendNotifToDriver(token, rideReq.key, context);
+      } else {
+        return;
+      }
+      const sec = Duration(seconds: 1);
+      var timer = Timer.periodic(sec, (timer) {
+        if (stat != 'requesting') {
+          driverRef.child(driver.key).child('newTrip').set('cancelled');
+          driverRef.child(driver.key).child('newTrip').onDisconnect();
+          dReqTimeout = 10;
+          timer.cancel();
+        }
+        dReqTimeout = dReqTimeout - 1;
+        driverRef.child(driver.key).child('newTrip').onValue.listen((event) {
+          if (event.snapshot.value.toString() == 'accepted') {
+            //     driverRef.child(driver.key).child('newTrip').set('waiting');
+            driverRef.child(driver.key).child('newTrip').onDisconnect();
+            dReqTimeout = 10;
+            timer.cancel();
+          }
+        });
+        if (dReqTimeout == 0) {
+          driverRef.child(driver.key).child('newTrip').set('timeout');
+          driverRef.child(driver.key).child('newTrip').onDisconnect();
+          dReqTimeout = 10;
+          timer.cancel();
+          searchNearestDriver();
+        }
+      });
+    });
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void sendNotifToDriver(String token, String rideReqId, context) async {
+    var destin =
+        Provider.of<AppData>(context, listen: false).destinationAddress;
+    Map<String, String> headerMap = {
+      'Content-Type': 'application/json',
+      'Authorization': serverToken,
+    };
+    Map notificationMap = {
+      'body': '${destin.placeName} إلى ',
+      'title': 'طلب توصيلة جديد'
+    };
+    Map dataMap = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'id': '1',
+      'status': 'done',
+      'riderequest_id': rideReqId,
+    };
+    Map sendNotificationMao = {
+      "notification": notificationMap,
+      "data": dataMap,
+      'priority': 'high',
+      'to': token,
+    };
+    var respon = await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: headerMap,
+      body: jsonEncode(sendNotificationMao),
+    );
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -31,13 +31,5 @@ class NotificChat {
       volume: 0.1, // Android only - API >= 28
       asAlarm: false, // Android only - all APIs
     );
-    /* showDialog(
-      context: context,
-      builder: (BuildContext context) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[],
-      ),
-    ); */
   }
 }

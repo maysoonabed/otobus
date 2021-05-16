@@ -1,7 +1,10 @@
 import 'dart:ui';
+import 'package:OtoBus/chat/passchat.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/screens/DriverMap.dart';
-import 'package:OtoBus/screens/TheCalendar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cube_transition/cube_transition.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 import 'dart:convert';
 import '../main.dart';
 import 'PassengerMap.dart';
@@ -16,17 +20,19 @@ import 'package:flutter_map/flutter_map.dart';
 import "package:latlong/latlong.dart" as latLng;
 import 'NetworkHelper.dart';
 import 'LineString.dart';
-import 'package:OtoBus/screens/calender.dart';
+import 'CurrUserInfo.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/nearDriver.dart';
+import 'package:OtoBus/screens/calender.dart';
+
+import 'TheCalendar.dart';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 //final GlobalKey<IconButton> home_key=GlobalKey<IconButton>();
 String name, email, password, errormsg, phone;
 bool error = false;
-final _startPointController = TextEditingController();
-
+final startPointController = TextEditingController();
 Adress destinationAdd = new Adress();
 var src_loc = TextEditingController();
 var des_loc = TextEditingController();
@@ -35,14 +41,20 @@ bool msgispress = false;
 bool notispress = false;
 bool proispress = false;
 List<NearDrivers> availableDrivers;
+final picker = ImagePicker();
+AssetImage img;
+bool showprogress = false;
+var namecon = TextEditingController();
+var emailcon = TextEditingController();
+var phonecon = TextEditingController();
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class PassengerPage extends StatefulWidget {
   @override
-  _PassengerPageState createState() => _PassengerPageState();
+  PassengerPageState createState() => PassengerPageState();
 }
 
-class _PassengerPageState extends State<PassengerPage> {
+class PassengerPageState extends State<PassengerPage> {
   final GlobalKey<ScaffoldState> _scafkey = GlobalKey<ScaffoldState>();
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   setPolyLines() {
@@ -102,7 +114,7 @@ class _PassengerPageState extends State<PassengerPage> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Future<void> _searchDialog() async {
+  Future<void> searchDialog() async {
     return showDialog<void>(
       builder: (context) => new AlertDialog(
         contentPadding: EdgeInsets.all(20.0),
@@ -141,7 +153,7 @@ class _PassengerPageState extends State<PassengerPage> {
                         prefixIcon: Icon(Icons.location_on_outlined),
                         hintText: 'الوجهة',
                       ),
-                      controller: _startPointController,
+                      controller: startPointController,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -150,7 +162,7 @@ class _PassengerPageState extends State<PassengerPage> {
                               apiKey: tokenkey,
                               hint: "حدد وجهتك",
                               onSelect: (place) {
-                                _startPointController.text = place.placeName;
+                                startPointController.text = place.placeName;
                                 setState(() {
                                   destinationAdd.lat = place.center[1];
                                   destinationAdd.long = place.center[0];
@@ -240,284 +252,504 @@ class _PassengerPageState extends State<PassengerPage> {
     );
   }
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void pic() async {
+    var pic = await FlutterSession().get('profpic');
+    setState(() {
+      if (pic != "") {
+        profname = pic;
+        img = AssetImage('phpfiles/cardlic/$profname');
+      } else
+        profname = null;
+    });
+  }
+
+  int msgsCount = 0;
+  int busflaf = 0;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
+    pic();
+    numUnredMsgs() {
+      int count = 0;
+      FirebaseFirestore.instance
+          .collection('chatrooms')
+          .where("users", arrayContains: thisUser.email)
+          .get()
+          .then((val) {
+        for (int i = 0; i < val.docs.length; i++) {
+          if (val.docs[i]['lastmsgread'] == null) {
+            break;
+          } else if ((val.docs[i]['lastmsgread'] == false) &&
+              (val.docs[i]['lastMessageSendBy'] != thisUser.name)) {
+            count++;
+          }
+        }
+        setState(() {
+          msgsCount = count;
+        });
+        //print(count);
+      });
+    }
 
-    return Scaffold(
-      key: _scafkey,
-      backgroundColor: ba1color,
-      //#######################################
-      appBar: AppBar(
-        actions: <Widget>[
-          new Container(),
-        ],
-        title: Center(
-          child: Text(
-            "OtoBüs",
-            style: TextStyle(
-              fontSize: 25,
-              fontFamily: 'Pacifico',
-              color: Colors.white,
-            ),
-          ),
-        ),
-        backgroundColor: apcolor,
-      ),
-
-      //#######################################
-      endDrawer: Drawer(
-        child: Column(
-          children: <Widget>[
-            Stack(
-              overflow: Overflow.visible,
-              alignment: Alignment.center,
-              children: <Widget>[
-                Image(image: AssetImage('lib/Images/passengercover.jpg')),
-                Positioned(
-                    bottom: -50.0,
-                    child: CircleAvatar(
-                        radius: 80,
-                        backgroundColor: Colors.white,
-                        backgroundImage:
-                            (AssetImage('lib/Images/Defultprof.jpg')))),
+    numUnredMsgs();
+    return MaterialApp(
+        debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+        home: Scaffold(
+            key: _scafkey,
+            backgroundColor: ba1color,
+            //#######################################
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              actions: <Widget>[
+                new Container(),
               ],
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            FutureBuilder(
-                future: FlutterSession().get('name'),
-                builder: (context, snapshot) {
-                  name = snapshot.hasData ? snapshot.data : '';
-                  return Text(snapshot.hasData ? snapshot.data : 'Loading...',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: "Lemonada",
-                      ));
-                }),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              child: FutureBuilder(
-                  future: FlutterSession().get('passemail'),
-                  builder: (context, snapshot) {
-                    //email = snapshot.hasData ? snapshot.data : '';
-                    return Text(snapshot.hasData ? snapshot.data : 'Loading...',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontFamily: "Lemonada",
-                        ));
-                  }),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            FutureBuilder(
-                future: FlutterSession().get('phone'),
-                builder: (context, snapshot) {
-                  phone = snapshot.hasData ? snapshot.data.toString() : '';
-                  return Text(
-                      snapshot.hasData
-                          ? snapshot.data.toString()
-                          : 'Loading...',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: "Lemonada",
-                      ));
-                }),
-            /*  ListTile(
-                title: Center(
-                    child: Text(name != null ? name : "",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontFamily: "Lemonada",
-                        )))),
-            SizedBox(
-              height: 20,
-            ),
-            FutureBuilder(
-                future: FlutterSession().get('token'),
-                builder: (context, snapshot) {
-                  email = snapshot.hasData ? snapshot.data : '';
-                  return Text(snapshot.hasData ? snapshot.data : 'Loading...',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: "Lemonada",
-                      ));
-                }),
-            SizedBox(
-              height: 20,
-            ),
-            ListTile(
               title: Center(
-                  child: Text(phone != null ? phone : "",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: "Lemonada",
-                      ))),
-            ), */
-            SizedBox(
-              height: 100,
-            ),
-            MaterialButton(
-              color: apBcolor,
-              height: 30,
-              minWidth: 150.0,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              onPressed: () {
-                setState(() {
-                  points.isNotEmpty ? points.clear() : null;
-                  markers.isNotEmpty ? markers.clear() : null;
-                  polyLines.isNotEmpty ? polyLines.clear() : null;
-
-                  FlutterSession().set('passemail', '');
-                  FlutterSession().set('name', '');
-                  FlutterSession().set('phone', '');
-                  FirebaseAuth.instance.signOut();
-                });
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => MyApp()));
-              },
-              child: Text('تسجيل الخروج',
+                child: Text(
+                  "OtoBüs",
                   style: TextStyle(
-                      fontSize: 15,
-                      fontFamily: "Lemonada",
-                      color: Colors.white)),
+                    fontSize: 25,
+                    fontFamily: 'Pacifico',
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              backgroundColor: apcolor,
             ),
-          ],
-        ),
-      ),
-      //#######################################
-      body: Stack(
-        children: [
-          PassengerMap(),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child: Container(
-              // color: apcolor,
-              width: size.width,
-              height: 80,
-              child: Stack(
-                children: [
-                  CustomPaint(
-                    size: Size(size.width, 80),
-                    painter: CusPaint(),
-                  ),
-                  Center(
-                    heightFactor: 0.6,
-                    child: FloatingActionButton(
-                      onPressed: () {
-                        driversDetailes == 0 ? _searchDialog() : null;
-                      },
-                      backgroundColor: mypink,
-                      //Color(0xFF0e6655),  //Colors.black,
-                      child: Icon(Icons.search),
-                      elevation: 0.1,
-                    ),
-                  ),
-                  Container(
-                      width: size.width,
-                      height: 80,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .spaceEvenly, //Center Row contents vertically,
-
-                        children: [
-                          Material(
-                            color: (homeispress) ? Color(0xFF1ccdaa) : apcolor,
-                            shape: CircleBorder(),
-                            clipBehavior: Clip.hardEdge,
-                            child: IconButton(
-                                icon: (homeispress)
-                                    ? Icon(Icons.home)
-                                    : Icon(Icons.home_outlined),
-                                color: (homeispress) ? mypink : Colors.white,
-                                // iconBack, //mypink, //apcolor,
-                                onPressed: () {
-                                  setState(() {
-                                    homeispress = true;
-                                    msgispress = false;
-                                    notispress = false;
-                                    proispress = false;
-                                  });
-                                }),
-                          ),
-                          Material(
-                            color: (msgispress) ? Color(0xFF1ccdaa) : apcolor,
-                            shape: CircleBorder(),
-                            clipBehavior: Clip.hardEdge,
-                            child: IconButton(
-                                icon: (msgispress)
-                                    ? Icon(Icons.message)
-                                    : Icon(Icons.message_outlined),
-                                color: (msgispress) ? mypink : Colors.white,
-                                onPressed: () {
-                                  setState(() {
-                                    homeispress = false;
-                                    msgispress = true;
-                                    notispress = false;
-                                    proispress = false;
-                                  });
-                                }),
-                          ),
-                          Container(
-                            width: size.width * 0.20,
-                          ),
-                          Material(
-                            color: (notispress) ? Color(0xFF1ccdaa) : apcolor,
-                            shape: CircleBorder(),
-                            clipBehavior: Clip.hardEdge,
-                            child: IconButton(
-                                icon: (notispress)
-                                    ? Icon(Icons.notifications)
-                                    : Icon(Icons.notifications_outlined),
-                                color: (notispress) ? mypink : Colors.white,
-                                onPressed: () {
-                                  setState(() {
-                                    homeispress = false;
-                                    msgispress = false;
-                                    notispress = true;
-                                    proispress = false;
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => TheCalendar()),
-                                    );
-                                  });
-                                }),
-                          ),
-                          Material(
-                            color: (proispress) ? Color(0xFF1ccdaa) : apcolor,
-                            shape: CircleBorder(),
-                            clipBehavior: Clip.hardEdge,
-                            child: IconButton(
-                                icon: (proispress)
-                                    ? Icon(Icons.person)
-                                    : Icon(Icons.person_outline_rounded),
-                                color: (proispress) ? mypink : Colors.white,
-                                onPressed: () {
-                                  _scafkey.currentState.openEndDrawer();
-                                  setState(() {
-                                    homeispress = false;
-                                    msgispress = false;
-                                    notispress = false;
-                                    proispress = true;
-                                  });
-                                }),
-                          ),
-                        ],
-                      ))
+            //######################################
+            drawer: Drawer(
+                child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  (currUser.uid != null)
+                      ? StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection("users")
+                              .doc(currUser.uid)
+                              .collection("favorit")
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            return snapshot.hasData
+                                ? ListView.builder(
+                                    itemCount: snapshot.data.docs.length,
+                                    shrinkWrap: true,
+                                    padding: EdgeInsets.only(top: 16),
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemBuilder: (context, index) {
+                                      if (!snapshot.hasData) {
+                                        return Container();
+                                      }
+                                      DocumentSnapshot favp =
+                                          snapshot.data.docs[index];
+                                      var fpname = favp['FavPlaceName'];
+                                      var ltt = favp['lattitude'];
+                                      var lgg = favp['longitude'];
+                                      return PassengerMapState()
+                                          .favlist(fpname, ltt, lgg, context);
+                                    })
+                                : Center(child: CircularProgressIndicator());
+                          })
+                      : Container(),
                 ],
               ),
-            ),
-          )
-        ],
-      ),
+            )),
+            //######################################
+            endDrawer: Drawer(
+                child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Stack(
+                    overflow: Overflow.visible,
+                    alignment: Alignment.center,
+                    children: <Widget>[
+                      Image(image: AssetImage('lib/Images/passengercover.jpg')),
+                      Positioned(
+                          //key: _photopickey,
+                          bottom: -50.0,
+                          child: CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.white,
+                            backgroundImage: (prof != null)
+                                ? FileImage(prof)
+                                : (profname != null
+                                    ? img
+                                    : AssetImage('lib/Images/Defultprof.jpg')),
+                            child: MaterialButton(
+                              height: 170,
+                              minWidth: 170.0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(80)),
+                              onPressed: () async {
+                                var picked = await picker.getImage(
+                                    source: ImageSource.gallery);
+                                prof = File(picked.path);
+                                profname = prof.path.split('/').last;
+                                PassengerMapState().upload(prof, profname);
+                                setState(() {
+                                  img =
+                                      AssetImage('phpfiles/cardlic/$profname');
+                                });
+                              },
+                            ),
+                          )),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 60,
+                  ),
+                  Container(
+                      child: TextField(
+                    controller: namecon,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: "Lemonada",
+                    ),
+                    readOnly: true,
+                    autofocus: false,
+                    decoration: myInputDecoration(
+                      label: " ",
+                      icon: Icons.person,
+                    ),
+                  )),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    child: TextField(
+                      controller: emailcon,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontFamily: "Lemonada",
+                      ),
+                      readOnly: true,
+                      autofocus: false,
+                      decoration: myInputDecoration(
+                        label: " ",
+                        icon: Icons.email,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Container(
+                    child: TextField(
+                      controller: phonecon,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontFamily: "Lemonada",
+                      ),
+                      readOnly: true,
+                      autofocus: false,
+                      decoration: myInputDecoration(
+                        label: " ",
+                        icon: Icons.phone_android,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: FloatingActionButton.extended(
+                        backgroundColor: Colors.amber,
+                        isExtended: true,
+                        onPressed: () {
+                          _scafkey.currentState.openDrawer();
+                        },
+                        label: Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(Icons.star_sharp),
+                            ),
+                            Text("الأماكن المفضلة",
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: "Lemonada",
+                                    color: Colors.white)),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: FloatingActionButton.extended(
+                        backgroundColor: apBcolor,
+                        isExtended: true,
+                        onPressed: () {},
+                        label: Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(
+                                Icons.update,
+                                size: 20,
+                              ),
+                            ),
+                            Text("تحديث المعلومات",
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: "Lemonada",
+                                    color: Colors.white)),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: FloatingActionButton.extended(
+                        backgroundColor: apBcolor,
+                        isExtended: true,
+                        onPressed: () {
+                          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                          setState(() {
+                            FirebaseAuth.instance.signOut();
+                            markers.clear();
+                            polyLines.clear();
+                            homeispress = false;
+                            msgispress = false;
+                            notispress = false;
+                            proispress = false;
+                            startPointController.text = "";
+                            FlutterSession().set('passemail', '');
+                            FlutterSession().set('name', '');
+                            FlutterSession().set('phone', '');
+                            FlutterSession().set('password', '');
+                            FlutterSession().set('profpic', '');
+                          });
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => MyApp()));
+                        },
+                        label: Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(
+                                Icons.logout,
+                                size: 20,
+                              ),
+                            ),
+                            Text("تسجيل الخروج",
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: "Lemonada",
+                                    color: Colors.white)),
+                          ],
+                        )),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                ],
+              ),
+            )),
+            //#######################################
+            body: Stack(
+              children: [
+                PassengerMap(),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: Container(
+                    // color: apcolor,
+                    width: size.width,
+                    height: 80,
+                    child: Stack(
+                      children: [
+                        CustomPaint(
+                          size: Size(size.width, 80),
+                          painter: CusPaint(),
+                        ),
+                        Center(
+                          heightFactor: 0.6,
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              driversDetailes == 0 ? searchDialog() : null;
+                            },
+                            backgroundColor: mypink,
+                            //Color(0xFF0e6655),  //Colors.black,
+                            child: Icon(Icons.search),
+                            elevation: 0.1,
+                          ),
+                        ),
+                        Container(
+                            width: size.width,
+                            height: 80,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment
+                                  .spaceEvenly, //Center Row contents vertically,
+
+                              children: [
+                                Material(
+                                  color: (homeispress)
+                                      ? Color(0xFF1ccdaa)
+                                      : apcolor,
+                                  shape: CircleBorder(),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: IconButton(
+                                      icon: Icon(Icons.home),
+                                      color:
+                                          (homeispress) ? mypink : Colors.white,
+                                      // iconBack, //mypink, //apcolor,
+                                      onPressed: () {
+                                        setState(() {
+                                          homeispress = true;
+                                          msgispress = false;
+                                          notispress = false;
+                                          proispress = false;
+                                        });
+                                      }),
+                                ),
+                                Material(
+                                  color: (msgispress)
+                                      ? Color(0xFF1ccdaa)
+                                      : apcolor,
+                                  shape: CircleBorder(),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: IconButton(
+                                      icon: new Stack(
+                                        children: <Widget>[
+                                          Icon(Icons
+                                              .chat_bubble_outlined), //Icons.message_outlined
+                                          new Positioned(
+                                            right: 0,
+                                            child: new Container(
+                                              padding: EdgeInsets.all(1),
+                                              decoration: new BoxDecoration(
+                                                color: (msgsCount > 0)
+                                                    ? Colors.red
+                                                    : Colors.transparent,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              constraints: BoxConstraints(
+                                                minWidth: 15,
+                                                minHeight: 15,
+                                              ),
+                                              child: new Text(
+                                                (msgsCount > 0)
+                                                    ? '$msgsCount'
+                                                    : '',
+                                                style: new TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      color:
+                                          (msgispress) ? mypink : Colors.white,
+                                      onPressed: () {
+                                        setState(() {
+                                          homeispress = false;
+                                          msgispress = true;
+                                          notispress = false;
+                                          proispress = false;
+                                        });
+                                        Navigator.of(context).push(
+                                          CubePageRoute(
+                                            enterPage: PassChat(
+                                                thisUser.email, thisUser.name),
+                                            exitPage: PassengerMap(),
+                                            duration: const Duration(
+                                                milliseconds: 1200),
+                                          ),
+                                        );
+                                      }),
+                                ),
+                                Container(
+                                  width: size.width * 0.20,
+                                ),
+                                Material(
+                                  color: (notispress)
+                                      ? Color(0xFF1ccdaa)
+                                      : apcolor,
+                                  shape: CircleBorder(),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: IconButton(
+                                      icon: Icon(Icons.notifications),
+                                      color:
+                                          (notispress) ? mypink : Colors.white,
+                                      onPressed: () {
+                                        setState(() {
+                                          homeispress = false;
+                                          msgispress = false;
+                                          notispress = true;
+                                          proispress = false;
+                                        });
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TheCalendar()),
+                                        );
+                                      }),
+                                ),
+                                Material(
+                                  color: (proispress)
+                                      ? Color(0xFF1ccdaa)
+                                      : apcolor,
+                                  shape: CircleBorder(),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: IconButton(
+                                      icon: Icon(Icons.person),
+                                      color:
+                                          (proispress) ? mypink : Colors.white,
+                                      onPressed: () {
+                                        _scafkey.currentState.openEndDrawer();
+                                        setState(() {
+                                          homeispress = false;
+                                          msgispress = false;
+                                          notispress = false;
+                                          proispress = true;
+                                        });
+                                      }),
+                                ),
+                              ],
+                            ))
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            )));
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  InputDecoration myInputDecoration({String label, IconData icon}) {
+    return InputDecoration(
+      hintText: label, //show label as placeholder
+      alignLabelWithHint: true,
+      suffixIcon: Padding(
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Icon(
+            icon,
+            color: Colors.black,
+          )),
+      contentPadding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide:
+              BorderSide(color: apcolor, width: 1)), //default border of input
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(40),
+          borderSide: BorderSide(color: apBcolor, width: 1)),
+      fillColor: apcolor,
+      filled: false, //set true if you want to show input background
     );
   }
 }

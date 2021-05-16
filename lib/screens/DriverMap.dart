@@ -388,9 +388,9 @@ class DriverMapState extends State<DriverMap> {
     if (response.statusCode == 200) {
       var jsondata = jsonDecode(response.body);
       driverInsDate = jsondata["insdate"];
-      _insalert.text = (onoff == 0)
+      _insalert.text = (driverInsDate > 0)
           ? "لم يتبقى سوى $driverInsDate يوم على انتهاءالتأمين"
-          : "لقد انتهى تأمينك يُرجى تجديده للعودة ";
+          : "لقد انتهى تأمينك يُرجى تجديده  ";
       onoff = jsondata["onofflag"];
       //print(driverInsDate);
     }
@@ -404,7 +404,7 @@ class DriverMapState extends State<DriverMap> {
     email = "";
     acc = false;
     acCount = 0;
-
+    driverNum = thisDriver.numOfPass;
     super.initState();
     driverInfo();
   }
@@ -1266,8 +1266,7 @@ class DriverMapState extends State<DriverMap> {
     nnum = FirebaseDatabase.instance
         .reference()
         .child('Drivers/${currUser.uid}/passengers');
-    nnum.set(thisDriver.numOfPass);
-    driverNum = thisDriver.numOfPass;
+    nnum.set(driverNum);
     whereTo = FirebaseDatabase.instance
         .reference()
         .child('Drivers/${currUser.uid}/whereTo');

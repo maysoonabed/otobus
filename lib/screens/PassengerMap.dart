@@ -1,5 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as Io;
+import 'dart:io';
+import 'package:OtoBus/chat/NotificChat.dart';
+import 'package:OtoBus/chat/PassChatDetailes.dart';
+import 'package:OtoBus/chat/globalFunctions.dart';
+import 'package:cube_transition/cube_transition.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/currDriverInfo.dart';
 import 'package:OtoBus/dataProvider/fUNCS.dart';
@@ -9,14 +17,13 @@ import 'package:OtoBus/screens/noDriversDialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 import '../main.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:provider/provider.dart';
@@ -36,8 +43,7 @@ const keyGeo = 'AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4';
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 final List<latLng.LatLng> points = [
-  /* 
-      currLatLng,
+  /*  currLatLng,
       latLng.LatLng(destinationAdd.lat, destinationAdd.long)
      */
 ];
@@ -51,16 +57,28 @@ DatabaseReference driverRef =
 bool nearLoaded = false;
 String errmsg;
 String driverPhone;
+File prof;
+String profname;
+var profile;
+String base64prof = "";
+var fileImg;
 
+String roomId = "";
+String drivEmail = "";
+String drivName = "";
+String drivImgPath = "lib/Images/Defultprof.jpg";
+String drivPhone = "";
+String path;
+String oneNamePlace;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
   @override
-  _PassengerMapState createState() => _PassengerMapState();
+  PassengerMapState createState() => PassengerMapState();
 }
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-class _PassengerMapState extends State<PassengerMap> {
+class PassengerMapState extends State<PassengerMap> {
   double mapBottomPadding = 0;
 
   MapController _mapct = MapController();
@@ -73,11 +91,48 @@ class _PassengerMapState extends State<PassengerMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void putvalues() async {
     var x;
-    thisUser.email = await FlutterSession().get('email');
+    thisUser.email = await FlutterSession().get('passemail');
     thisUser.name = await FlutterSession().get('name');
-
     x = await FlutterSession().get('phone');
     thisUser.phone = x.toString();
+    setState(() {
+      namecon.text = thisUser.name;
+      emailcon.text = thisUser.email;
+      phonecon.text = thisUser.phone;
+    });
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future upload(File img, String imgname) async {
+    profile = Io.File(img.path).readAsBytesSync();
+    base64prof = base64Encode(profile);
+    String url =
+        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
+    var response = await http.post(url, body: {
+      'profimg': base64prof,
+      'profname': imgname,
+      'email': email,
+    });
+    if (response.statusCode == 200) {}
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  getInfoForChat(String dPhone) async {
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
+    var response = await http.post(apiurl, body: {'phone': dPhone});
+    //print(response.body);
+    if (response.statusCode == 200) {
+      var jsondata = jsonDecode(response.body);
+      setState(() {
+        drivName = jsondata["name"];
+        drivEmail = jsondata["email"];
+        path = jsondata["profpic"];
+        if (path != "") {
+          drivImgPath = "phpfiles/cardlic/$path";
+        }
+      });
+    }
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -157,7 +212,63 @@ class _PassengerMapState extends State<PassengerMap> {
       driversDetailes = 400;
     });
   }
+
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  favlist(String favname, double lattt, double longgg, context) {
+    return GestureDetector(
+        onTap: () {
+          startPointController.text = favname;
+          destinationAdd.lat = lattt;
+          destinationAdd.long = longgg;
+          destinationAdd.placeName = favname;
+          Provider.of<AppData>(context, listen: false)
+              .updateDestAddress(destinationAdd);
+          latLng.LatLng posd =
+              latLng.LatLng(destinationAdd.lat, destinationAdd.long);
+          PassengerPageState().searchDialog();
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          color: Colors.transparent, //Color(0xFF01d5ab), //(0xFF548279)
+          child: Column(
+            children: [
+              Container(
+                color: Color(0xFF1fdeb9), //Color(0xFF4b8b7e), //
+                //padding: EdgeInsets.only(left: 40),
+                child: Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Icon(
+                        Icons.star_sharp,
+                        color: Colors.amber,
+                        size: 35,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Text(
+                          favname,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Lemonada'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
+        ));
+  }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void createRequest() {
@@ -352,13 +463,11 @@ class _PassengerMapState extends State<PassengerMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void startGeoListen() async {
     Geofire.initialize('availableDrivers');
     await Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
         .listen((map) {
-        print(map);
+      print(map);
       if (map != null) {
         var callBack = map['callBack'];
         switch (callBack) {
@@ -503,205 +612,251 @@ class _PassengerMapState extends State<PassengerMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   int isExtended = 0;
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void logFire() async {
+    currUser = await FirebaseAuth.instance.currentUser;
+    NotificChat pushNot = NotificChat();
+    pushNot.initialize(context);
+  }
+
+  int msgsCount = 0;
+  int busflaf = 0;
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Widget build(BuildContext context) {
     /*   if(currLatLng.latitude!=null){
     _mapct.move(currLatLng,10);} */
+    logFire();
     putvalues();
     final Size size = MediaQuery.of(context).size;
     putvalues();
-    return Stack(children: [
-      FlutterMap(
-        options: MapOptions(
-          center: latLng.LatLng(32.0442, 35.2242),
-          zoom: 10.0,
-        ),
-        layers: [
-          TileLayerOptions(
-            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          ),
-          PolylineLayerOptions(
-            polylines: polyLines,
-          ),
-          MarkerLayerOptions(
-            markers: markers,
-          ),
-        ],
-      ),
-      markers.length > 1
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 90, right: 10),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: FloatingActionButton.extended(
-                  backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
-                  isExtended: isExtended > 0 ? true : false,
-                  onPressed: () async {
-                    if (isExtended == 1) {
-                      createRequest();
-                      await startGeoListen();
-                      await Future.delayed(const Duration(seconds: 2), () {});
-
-                      availableDrivers = FireDrivers.nDrivers;
-                      searchNearestDriver();
-                    } else if (isExtended == 2) {
-                      cancelReq();
-                    }
-                    setState(
-                      () {
-                        if (isExtended < 2) {
-                          isExtended++;
-                          isExtended == 1 ? stat = 'requesting' : null;
-                        } else {
-                          isExtended = 0;
-                        }
-                      },
-                    );
-                  },
-                  label: getWidget(),
-                ),
-              ),
-            )
-          : Container(
-              height: 0.1,
-              width: 0.1,
+    return MaterialApp(
+        debugShowCheckedModeBanner: false, //لإخفاء شريط depug
+        home: Stack(children: [
+          FlutterMap(
+            options: MapOptions(
+              center: latLng.LatLng(32.0442, 35.2242),
+              zoom: 10.0,
             ),
+            layers: [
+              TileLayerOptions(
+                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              ),
+              PolylineLayerOptions(
+                polylines: polyLines,
+              ),
+              MarkerLayerOptions(
+                markers: markers,
+              ),
+            ],
+          ),
+          markers.length > 1
+              ? Padding(
+                  padding: const EdgeInsets.only(bottom: 90, right: 10),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: FloatingActionButton.extended(
+                      backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
+                      isExtended: isExtended > 0 ? true : false,
+                      onPressed: () async {
+                        if (isExtended == 1) {
+                          createRequest();
+                          await startGeoListen();
+                          await Future.delayed(
+                              const Duration(seconds: 2), () {});
+
+                          availableDrivers = FireDrivers.nDrivers;
+                          searchNearestDriver();
+                        } else if (isExtended == 2) {
+                          cancelReq();
+                        }
+                        setState(
+                          () {
+                            if (isExtended < 2) {
+                              isExtended++;
+                              isExtended == 1 ? stat = 'requesting' : null;
+                            } else {
+                              isExtended = 0;
+                            }
+                          },
+                        );
+                      },
+                      label: getWidget(),
+                    ),
+                  ),
+                )
+              : Container(
+                  height: 0.1,
+                  width: 0.1,
+                ),
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //Display driver's info
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      Positioned(
-        bottom: 10,
-        left: 0,
-        right: 0,
-        child: Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(16), topLeft: Radius.circular(16)),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                    spreadRadius: 0.5,
-                    blurRadius: 16,
-                    color: Colors.black54,
-                    offset: Offset(0.7, 0.7)),
-              ]),
-          height: driversDetailes,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SizedBox(
-                  height: 6,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          Positioned(
+            bottom: 10,
+            left: 0,
+            right: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(16),
+                      topLeft: Radius.circular(16)),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                        spreadRadius: 0.5,
+                        blurRadius: 16,
+                        color: Colors.black54,
+                        offset: Offset(0.7, 0.7)),
+                  ]),
+              height: driversDetailes,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    SizedBox(
+                      height: 6,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          arrivalStatus,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 22,
+                    ),
+                    Divider(),
                     Text(
-                      arrivalStatus,
+                      theDriver.busType != null
+                          ? theDriver.busType
+                          : ' نوع الباص',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(color: Colors.grey),
                     ),
-                  ],
-                ),
-                SizedBox(
-                  height: 22,
-                ),
-                Divider(),
-                Text(
-                  theDriver.busType != null ? theDriver.busType : ' نوع الباص',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
-                ),
-                Text(
-                  theDriver.name != null ? theDriver.name : 'اسم السائق',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
-                ),
-                SizedBox(
-                  height: 22,
-                ),
-                Divider(),
-                SizedBox(
-                  height: 22,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          height: 55,
-                          width: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(26)),
-                            border: Border.all(width: 2, color: Colors.grey),
-                          ),
-                          child: Icon(Icons.cancel),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text('إلغاء طلب الرحلة'),
-                      ],
+                    Text(
+                      theDriver.name != null ? theDriver.name : 'اسم السائق',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          height: 55,
-                          width: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(26)),
-                            border: Border.all(width: 2, color: Colors.grey),
-                          ),
-                          child: Icon(Icons.message),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text('تواصل مع السائق'),
-                      ],
+                    SizedBox(
+                      height: 22,
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    Divider(),
+                    SizedBox(
+                      height: 22,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        InkWell(
-                          onTap: () {
-                            showBottomSheet(
-                                context: context,
-                                backgroundColor: Colors.transparent,
-                                builder: (BuildContext context) {
-                                  return DriverInfoBottom(); // returns your BottomSheet widget
-                                });
-                          },
-                          child: Container(
-                            height: 55,
-                            width: 55,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(26)),
-                              border: Border.all(width: 2, color: Colors.grey),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 55,
+                              width: 55,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(26)),
+                                border:
+                                    Border.all(width: 2, color: Colors.grey),
+                              ),
+                              child: Icon(Icons.cancel),
                             ),
-                            child: Icon(Icons.list),
-                          ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text('إلغاء طلب الرحلة'),
+                          ],
                         ),
-                        SizedBox(
-                          height: 10,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                                onTap: () {
+                                  drivPhone = theDriver.phone;
+                                  getInfoForChat(drivPhone);
+                                  roomId = globalFunctions().creatChatRoomInfo(
+                                      thisUser.email, drivEmail);
+                                  //print(roomId);
+                                  Navigator.of(context).push(
+                                    CubePageRoute(
+                                      enterPage: PassChatDetailes(
+                                        username: drivName,
+                                        imageURL: drivImgPath,
+                                        useremail: drivEmail,
+                                        roomID: roomId,
+                                        sendername: thisUser.name,
+                                      ),
+                                      exitPage: PassengerMap(),
+                                      duration:
+                                          const Duration(milliseconds: 1200),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  height: 55,
+                                  width: 55,
+                                  decoration: BoxDecoration(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(26)),
+                                    border: Border.all(
+                                        width: 2, color: Colors.grey),
+                                  ),
+                                  child: Icon(Icons.message),
+                                )),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text('تواصل مع السائق'),
+                          ],
                         ),
-                        Text(' معلومات السائق'),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                showBottomSheet(
+                                    context: context,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (BuildContext context) {
+                                      return DriverInfoBottom(); // returns your BottomSheet widget
+                                    });
+                              },
+                              child: Container(
+                                height: 55,
+                                width: 55,
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(26)),
+                                  border:
+                                      Border.all(width: 2, color: Colors.grey),
+                                ),
+                                child: Icon(Icons.list),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(' معلومات السائق'),
+                          ],
+                        ),
                       ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
-    ]);
+        ]));
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -800,6 +955,10 @@ class _PassengerMapState extends State<PassengerMap> {
 
   @override
   void initState() {
+    homeispress = true;
+    msgispress = false;
+    notispress = false;
+    proispress = false;
     super.initState();
     setupPositionLocator();
   }
