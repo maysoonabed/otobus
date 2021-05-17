@@ -1414,17 +1414,26 @@ deletePassenger(key) {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 String getSndWord(String input) {
-  int i = input.indexOf(',');
-  String rest = input.substring(i + 1, input.length - 1);
-  i = rest.indexOf(',');
-  String word = rest.substring(0, i);
-  return word;
+  if (input.contains(',')) {
+    int i = input.indexOf(',');
+    String rest = input.substring(i + 1, input.length - 1);
+    if (rest.contains(',')) {
+      i = rest.indexOf(',');
+      String word = rest.substring(0, i);
+      return word;
+    } else
+      return rest;
+  } else
+    return input;
 }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 String getFstWord(String input) {
-  int i = input.indexOf(',');
-  String word = input.substring(0, i);
-  return word;
+  if (input.contains(',')) {
+    int i = input.indexOf(',');
+    String word = input.substring(0, i);
+    return word;
+  } else
+    return input;
 }
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -253,8 +253,11 @@ class DriverInfoBottom extends StatelessWidget {
   }
 
   String getFstWord(String input) {
-    int i = input.indexOf(',');
-    String word = input.substring(0, i);
-    return word;
+    if (input.contains(',')) {
+      int i = input.indexOf(',');
+      String word = input.substring(0, i);
+      return word;
+    } else
+      return input;
   }
 }

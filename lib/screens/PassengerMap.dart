@@ -216,7 +216,7 @@ class PassengerMapState extends State<PassengerMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void createRequest() {
     rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
-
+    numCont != null ? null : numCont = 1;
     var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
     var destination =
         Provider.of<AppData>(context, listen: false).destinationAddress;
