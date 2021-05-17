@@ -145,7 +145,7 @@ class _PassMapState extends State<PassMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.9//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -157,7 +157,7 @@ class _PassMapState extends State<PassMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.9////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -576,7 +576,7 @@ class _PassMapState extends State<PassMap> {
   getRatings() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.9//
     var response = await http.post(apiurl, body: {
       'phone': theDriver.phone, //get the username text
     });
@@ -1400,12 +1400,10 @@ class _PassMapState extends State<PassMap> {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    showBottomSheet(
-                                        context: context,
-                                        backgroundColor: Colors.transparent,
-                                        builder: (BuildContext context) {
-                                          return DriverInfoBottom(); // returns your BottomSheet widget
-                                        });
+                                    _scaffoldkey.currentState.showBottomSheet(
+                                      (context) => DriverInfoBottom(),
+                                      backgroundColor: Colors.transparent,
+                                    );
                                   },
                                   child: Container(
                                     height: 55,
@@ -1607,7 +1605,7 @@ class _PassMapState extends State<PassMap> {
         barrierDismissible: false,
         builder: (BuildContext context) => NoDriverDialog(),
       );
-      //cancelReq();
+      cancelReq();
     } else {
       setState(() {
         //markers.length > 1 ? markers.removeRange(1, markers.length) : null;

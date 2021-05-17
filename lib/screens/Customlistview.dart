@@ -11,7 +11,6 @@ import 'dart:convert';
 import 'package:OtoBus/configMaps.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
-
 class CustomListView extends StatefulWidget {
   final List<Spacecraft> spacecrafts;
 
@@ -53,7 +52,7 @@ class _CustomListViewState extends State<CustomListView> {
                       Row(children: <Widget>[
                         Padding(
                             child: Text(
-                             spacecraft.passid,
+                              spacecraft.passid,
                               style: new TextStyle(fontWeight: FontWeight.bold),
                               textAlign: TextAlign.right,
                             ),
@@ -90,7 +89,8 @@ class _CustomListViewState extends State<CustomListView> {
 
 //Future is n object representing a delayed computation.
 Future<List<Spacecraft>> downloadJSON() async {
-  final jsonEndpoint = "http://10.0.0.9/otobus/phpfiles/feedbacK.php";
+  final jsonEndpoint =
+      "http://192.168.1.108:8089/otobus/phpfiles/feedbacK.php"; //10.0.0.9
 
   final response = await get(jsonEndpoint);
 
