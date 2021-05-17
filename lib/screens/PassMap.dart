@@ -242,226 +242,6 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void updateDriTime(LatLng driverCurrLoc) async {
-    if (reqPosDet == false) {
-      reqPosDet = true;
-      var pos = LatLng(_originLatitude, _originLongitude);
-      String time = await calcTime(pos, driverCurrLoc);
-      setState(() {
-        arrivalStatus = ' سيصل الباص بحدود ' + time /* + " دقائق " */;
-      });
-      reqPosDet = false;
-    }
-  }
-
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void updateTripTime(LatLng driverCurrLoc) async {
-    if (reqPosDet == false) {
-      reqPosDet = true;
-      var posAdd =
-          Provider.of<AppData>(context, listen: false).destinationAddress;
-      var pos = LatLng(posAdd.lat, posAdd.long);
-      String time = await calcTime(pos, driverCurrLoc);
-      setState(() {
-        arrivalStatus = ' باقٍ على الوصول للوجهة ' + time /* + 'دقائق' */;
-      });
-      reqPosDet = false;
-    }
-  }
-
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Future<String> calcTime(LatLng source, LatLng dest) async {
-    http.Response response = await http.get(
-        'https://maps.googleapis.com/maps/api/distancematrix/json?origins=${source.latitude},${source.longitude}&destinations=side_of_road:${dest.latitude},${dest.longitude}&key=$googlekey');
-    //rows[0].elements[0].duration.text
-    if (response.statusCode == 200) {
-      String data = response.body;
-      String input =
-          jsonDecode(data)['rows'][0]['elements'][0]['duration']['text'];
-      int i = input.indexOf(' ');
-      String word = input.substring(0, i);
-      return word + ' دقائق ';
-    }
-    return 'لم يحدد';
-  }
-
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  getRatings() async {
-    SystemChannels.textInput.invokeMethod('TextInput.hide');
-    String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
-    var response = await http.post(apiurl, body: {
-      'phone': theDriver.phone, //get the username text
-    });
-
-    if (response.statusCode == 200) {
-      var jsondata = json.decode(response.body);
-      if (jsondata["error"] == 1) {
-        errormsg = jsondata["message"];
-      } else {
-        if (jsondata["success"] == 1) {
-          print(jsondata['cou']);
-          rateCount = int.parse(jsondata['cou']);
-          s1 = int.parse(jsondata['cnt1']);
-          s2 = int.parse(jsondata['cnt2']);
-          s3 = int.parse(jsondata['cnt3']);
-          s4 = int.parse(jsondata['cnt4']);
-          s5 = int.parse(jsondata['cnt5']);
-
-          errormsg = jsondata["message"];
-        } else {
-          errormsg = "حدث خطأ";
-        }
-      }
-    } else {
-      errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
-    }
-    Fluttertoast.showToast(
-      context,
-      msg: errormsg,
-    );
-  }
-
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Future<void> displayDriverDetails() async {
-    SystemChannels.textInput.invokeMethod('TextInput.hide');
-    String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.9//
-    var response = await http.post(apiurl, body: {
-      'phone': driverPhone,
-    });
-    if (response.statusCode == 200) {
-      var jsondata = json.decode(response.body);
-      if (jsondata["error"] == 1) {
-        errmsg = jsondata["message"];
-      } else {
-        theDriver.phone = driverPhone;
-        theDriver.name = jsondata["name"];
-        theDriver.pic = jsondata['profpic'];
-        theDriver.begN = jsondata['begN'];
-        theDriver.endN = jsondata['endN'];
-        theDriver.busType = jsondata["busType"];
-
-        var x = jsondata["rate"];
-        theDriver.rate = double.parse(x);
-        var xx = jsondata["numOfPass"];
-        theDriver.numOfPass = int.parse(xx);
-        getRatings();
-        errmsg = jsondata["message"];
-      }
-    } else {
-      errmsg = "حدث خطأ أثناء الاتصال بالشبكة";
-    }
-    Fluttertoast.showToast(
-      context,
-      msg: errmsg != null ? errmsg : 'hi',
-    );
-
-    setState(() {
-      driversDetailes = 400;
-    });
-  }
-
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void createRequest() {
-    //print(email);print(name);print(phone);
-    rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
-    var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
-    var destination =
-        Provider.of<AppData>(context, listen: false).destinationAddress;
-    //print(pickUp);
-    //print(destination);
-    Map pickUpMap = {
-      'longitude': pickUp.long.toString(),
-      'latitude': pickUp.lat.toString(),
-    };
-    Map destinationMap = {
-      'longitude': destination.long.toString(),
-      'latitude': destination.lat.toString(),
-    };
-    Map rideMap = {
-      'createdAt': DateTime.now().toString(),
-      'passengerName': thisUser.name,
-      'passengerPhone': thisUser.phone,
-      'pickUpAddress': pickUp.placeName,
-      'destinationAddress': destination.placeName,
-      'location': pickUpMap,
-      'destination': destinationMap,
-      'driver_id': 'waiting',
-      'status': 'waiting',
-      'passengers': numCont != null ? numCont : 1,
-    };
-    rideReq.set(rideMap);
-    ridestreams = rideReq.onValue.listen((event) {
-      if (event.snapshot.value == null) {
-        return;
-      }
-      if (event.snapshot.value['status'] != null) {
-        statusRide = event.snapshot.value['status'].toString();
-      }
-      if (event.snapshot.value['driver_location'] != null) {
-        double driverLat = double.parse(
-            event.snapshot.value['driver_location']['latitude'].toString());
-        double driverLong = double.parse(
-            event.snapshot.value['driver_location']['longitude'].toString());
-        LatLng driverCurrLoc = LatLng(driverLat, driverLong);
-        driverPhone = '';
-        if (event.snapshot.value['driver_phone'] != null) {
-          driverPhone = event.snapshot.value['driver_phone'].toString();
-        }
-        if (statusRide == 'accepted') {
-          updateDriTime(driverCurrLoc);
-        } else if (statusRide == 'onTrip') {
-          updateTripTime(driverCurrLoc);
-        } else if (statusRide == 'arrived') {
-          setState(() {
-            arrivalStatus = 'وصل الباص';
-          });
-        }
-      }
-
-      if (statusRide == 'accepted') {
-        displayDriverDetails();
-        Geofire.stopListener();
-        //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
-      }
-      if (statusRide == 'ended') {
-        if (event.snapshot.value['driver_phone'] != null) {
-          driverPhone = event.snapshot.value['driver_phone'].toString();
-        }
-        showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) =>
-                Rating(driverPhone: driverPhone));
-
-        rideReq.onDisconnect();
-        rideReq = null;
-        ridestreams.cancel();
-        ridestreams = null;
-        //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
-
-        driversDetailes = 0;
-        statusRide = '';
-        arrivalStatus = ' الباص على الطريق ';
-      }
-    });
-  }
-
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void cancelReq() {
-    rideReq.remove();
-    setState(() {
-      markers.clear();
-      circles.clear();
-      polylines.clear();
-    });
-    LatLng pos = LatLng(_originLatitude, _originLongitude);
-    CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
-    newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
-  }
-
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void butMarker() {
     currltlg = LatLng(_originLatitude, _originLongitude);
     destltlg = LatLng(_destLatitude, _destLongitude);
@@ -518,119 +298,19 @@ class _PassMapState extends State<PassMap> {
         .animateCamera(CameraUpdate.newLatLngBounds(bounds, 30));
   }
 
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void driversMarkers() {
-    setState(() {
-      //markers.length > 1 ? markers.removeRange(1, markers.length) : null;//removeAll()
-      circles.clear();
-      polylines.clear();
-      markers.clear();
-    });
-    for (NearDrivers driver in FireDrivers.nDrivers) {
-      setState(() {
-        driverltlg = LatLng(driver.lat, driver.long);
-
-        Marker driversmark = Marker(
-          markerId: MarkerId("drivmk"),
-          position: driverltlg,
-          icon: BitmapDescriptor.defaultMarkerWithHue(30),
-        );
-        markers.add(driversmark);
-      });
-    }
-  }
-
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void startGeoListen() {
-    Geofire.initialize('availableDrivers');
-    Geofire.queryAtLocation(
-            _originLatitude, _originLongitude, 5) //بدنا نغير ال5 كيلو
-        .listen((map) {
-      // print(map);
-      if (map != null) {
-        var callBack = map['callBack'];
-        //latitude will be retrieved from map['latitude']
-        //longitude will be retrieved from map['longitude']
-        switch (callBack) {
-          case Geofire.onKeyEntered:
-            NearDrivers nDriver = NearDrivers();
-            int dNum; //
-            nDriver.key = map['key'];
-            nDriver.lat = map['latitude'];
-            nDriver.long = map['longitude'];
-
-            /* FireDrivers.nDrivers.add(nDriver);
-            if (nearLoaded) {
-              driversMarkers();
-            } */
-            DatabaseReference nDrivers = FirebaseDatabase.instance
-                .reference()
-                .child('Drivers/${nDriver.key}');
-            nDrivers.once().then((DataSnapshot snapshot) {
-              if (snapshot.value != null) {
-                dNum = snapshot.value['passengers'];
-                double wLat = double.parse(
-                    snapshot.value['whereTo']['latitude'].toString());
-                double wLng = double.parse(
-                    snapshot.value['whereTo']['longitude'].toString());
-                Funcs.checkPoint(wLat, wLng, nDriver.lat, nDriver.long,
-                    _destLatitude, _destLongitude);
-                if (dNum >= numCont && chP == true) {
-                  FireDrivers.nDrivers.add(nDriver);
-                  if (nearLoaded) {
-                    setState(() {
-                      driversMarkers();
-                    });
-                  }
-                }
-              }
-            });
-            break;
-
-          case Geofire.onKeyExited:
-            FireDrivers.removeDriver(map['key']);
-            setState(() {
-              driversMarkers();
-            });
-            break;
-
-          case Geofire.onKeyMoved:
-            // Update your key's location
-            NearDrivers nDriver = NearDrivers();
-            nDriver.key = map['key'];
-            nDriver.lat = map['latitude'];
-            nDriver.long = map['longitude'];
-            FireDrivers.updateDriver(nDriver);
-            setState(() {
-              driversMarkers();
-            });
-            break;
-
-          case Geofire.onGeoQueryReady:
-            // All Intial Data is loaded
-            setState(() {
-              nearLoaded = true;
-              driversMarkers();
-            });
-            //  print(map['result']);
-
-            break;
-        }
-      }
-    });
-  }
-
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   favlist(String favname, double lattt, double longgg, context) {
     return GestureDetector(
         onTap: () {
-          _startPointController.text = favname;
-          _destLatitude = lattt;
-          _destLongitude = longgg;
-          _destName = favname;
-          destprv.placeName = _destName;
-          destprv.lat = _destLatitude;
-          destprv.long = _destLongitude;
+          setState(() {
+            _startPointController.text = favname;
+            _destLatitude = lattt;
+            _destLongitude = longgg;
+            _destName = favname;
+            destprv.placeName = _destName;
+            destprv.lat = _destLatitude;
+            destprv.long = _destLongitude;
+          });
           Provider.of<AppData>(context, listen: false)
               .updateDestAddress(destprv);
           LatLng posd = LatLng(_destLatitude, _destLongitude);
@@ -847,6 +527,331 @@ class _PassMapState extends State<PassMap> {
     );
   }
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void updateDriTime(LatLng driverCurrLoc) async {
+    if (reqPosDet == false) {
+      reqPosDet = true;
+      var pos = LatLng(_originLatitude, _originLongitude);
+      String time = await calcTime(pos, driverCurrLoc);
+      setState(() {
+        arrivalStatus = ' سيصل الباص بحدود ' + time /* + " دقائق " */;
+      });
+      reqPosDet = false;
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void updateTripTime(LatLng driverCurrLoc) async {
+    if (reqPosDet == false) {
+      reqPosDet = true;
+      var posAdd =
+          Provider.of<AppData>(context, listen: false).destinationAddress;
+      var pos = LatLng(posAdd.lat, posAdd.long);
+      String time = await calcTime(pos, driverCurrLoc);
+      setState(() {
+        arrivalStatus = ' باقٍ على الوصول للوجهة ' + time /* + 'دقائق' */;
+      });
+      reqPosDet = false;
+    }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future<String> calcTime(LatLng source, LatLng dest) async {
+    http.Response response = await http.get(
+        'https://maps.googleapis.com/maps/api/distancematrix/json?origins=${source.latitude},${source.longitude}&destinations=side_of_road:${dest.latitude},${dest.longitude}&key=$googlekey');
+    //rows[0].elements[0].duration.text
+    if (response.statusCode == 200) {
+      String data = response.body;
+      String input =
+          jsonDecode(data)['rows'][0]['elements'][0]['duration']['text'];
+      int i = input.indexOf(' ');
+      String word = input.substring(0, i);
+      return word + ' دقائق ';
+    }
+    return 'لم يحدد';
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  getRatings() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+    var response = await http.post(apiurl, body: {
+      'phone': theDriver.phone, //get the username text
+    });
+
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        errormsg = jsondata["message"];
+      } else {
+        if (jsondata["success"] == 1) {
+          print(jsondata['cou']);
+          rateCount = int.parse(jsondata['cou']);
+          s1 = int.parse(jsondata['cnt1']);
+          s2 = int.parse(jsondata['cnt2']);
+          s3 = int.parse(jsondata['cnt3']);
+          s4 = int.parse(jsondata['cnt4']);
+          s5 = int.parse(jsondata['cnt5']);
+
+          errormsg = jsondata["message"];
+        } else {
+          errormsg = "حدث خطأ";
+        }
+      }
+    } else {
+      errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
+    }
+    Fluttertoast.showToast(
+      context,
+      msg: errormsg,
+    );
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future<void> displayDriverDetails() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.9//
+    var response = await http.post(apiurl, body: {
+      'phone': driverPhone,
+    });
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        errmsg = jsondata["message"];
+      } else {
+        theDriver.phone = driverPhone;
+        theDriver.name = jsondata["name"];
+        theDriver.pic = jsondata['profpic'];
+        theDriver.begN = jsondata['begN'];
+        theDriver.endN = jsondata['endN'];
+        theDriver.busType = jsondata["busType"];
+
+        var x = jsondata["rate"];
+        theDriver.rate = double.parse(x);
+        var xx = jsondata["numOfPass"];
+        theDriver.numOfPass = int.parse(xx);
+        getRatings();
+        errmsg = jsondata["message"];
+      }
+    } else {
+      errmsg = "حدث خطأ أثناء الاتصال بالشبكة";
+    }
+    Fluttertoast.showToast(
+      context,
+      msg: errmsg != null ? errmsg : 'hi',
+    );
+
+    setState(() {
+      driversDetailes = 400;
+    });
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void createRequest() {
+    //print(email);print(name);print(phone);
+    rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
+    var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
+    var destination =
+        Provider.of<AppData>(context, listen: false).destinationAddress;
+    //print(pickUp);
+    //print(destination);
+    Map pickUpMap = {
+      'longitude': pickUp.long.toString(),
+      'latitude': pickUp.lat.toString(),
+    };
+    Map destinationMap = {
+      'longitude': destination.long.toString(),
+      'latitude': destination.lat.toString(),
+    };
+    Map rideMap = {
+      'createdAt': DateTime.now().toString(),
+      'passengerName': thisUser.name,
+      'passengerPhone': thisUser.phone,
+      'pickUpAddress': pickUp.placeName,
+      'destinationAddress': destination.placeName,
+      'location': pickUpMap,
+      'destination': destinationMap,
+      'driver_id': 'waiting',
+      'status': 'waiting',
+      'passengers': numCont != null ? numCont : 1,
+    };
+    rideReq.set(rideMap);
+    ridestreams = rideReq.onValue.listen((event) {
+      if (event.snapshot.value == null) {
+        return;
+      }
+      if (event.snapshot.value['status'] != null) {
+        statusRide = event.snapshot.value['status'].toString();
+      }
+      if (event.snapshot.value['driver_location'] != null) {
+        double driverLat = double.parse(
+            event.snapshot.value['driver_location']['latitude'].toString());
+        double driverLong = double.parse(
+            event.snapshot.value['driver_location']['longitude'].toString());
+        LatLng driverCurrLoc = LatLng(driverLat, driverLong);
+        driverPhone = '';
+        if (event.snapshot.value['driver_phone'] != null) {
+          driverPhone = event.snapshot.value['driver_phone'].toString();
+        }
+        if (statusRide == 'accepted') {
+          updateDriTime(driverCurrLoc); //bbbbbbbaaaaaaaccckkkk
+        } else if (statusRide == 'onTrip') {
+          updateTripTime(driverCurrLoc);
+        } else if (statusRide == 'arrived') {
+          setState(() {
+            arrivalStatus = 'وصل الباص';
+          });
+        }
+      }
+
+      if (statusRide == 'accepted') {
+        displayDriverDetails();
+        Geofire.stopListener();
+        //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
+      }
+      if (statusRide == 'ended') {
+        if (event.snapshot.value['driver_phone'] != null) {
+          driverPhone = event.snapshot.value['driver_phone'].toString();
+        }
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) =>
+                Rating(driverPhone: driverPhone));
+
+        rideReq.onDisconnect();
+        rideReq = null;
+        ridestreams.cancel();
+        ridestreams = null;
+        //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
+
+        driversDetailes = 0;
+        statusRide = '';
+        arrivalStatus = ' الباص على الطريق ';
+      }
+    });
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void cancelReq() {
+    rideReq.remove();
+    setState(() {
+      markers.clear();
+      circles.clear();
+      polylines.clear();
+    });
+    LatLng pos = LatLng(_originLatitude, _originLongitude);
+    CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
+    newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void driversMarkers() {
+    setState(() {
+      //markers.length > 1 ? markers.removeRange(1, markers.length) : null;//removeAll()
+      circles.clear();
+      polylines.clear();
+      markers.clear();
+    });
+    for (NearDrivers driver in FireDrivers.nDrivers) {
+      setState(() {
+        driverltlg = LatLng(driver.lat, driver.long);
+
+        Marker driversmark = Marker(
+          markerId: MarkerId("drivmk"),
+          position: driverltlg,
+          icon: BitmapDescriptor.defaultMarkerWithHue(30),
+        );
+        markers.add(driversmark);
+      });
+    }
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void startGeoListen() {
+    Geofire.initialize('availableDrivers');
+    Geofire.queryAtLocation(
+            _originLatitude, _originLongitude, 5) //بدنا نغير ال5 كيلو
+        .listen((map) {
+      // print(map);
+      if (map != null) {
+        var callBack = map['callBack'];
+        //latitude will be retrieved from map['latitude']
+        //longitude will be retrieved from map['longitude']
+        switch (callBack) {
+          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+          case Geofire.onKeyEntered:
+            NearDrivers nDriver = NearDrivers();
+            int dNum; //
+            nDriver.key = map['key'];
+            nDriver.lat = map['latitude'];
+            nDriver.long = map['longitude'];
+
+            /* FireDrivers.nDrivers.add(nDriver);
+            if (nearLoaded) {
+              driversMarkers();
+            } */
+            DatabaseReference nDrivers = FirebaseDatabase.instance
+                .reference()
+                .child('Drivers/${nDriver.key}');
+            nDrivers.once().then((DataSnapshot snapshot) {
+              if (snapshot.value != null) {
+                dNum = snapshot.value['passengers'];
+                double wLat = double.parse(
+                    snapshot.value['whereTo']['latitude'].toString());
+                double wLng = double.parse(
+                    snapshot.value['whereTo']['longitude'].toString());
+                Funcs.checkPoint(wLat, wLng, nDriver.lat, nDriver.long,
+                    _destLatitude, _destLongitude);
+                if (dNum >= numCont && chP == true) {
+                  FireDrivers.nDrivers.add(nDriver);
+                  if (nearLoaded) {
+                    setState(() {
+                      driversMarkers();
+                    });
+                  }
+                }
+              }
+            });
+            break;
+          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+          case Geofire.onKeyExited:
+            FireDrivers.removeDriver(map['key']);
+            setState(() {
+              driversMarkers();
+            });
+            break;
+          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+          case Geofire.onKeyMoved:
+            // Update your key's location
+            NearDrivers nDriver = NearDrivers();
+            nDriver.key = map['key'];
+            nDriver.lat = map['latitude'];
+            nDriver.long = map['longitude'];
+            FireDrivers.updateDriver(nDriver);
+            setState(() {
+              driversMarkers();
+            });
+            break;
+          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+          case Geofire.onGeoQueryReady:
+            // All Intial Data is loaded
+            setState(() {
+              nearLoaded = true;
+              driversMarkers();
+            });
+            //  print(map['result']);
+
+            break;
+          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+        }
+      }
+    });
+  }
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Widget getWidget() {
     switch (isExtended) {
@@ -907,6 +912,7 @@ class _PassMapState extends State<PassMap> {
   Widget build(BuildContext context) {
     logFire();
     final Size size = MediaQuery.of(context).size;
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     numUnredMsgs() {
       int count = 0;
       FirebaseFirestore.instance
@@ -929,7 +935,7 @@ class _PassMapState extends State<PassMap> {
       });
     }
 
-    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     pic();
     putvalues();
     numUnredMsgs();
@@ -1152,6 +1158,7 @@ class _PassMapState extends State<PassMap> {
                         //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                         setState(() {
                           markers.clear();
+                          circles.clear();
                           polylines.clear();
                           homeispress = false;
                           msgispress = false;
@@ -1231,7 +1238,6 @@ class _PassMapState extends State<PassMap> {
                               createRequest();
                               startGeoListen();
                               //Future.delayed(const Duration(seconds: 2), () {});
-
                               availableDrivers = FireDrivers.nDrivers;
                               searchNearestDriver();
                             } else if (isExtended == 2) {
@@ -1596,21 +1602,20 @@ class _PassMapState extends State<PassMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void searchNearestDriver() {
     if (availableDrivers.length == 0) {
-      cancelReq();
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => NoDriverDialog(),
       );
+      cancelReq();
     } else {
       setState(() {
         //markers.length > 1 ? markers.removeRange(1, markers.length) : null;
         markers.clear();
         polylines.clear();
       });
-      var driver = availableDrivers[0];
-
-      print(driver.key);
+      var driver = availableDrivers[0]; //length-1
+      //print(driver.key);
       availableDrivers.removeAt(0);
       notifyDriver(driver);
     }

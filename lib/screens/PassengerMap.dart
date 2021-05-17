@@ -214,63 +214,6 @@ class PassengerMapState extends State<PassengerMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  favlist(String favname, double lattt, double longgg, context) {
-    return GestureDetector(
-        onTap: () {
-          startPointController.text = favname;
-          destinationAdd.lat = lattt;
-          destinationAdd.long = longgg;
-          destinationAdd.placeName = favname;
-          Provider.of<AppData>(context, listen: false)
-              .updateDestAddress(destinationAdd);
-          latLng.LatLng posd =
-              latLng.LatLng(destinationAdd.lat, destinationAdd.long);
-          PassengerPageState().searchDialog();
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          color: Colors.transparent, //Color(0xFF01d5ab), //(0xFF548279)
-          child: Column(
-            children: [
-              Container(
-                color: Color(0xFF1fdeb9), //Color(0xFF4b8b7e), //
-                //padding: EdgeInsets.only(left: 40),
-                child: Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Icon(
-                        Icons.star_sharp,
-                        color: Colors.amber,
-                        size: 35,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Text(
-                          favname,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Lemonada'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-            ],
-          ),
-        ));
-  }
-
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void createRequest() {
     rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
 

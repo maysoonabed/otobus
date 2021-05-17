@@ -55,7 +55,7 @@ class PassengerPage extends StatefulWidget {
 }
 
 class PassengerPageState extends State<PassengerPage> {
-  final GlobalKey<ScaffoldState> _scafkey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> scafkey = GlobalKey<ScaffoldState>();
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   setPolyLines() {
     setState(() {
@@ -111,6 +111,65 @@ class PassengerPageState extends State<PassengerPage> {
     } catch (e) {
       print(e);
     }
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  favlist(String favname, double lattt, double longgg, context) {
+    return GestureDetector(
+        onTap: () {
+          setState(() {
+            startPointController.text = favname;
+            destinationAdd.lat = lattt;
+            destinationAdd.long = longgg;
+            destinationAdd.placeName = favname;
+          });
+          Provider.of<AppData>(context, listen: false)
+              .updateDestAddress(destinationAdd);
+          latLng.LatLng posd =
+              latLng.LatLng(destinationAdd.lat, destinationAdd.long);
+          searchDialog();
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          color: Colors.transparent, //Color(0xFF01d5ab), //(0xFF548279)
+          child: Column(
+            children: [
+              Container(
+                color: Color(0xFF1fdeb9), //Color(0xFF4b8b7e), //
+                //padding: EdgeInsets.only(left: 40),
+                child: Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Icon(
+                        Icons.star_sharp,
+                        color: Colors.amber,
+                        size: 35,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Text(
+                          favname,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Lemonada'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
+        ));
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -171,8 +230,7 @@ class PassengerPageState extends State<PassengerPage> {
                                       startPointController.text = oneNamePlace;
                                       destinationAdd.lat = place.center[1];
                                       destinationAdd.long = place.center[0];
-                                      destinationAdd.placeName =
-                                          place.placeName;
+                                      destinationAdd.placeName = oneNamePlace;
                                       Provider.of<AppData>(context,
                                               listen: false)
                                           .updateDestAddress(destinationAdd);
@@ -216,7 +274,7 @@ class PassengerPageState extends State<PassengerPage> {
 
                               addnewplace(newFav, oneNamePlace);
                               Navigator.pop(context);
-                              _scafkey.currentState.openDrawer();
+                              scafkey.currentState.openDrawer();
                             },
                           ),
                   ],
@@ -333,7 +391,7 @@ class PassengerPageState extends State<PassengerPage> {
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
         home: Scaffold(
-            key: _scafkey,
+            key: scafkey,
             backgroundColor: ba1color,
             //#######################################
             appBar: AppBar(
@@ -383,8 +441,7 @@ class PassengerPageState extends State<PassengerPage> {
                                       var fpname = favp['FavPlaceName'];
                                       var ltt = favp['lattitude'];
                                       var lgg = favp['longitude'];
-                                      return PassengerMapState()
-                                          .favlist(fpname, ltt, lgg, context);
+                                      return favlist(fpname, ltt, lgg, context);
                                     })
                                 : Center(child: CircularProgressIndicator());
                           })
@@ -498,7 +555,7 @@ class PassengerPageState extends State<PassengerPage> {
                         backgroundColor: Colors.amber,
                         isExtended: true,
                         onPressed: () {
-                          _scafkey.currentState.openDrawer();
+                          scafkey.currentState.openDrawer();
                         },
                         label: Row(
                           children: <Widget>[
@@ -747,7 +804,7 @@ class PassengerPageState extends State<PassengerPage> {
                                       color:
                                           (proispress) ? mypink : Colors.white,
                                       onPressed: () {
-                                        _scafkey.currentState.openEndDrawer();
+                                        scafkey.currentState.openEndDrawer();
                                         setState(() {
                                           homeispress = false;
                                           msgispress = false;
