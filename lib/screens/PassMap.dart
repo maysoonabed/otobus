@@ -1607,7 +1607,7 @@ class _PassMapState extends State<PassMap> {
         barrierDismissible: false,
         builder: (BuildContext context) => NoDriverDialog(),
       );
-      cancelReq();
+      //cancelReq();
     } else {
       setState(() {
         //markers.length > 1 ? markers.removeRange(1, markers.length) : null;
@@ -1615,7 +1615,7 @@ class _PassMapState extends State<PassMap> {
         polylines.clear();
       });
       var driver = availableDrivers[0]; //length-1
-      //print(driver.key);
+      print(driver.key);
       availableDrivers.removeAt(0);
       notifyDriver(driver);
     }

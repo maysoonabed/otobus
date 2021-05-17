@@ -562,9 +562,6 @@ class PassengerMapState extends State<PassengerMap> {
     NotificChat pushNot = NotificChat();
     pushNot.initialize(context);
   }
-
-  int msgsCount = 0;
-  int busflaf = 0;
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Widget build(BuildContext context) {
