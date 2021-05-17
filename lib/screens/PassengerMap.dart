@@ -826,6 +826,7 @@ class PassengerMapState extends State<PassengerMap> {
         return;
       }
       const sec = Duration(seconds: 1);
+      // dReqTimeout = 0; ///////
       var timer = Timer.periodic(sec, (timer) {
         if (stat != 'requesting') {
           driverRef.child(driver.key).child('newTrip').set('cancelled');
