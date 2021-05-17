@@ -574,135 +574,168 @@ class PassengerMapState extends State<PassengerMap> {
     putvalues();
     final Size size = MediaQuery.of(context).size;
     putvalues();
-    return MaterialApp(
-        debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home: Stack(children: [
-          FlutterMap(
-            options: MapOptions(
-              center: latLng.LatLng(32.0442, 35.2242),
-              zoom: 10.0,
-            ),
-            layers: [
-              TileLayerOptions(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-              ),
-              PolylineLayerOptions(
-                polylines: polyLines,
-              ),
-              MarkerLayerOptions(
-                markers: markers,
-              ),
-            ],
+    return Stack(children: [
+      FlutterMap(
+        options: MapOptions(
+          center: latLng.LatLng(32.0442, 35.2242),
+          zoom: 10.0,
+        ),
+        layers: [
+          TileLayerOptions(
+            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
           ),
-          markers.length > 1
-              ? Padding(
-                  padding: const EdgeInsets.only(bottom: 90, right: 10),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: FloatingActionButton.extended(
-                      backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
-                      isExtended: isExtended > 0 ? true : false,
-                      onPressed: () {
-                        if (isExtended == 1) {
-                          createRequest();
-                          startGeoListen();
-                          Future.delayed(const Duration(seconds: 2), () {});
+          PolylineLayerOptions(
+            polylines: polyLines,
+          ),
+          MarkerLayerOptions(
+            markers: markers,
+          ),
+        ],
+      ),
+      markers.length > 1
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 90, right: 10),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton.extended(
+                  backgroundColor: isExtended < 2 ? apBcolor : Colors.black,
+                  isExtended: isExtended > 0 ? true : false,
+                  onPressed: () {
+                    if (isExtended == 1) {
+                      createRequest();
+                      startGeoListen();
+                      Future.delayed(const Duration(seconds: 2), () {});
 
-                          availableDrivers = FireDrivers.nDrivers;
-                          searchNearestDriver();
-                        } else if (isExtended == 2) {
-                          cancelReq();
+                      availableDrivers = FireDrivers.nDrivers;
+                      searchNearestDriver();
+                    } else if (isExtended == 2) {
+                      cancelReq();
+                    }
+                    setState(
+                      () {
+                        if (isExtended < 2) {
+                          isExtended++;
+                          isExtended == 1 ? stat = 'requesting' : null;
+                        } else {
+                          isExtended = 0;
                         }
-                        setState(
-                          () {
-                            if (isExtended < 2) {
-                              isExtended++;
-                              isExtended == 1 ? stat = 'requesting' : null;
-                            } else {
-                              isExtended = 0;
-                            }
-                          },
-                        );
                       },
-                      label: getWidget(),
-                    ),
-                  ),
-                )
-              : Container(
-                  height: 0.1,
-                  width: 0.1,
+                    );
+                  },
+                  label: getWidget(),
                 ),
+              ),
+            )
+          : Container(
+              height: 0.1,
+              width: 0.1,
+            ),
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //Display driver's info
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-          Positioned(
-            bottom: 10,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      topLeft: Radius.circular(16)),
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                        spreadRadius: 0.5,
-                        blurRadius: 16,
-                        color: Colors.black54,
-                        offset: Offset(0.7, 0.7)),
-                  ]),
-              height: driversDetailes,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+      Positioned(
+        bottom: 10,
+        left: 0,
+        right: 0,
+        child: Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(16), topLeft: Radius.circular(16)),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    spreadRadius: 0.5,
+                    blurRadius: 16,
+                    color: Colors.black54,
+                    offset: Offset(0.7, 0.7)),
+              ]),
+          height: driversDetailes,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 6,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      height: 6,
+                    Text(
+                      arrivalStatus,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  ],
+                ),
+                SizedBox(
+                  height: 22,
+                ),
+                Divider(),
+                Text(
+                  theDriver.busType != null ? theDriver.busType : ' نوع الباص',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                Text(
+                  theDriver.name != null ? theDriver.name : 'اسم السائق',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                ),
+                SizedBox(
+                  height: 22,
+                ),
+                Divider(),
+                SizedBox(
+                  height: 22,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          arrivalStatus,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20),
+                        Container(
+                          height: 55,
+                          width: 55,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(26)),
+                            border: Border.all(width: 2, color: Colors.grey),
+                          ),
+                          child: Icon(Icons.cancel),
                         ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text('إلغاء طلب الرحلة'),
                       ],
                     ),
-                    SizedBox(
-                      height: 22,
-                    ),
-                    Divider(),
-                    Text(
-                      theDriver.busType != null
-                          ? theDriver.busType
-                          : ' نوع الباص',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    Text(
-                      theDriver.name != null ? theDriver.name : 'اسم السائق',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
-                    ),
-                    SizedBox(
-                      height: 22,
-                    ),
-                    Divider(),
-                    SizedBox(
-                      height: 22,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
+                        InkWell(
+                            onTap: () {
+                              drivPhone = theDriver.phone;
+                              getInfoForChat(drivPhone);
+                              roomId = globalFunctions()
+                                  .creatChatRoomInfo(thisUser.email, drivEmail);
+                              //print(roomId);
+                              Navigator.of(context).push(
+                                CubePageRoute(
+                                  enterPage: PassChatDetailes(
+                                    username: drivName,
+                                    imageURL: drivImgPath,
+                                    useremail: drivEmail,
+                                    roomID: roomId,
+                                    sendername: thisUser.name,
+                                  ),
+                                  exitPage: PassengerMap(),
+                                  duration: const Duration(milliseconds: 1200),
+                                ),
+                              );
+                            },
+                            child: Container(
                               height: 55,
                               width: 55,
                               decoration: BoxDecoration(
@@ -711,94 +744,51 @@ class PassengerMapState extends State<PassengerMap> {
                                 border:
                                     Border.all(width: 2, color: Colors.grey),
                               ),
-                              child: Icon(Icons.cancel),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text('إلغاء طلب الرحلة'),
-                          ],
+                              child: Icon(Icons.message),
+                            )),
+                        SizedBox(
+                          height: 10,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            InkWell(
-                                onTap: () {
-                                  drivPhone = theDriver.phone;
-                                  getInfoForChat(drivPhone);
-                                  roomId = globalFunctions().creatChatRoomInfo(
-                                      thisUser.email, drivEmail);
-                                  //print(roomId);
-                                  Navigator.of(context).push(
-                                    CubePageRoute(
-                                      enterPage: PassChatDetailes(
-                                        username: drivName,
-                                        imageURL: drivImgPath,
-                                        useremail: drivEmail,
-                                        roomID: roomId,
-                                        sendername: thisUser.name,
-                                      ),
-                                      exitPage: PassengerMap(),
-                                      duration:
-                                          const Duration(milliseconds: 1200),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  height: 55,
-                                  width: 55,
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(26)),
-                                    border: Border.all(
-                                        width: 2, color: Colors.grey),
-                                  ),
-                                  child: Icon(Icons.message),
-                                )),
-                            SizedBox(
-                              height: 10,
+                        Text('تواصل مع السائق'),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            showBottomSheet(
+                                context: context,
+                                backgroundColor: Colors.transparent,
+                                builder: (BuildContext context) {
+                                  return DriverInfoBottom(); // returns your BottomSheet widget
+                                });
+                          },
+                          child: Container(
+                            height: 55,
+                            width: 55,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(26)),
+                              border: Border.all(width: 2, color: Colors.grey),
                             ),
-                            Text('تواصل مع السائق'),
-                          ],
+                            child: Icon(Icons.list),
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                showBottomSheet(
-                                    context: context,
-                                    backgroundColor: Colors.transparent,
-                                    builder: (BuildContext context) {
-                                      return DriverInfoBottom(); // returns your BottomSheet widget
-                                    });
-                              },
-                              child: Container(
-                                height: 55,
-                                width: 55,
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(26)),
-                                  border:
-                                      Border.all(width: 2, color: Colors.grey),
-                                ),
-                                child: Icon(Icons.list),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Text(' معلومات السائق'),
-                          ],
+                        SizedBox(
+                          height: 10,
                         ),
+                        Text(' معلومات السائق'),
                       ],
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
           ),
-        ]));
+        ),
+      ),
+    ]);
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

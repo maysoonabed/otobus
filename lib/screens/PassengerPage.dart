@@ -388,439 +388,422 @@ class PassengerPageState extends State<PassengerPage> {
     }
 
     numUnredMsgs();
-    return MaterialApp(
-        debugShowCheckedModeBanner: false, //لإخفاء شريط depug
-        home: Scaffold(
-            key: scafkey,
-            backgroundColor: ba1color,
-            //#######################################
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              actions: <Widget>[
-                new Container(),
-              ],
-              title: Center(
-                child: Text(
-                  "OtoBüs",
+    return Scaffold(
+        key: scafkey,
+        backgroundColor: ba1color,
+        //#######################################
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            new Container(),
+          ],
+          title: Center(
+            child: Text(
+              "OtoBüs",
+              style: TextStyle(
+                fontSize: 25,
+                fontFamily: 'Pacifico',
+                color: Colors.white,
+              ),
+            ),
+          ),
+          backgroundColor: apcolor,
+        ),
+        //######################################
+        drawer: Drawer(
+            child: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              (currUser.uid != null)
+                  ? StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(currUser.uid)
+                          .collection("favorit")
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        return snapshot.hasData
+                            ? ListView.builder(
+                                itemCount: snapshot.data.docs.length,
+                                shrinkWrap: true,
+                                padding: EdgeInsets.only(top: 16),
+                                physics: NeverScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  if (!snapshot.hasData) {
+                                    return Container();
+                                  }
+                                  DocumentSnapshot favp =
+                                      snapshot.data.docs[index];
+                                  var fpname = favp['FavPlaceName'];
+                                  var ltt = favp['lattitude'];
+                                  var lgg = favp['longitude'];
+                                  return favlist(fpname, ltt, lgg, context);
+                                })
+                            : Center(child: CircularProgressIndicator());
+                      })
+                  : Container(),
+            ],
+          ),
+        )),
+        //######################################
+        endDrawer: Drawer(
+            child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Stack(
+                overflow: Overflow.visible,
+                alignment: Alignment.center,
+                children: <Widget>[
+                  Image(image: AssetImage('lib/Images/passengercover.jpg')),
+                  Positioned(
+                      //key: _photopickey,
+                      bottom: -50.0,
+                      child: CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.white,
+                        backgroundImage: (prof != null)
+                            ? FileImage(prof)
+                            : (profname != null
+                                ? img
+                                : AssetImage('lib/Images/Defultprof.jpg')),
+                        child: MaterialButton(
+                          height: 170,
+                          minWidth: 170.0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(80)),
+                          onPressed: () async {
+                            var picked = await picker.getImage(
+                                source: ImageSource.gallery);
+                            prof = File(picked.path);
+                            profname = prof.path.split('/').last;
+                            PassengerMapState().upload(prof, profname);
+                            setState(() {
+                              img = AssetImage('phpfiles/cardlic/$profname');
+                            });
+                          },
+                        ),
+                      )),
+                ],
+              ),
+              SizedBox(
+                height: 60,
+              ),
+              Container(
+                  child: TextField(
+                controller: namecon,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontFamily: "Lemonada",
+                ),
+                readOnly: true,
+                autofocus: false,
+                decoration: myInputDecoration(
+                  label: " ",
+                  icon: Icons.person,
+                ),
+              )),
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                child: TextField(
+                  controller: emailcon,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: 'Pacifico',
-                    color: Colors.white,
+                    fontSize: 15,
+                    fontFamily: "Lemonada",
+                  ),
+                  readOnly: true,
+                  autofocus: false,
+                  decoration: myInputDecoration(
+                    label: " ",
+                    icon: Icons.email,
                   ),
                 ),
               ),
-              backgroundColor: apcolor,
-            ),
-            //######################################
-            drawer: Drawer(
-                child: SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  (currUser.uid != null)
-                      ? StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection("users")
-                              .doc(currUser.uid)
-                              .collection("favorit")
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            return snapshot.hasData
-                                ? ListView.builder(
-                                    itemCount: snapshot.data.docs.length,
-                                    shrinkWrap: true,
-                                    padding: EdgeInsets.only(top: 16),
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (context, index) {
-                                      if (!snapshot.hasData) {
-                                        return Container();
-                                      }
-                                      DocumentSnapshot favp =
-                                          snapshot.data.docs[index];
-                                      var fpname = favp['FavPlaceName'];
-                                      var ltt = favp['lattitude'];
-                                      var lgg = favp['longitude'];
-                                      return favlist(fpname, ltt, lgg, context);
-                                    })
-                                : Center(child: CircularProgressIndicator());
-                          })
-                      : Container(),
-                ],
+              SizedBox(
+                height: 10,
               ),
-            )),
-            //######################################
-            endDrawer: Drawer(
-                child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  Stack(
-                    overflow: Overflow.visible,
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Image(image: AssetImage('lib/Images/passengercover.jpg')),
-                      Positioned(
-                          //key: _photopickey,
-                          bottom: -50.0,
-                          child: CircleAvatar(
-                            radius: 80,
-                            backgroundColor: Colors.white,
-                            backgroundImage: (prof != null)
-                                ? FileImage(prof)
-                                : (profname != null
-                                    ? img
-                                    : AssetImage('lib/Images/Defultprof.jpg')),
-                            child: MaterialButton(
-                              height: 170,
-                              minWidth: 170.0,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(80)),
-                              onPressed: () async {
-                                var picked = await picker.getImage(
-                                    source: ImageSource.gallery);
-                                prof = File(picked.path);
-                                profname = prof.path.split('/').last;
-                                PassengerMapState().upload(prof, profname);
-                                setState(() {
-                                  img =
-                                      AssetImage('phpfiles/cardlic/$profname');
-                                });
-                              },
-                            ),
-                          )),
-                    ],
+              Container(
+                child: TextField(
+                  controller: phonecon,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontFamily: "Lemonada",
                   ),
-                  SizedBox(
-                    height: 60,
+                  readOnly: true,
+                  autofocus: false,
+                  decoration: myInputDecoration(
+                    label: " ",
+                    icon: Icons.phone_android,
                   ),
-                  Container(
-                      child: TextField(
-                    controller: namecon,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontFamily: "Lemonada",
-                    ),
-                    readOnly: true,
-                    autofocus: false,
-                    decoration: myInputDecoration(
-                      label: " ",
-                      icon: Icons.person,
-                    ),
-                  )),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    child: TextField(
-                      controller: emailcon,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontFamily: "Lemonada",
-                      ),
-                      readOnly: true,
-                      autofocus: false,
-                      decoration: myInputDecoration(
-                        label: " ",
-                        icon: Icons.email,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Container(
-                    child: TextField(
-                      controller: phonecon,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontFamily: "Lemonada",
-                      ),
-                      readOnly: true,
-                      autofocus: false,
-                      decoration: myInputDecoration(
-                        label: " ",
-                        icon: Icons.phone_android,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: FloatingActionButton.extended(
-                        backgroundColor: Colors.amber,
-                        isExtended: true,
-                        onPressed: () {
-                          scafkey.currentState.openDrawer();
-                        },
-                        label: Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Icon(Icons.star_sharp),
-                            ),
-                            Text("الأماكن المفضلة",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    fontFamily: "Lemonada",
-                                    color: Colors.white)),
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: FloatingActionButton.extended(
-                        backgroundColor: apBcolor,
-                        isExtended: true,
-                        onPressed: () {},
-                        label: Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Icon(
-                                Icons.update,
-                                size: 20,
-                              ),
-                            ),
-                            Text("تحديث المعلومات",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: "Lemonada",
-                                    color: Colors.white)),
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: FloatingActionButton.extended(
-                        backgroundColor: apBcolor,
-                        isExtended: true,
-                        onPressed: () {
-                          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                          setState(() {
-                            FirebaseAuth.instance.signOut();
-                            markers.clear();
-                            polyLines.clear();
-                            homeispress = false;
-                            msgispress = false;
-                            notispress = false;
-                            proispress = false;
-                            startPointController.text = "";
-                            FlutterSession().set('passemail', '');
-                            FlutterSession().set('name', '');
-                            FlutterSession().set('phone', '');
-                            FlutterSession().set('password', '');
-                            FlutterSession().set('profpic', '');
-                          });
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => MyApp()));
-                        },
-                        label: Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Icon(
-                                Icons.logout,
-                                size: 20,
-                              ),
-                            ),
-                            Text("تسجيل الخروج",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: "Lemonada",
-                                    color: Colors.white)),
-                          ],
-                        )),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                ],
+                ),
               ),
-            )),
-            //#######################################
-            body: Stack(
-              children: [
-                PassengerMap(),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  child: Container(
-                    // color: apcolor,
-                    width: size.width,
-                    height: 80,
-                    child: Stack(
-                      children: [
-                        CustomPaint(
-                          size: Size(size.width, 80),
-                          painter: CusPaint(),
+              SizedBox(
+                height: 20,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: FloatingActionButton.extended(
+                    backgroundColor: Colors.amber,
+                    isExtended: true,
+                    onPressed: () {
+                      scafkey.currentState.openDrawer();
+                    },
+                    label: Row(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Icon(Icons.star_sharp),
                         ),
-                        Center(
-                          heightFactor: 0.6,
-                          child: FloatingActionButton(
-                            onPressed: () {
-                              driversDetailes == 0 ? searchDialog() : null;
-                            },
-                            backgroundColor: mypink,
-                            //Color(0xFF0e6655),  //Colors.black,
-                            child: Icon(Icons.search),
-                            elevation: 0.1,
+                        Text("الأماكن المفضلة",
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontFamily: "Lemonada",
+                                color: Colors.white)),
+                      ],
+                    )),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: FloatingActionButton.extended(
+                    backgroundColor: apBcolor,
+                    isExtended: true,
+                    onPressed: () {},
+                    label: Row(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.update,
+                            size: 20,
                           ),
                         ),
-                        Container(
-                            width: size.width,
-                            height: 80,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment
-                                  .spaceEvenly, //Center Row contents vertically,
-
-                              children: [
-                                Material(
-                                  color: (homeispress)
-                                      ? Color(0xFF1ccdaa)
-                                      : apcolor,
-                                  shape: CircleBorder(),
-                                  clipBehavior: Clip.hardEdge,
-                                  child: IconButton(
-                                      icon: Icon(Icons.home),
-                                      color:
-                                          (homeispress) ? mypink : Colors.white,
-                                      // iconBack, //mypink, //apcolor,
-                                      onPressed: () {
-                                        setState(() {
-                                          homeispress = true;
-                                          msgispress = false;
-                                          notispress = false;
-                                          proispress = false;
-                                        });
-                                      }),
-                                ),
-                                Material(
-                                  color: (msgispress)
-                                      ? Color(0xFF1ccdaa)
-                                      : apcolor,
-                                  shape: CircleBorder(),
-                                  clipBehavior: Clip.hardEdge,
-                                  child: IconButton(
-                                      icon: new Stack(
-                                        children: <Widget>[
-                                          Icon(Icons
-                                              .chat_bubble_outlined), //Icons.message_outlined
-                                          new Positioned(
-                                            right: 0,
-                                            child: new Container(
-                                              padding: EdgeInsets.all(1),
-                                              decoration: new BoxDecoration(
-                                                color: (msgsCount > 0)
-                                                    ? Colors.red
-                                                    : Colors.transparent,
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              constraints: BoxConstraints(
-                                                minWidth: 15,
-                                                minHeight: 15,
-                                              ),
-                                              child: new Text(
-                                                (msgsCount > 0)
-                                                    ? '$msgsCount'
-                                                    : '',
-                                                style: new TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                ),
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      color:
-                                          (msgispress) ? mypink : Colors.white,
-                                      onPressed: () {
-                                        setState(() {
-                                          homeispress = false;
-                                          msgispress = true;
-                                          notispress = false;
-                                          proispress = false;
-                                        });
-                                        Navigator.of(context).push(
-                                          CubePageRoute(
-                                            enterPage: PassChat(
-                                                thisUser.email, thisUser.name),
-                                            exitPage: PassengerMap(),
-                                            duration: const Duration(
-                                                milliseconds: 1200),
-                                          ),
-                                        );
-                                      }),
-                                ),
-                                Container(
-                                  width: size.width * 0.20,
-                                ),
-                                Material(
-                                  color: (notispress)
-                                      ? Color(0xFF1ccdaa)
-                                      : apcolor,
-                                  shape: CircleBorder(),
-                                  clipBehavior: Clip.hardEdge,
-                                  child: IconButton(
-                                      icon: Icon(Icons.notifications),
-                                      color:
-                                          (notispress) ? mypink : Colors.white,
-                                      onPressed: () {
-                                        setState(() {
-                                          homeispress = false;
-                                          msgispress = false;
-                                          notispress = true;
-                                          proispress = false;
-                                        });
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  TheCalendar()),
-                                        );
-                                      }),
-                                ),
-                                Material(
-                                  color: (proispress)
-                                      ? Color(0xFF1ccdaa)
-                                      : apcolor,
-                                  shape: CircleBorder(),
-                                  clipBehavior: Clip.hardEdge,
-                                  child: IconButton(
-                                      icon: Icon(Icons.person),
-                                      color:
-                                          (proispress) ? mypink : Colors.white,
-                                      onPressed: () {
-                                        scafkey.currentState.openEndDrawer();
-                                        setState(() {
-                                          homeispress = false;
-                                          msgispress = false;
-                                          notispress = false;
-                                          proispress = true;
-                                        });
-                                      }),
-                                ),
-                              ],
-                            ))
+                        Text("تحديث المعلومات",
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: "Lemonada",
+                                color: Colors.white)),
                       ],
+                    )),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: FloatingActionButton.extended(
+                    backgroundColor: apBcolor,
+                    isExtended: true,
+                    onPressed: () {
+                      //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                      setState(() {
+                        FirebaseAuth.instance.signOut();
+                        markers.clear();
+                        polyLines.clear();
+                        homeispress = false;
+                        msgispress = false;
+                        notispress = false;
+                        proispress = false;
+                        startPointController.text = "";
+                        FlutterSession().set('passemail', '');
+                        FlutterSession().set('name', '');
+                        FlutterSession().set('phone', '');
+                        FlutterSession().set('password', '');
+                        FlutterSession().set('profpic', '');
+                      });
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => MyApp()));
+                    },
+                    label: Row(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.logout,
+                            size: 20,
+                          ),
+                        ),
+                        Text("تسجيل الخروج",
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: "Lemonada",
+                                color: Colors.white)),
+                      ],
+                    )),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+            ],
+          ),
+        )),
+        //#######################################
+        body: Stack(
+          children: [
+            PassengerMap(),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              child: Container(
+                // color: apcolor,
+                width: size.width,
+                height: 80,
+                child: Stack(
+                  children: [
+                    CustomPaint(
+                      size: Size(size.width, 80),
+                      painter: CusPaint(),
                     ),
-                  ),
-                )
-              ],
-            )));
+                    Center(
+                      heightFactor: 0.6,
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          driversDetailes == 0 ? searchDialog() : null;
+                        },
+                        backgroundColor: mypink,
+                        //Color(0xFF0e6655),  //Colors.black,
+                        child: Icon(Icons.search),
+                        elevation: 0.1,
+                      ),
+                    ),
+                    Container(
+                        width: size.width,
+                        height: 80,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment
+                              .spaceEvenly, //Center Row contents vertically,
+
+                          children: [
+                            Material(
+                              color:
+                                  (homeispress) ? Color(0xFF1ccdaa) : apcolor,
+                              shape: CircleBorder(),
+                              clipBehavior: Clip.hardEdge,
+                              child: IconButton(
+                                  icon: Icon(Icons.home),
+                                  color: (homeispress) ? mypink : Colors.white,
+                                  // iconBack, //mypink, //apcolor,
+                                  onPressed: () {
+                                    setState(() {
+                                      homeispress = true;
+                                      msgispress = false;
+                                      notispress = false;
+                                      proispress = false;
+                                    });
+                                  }),
+                            ),
+                            Material(
+                              color: (msgispress) ? Color(0xFF1ccdaa) : apcolor,
+                              shape: CircleBorder(),
+                              clipBehavior: Clip.hardEdge,
+                              child: IconButton(
+                                  icon: new Stack(
+                                    children: <Widget>[
+                                      Icon(Icons
+                                          .chat_bubble_outlined), //Icons.message_outlined
+                                      new Positioned(
+                                        right: 0,
+                                        child: new Container(
+                                          padding: EdgeInsets.all(1),
+                                          decoration: new BoxDecoration(
+                                            color: (msgsCount > 0)
+                                                ? Colors.red
+                                                : Colors.transparent,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          constraints: BoxConstraints(
+                                            minWidth: 15,
+                                            minHeight: 15,
+                                          ),
+                                          child: new Text(
+                                            (msgsCount > 0) ? '$msgsCount' : '',
+                                            style: new TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  color: (msgispress) ? mypink : Colors.white,
+                                  onPressed: () {
+                                    setState(() {
+                                      homeispress = false;
+                                      msgispress = true;
+                                      notispress = false;
+                                      proispress = false;
+                                    });
+                                    Navigator.of(context).push(
+                                      CubePageRoute(
+                                        enterPage: PassChat(
+                                            thisUser.email, thisUser.name),
+                                        exitPage: PassengerMap(),
+                                        duration:
+                                            const Duration(milliseconds: 1200),
+                                      ),
+                                    );
+                                  }),
+                            ),
+                            Container(
+                              width: size.width * 0.20,
+                            ),
+                            Material(
+                              color: (notispress) ? Color(0xFF1ccdaa) : apcolor,
+                              shape: CircleBorder(),
+                              clipBehavior: Clip.hardEdge,
+                              child: IconButton(
+                                  icon: Icon(Icons.notifications),
+                                  color: (notispress) ? mypink : Colors.white,
+                                  onPressed: () {
+                                    setState(() {
+                                      homeispress = false;
+                                      msgispress = false;
+                                      notispress = true;
+                                      proispress = false;
+                                    });
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => TheCalendar()),
+                                    );
+                                  }),
+                            ),
+                            Material(
+                              color: (proispress) ? Color(0xFF1ccdaa) : apcolor,
+                              shape: CircleBorder(),
+                              clipBehavior: Clip.hardEdge,
+                              child: IconButton(
+                                  icon: Icon(Icons.person),
+                                  color: (proispress) ? mypink : Colors.white,
+                                  onPressed: () {
+                                    scafkey.currentState.openEndDrawer();
+                                    setState(() {
+                                      homeispress = false;
+                                      msgispress = false;
+                                      notispress = false;
+                                      proispress = true;
+                                    });
+                                  }),
+                            ),
+                          ],
+                        ))
+                  ],
+                ),
+              ),
+            )
+          ],
+        ));
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
