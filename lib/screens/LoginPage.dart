@@ -57,16 +57,13 @@ class _LoginPageState extends State<LoginPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/login.php"; //10.0.0.9////192.168.1.108:8089
+        "http://192.168.1.7/otobus/phpfiles/login.php"; //10.0.0.9////192.168.1.7
 
     var response = await http.post(apiurl, body: {
       'email': email,
       'password': password,
       'id': id.toString(),
-    });
-    //print(phone + password + id.toString());
-    //print(response.statusCode);
-    //print(response.body);
+    }); 
     if (response.statusCode == 200) {
       var jsondata = jsonDecode(response.body); //json.decode
       if (jsondata["error"] == 1) {

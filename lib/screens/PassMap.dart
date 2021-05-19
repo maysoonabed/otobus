@@ -90,7 +90,8 @@ String drivImgPath = "lib/Images/Defultprof.jpg";
 String drivPhone = "";
 String path;
 String oneNamePlace;
-
+Position myPos;
+BitmapDescriptor movingMarkerIcon;
 StreamSubscription<Event> ridestreams;
 String driverPhone;
 String errmsg;
@@ -145,7 +146,7 @@ class _PassMapState extends State<PassMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.9//192.168.1.106:8089
+        "http://192.168.1.7/otobus/phpfiles/updatepass.php"; //10.0.0.9//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -157,7 +158,7 @@ class _PassMapState extends State<PassMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.9////192.168.1.108:8089
+        "http://192.168.1.7/otobus/phpfiles/getdataforchat.php"; //10.0.0.9////192.168.1.7
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -268,7 +269,7 @@ class _PassMapState extends State<PassMap> {
       fillColor: Colors.green,
     );
     Circle destCircle = Circle(
-      circleId: CircleId('current'),
+      circleId: CircleId('dest'),
       strokeColor: Colors.black,
       strokeWidth: 1,
       radius: 80,
@@ -535,7 +536,8 @@ class _PassMapState extends State<PassMap> {
       var pos = LatLng(_originLatitude, _originLongitude);
       String time = await calcTime(pos, driverCurrLoc);
       setState(() {
-        arrivalStatus = ' سيصل الباص بحدود ' + time /* + " دقائق " */;
+        arrivalStatus = ' الرجاء التوجه إلى مسار الباص, الباص يبعد ' +
+            time /* + " دقائق " */;
       });
       reqPosDet = false;
     }
@@ -576,7 +578,7 @@ class _PassMapState extends State<PassMap> {
   getRatings() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.9//
+        "http://192.168.1.7/otobus/phpfiles/avgRatings.php"; //10.0.0.9//
     var response = await http.post(apiurl, body: {
       'phone': theDriver.phone, //get the username text
     });
@@ -585,6 +587,10 @@ class _PassMapState extends State<PassMap> {
       var jsondata = json.decode(response.body);
       if (jsondata["error"] == 1) {
         errormsg = jsondata["message"];
+        Fluttertoast.showToast(
+          context,
+          msg: errormsg,
+        );
       } else {
         if (jsondata["success"] == 1) {
           print(jsondata['cou']);
@@ -598,22 +604,26 @@ class _PassMapState extends State<PassMap> {
           errormsg = jsondata["message"];
         } else {
           errormsg = "حدث خطأ";
+          Fluttertoast.showToast(
+            context,
+            msg: errormsg,
+          );
         }
       }
     } else {
       errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
+      Fluttertoast.showToast(
+        context,
+        msg: errormsg,
+      );
     }
-    Fluttertoast.showToast(
-      context,
-      msg: errormsg,
-    );
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future<void> displayDriverDetails() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.9//
+        "http://192.168.1.7/otobus/phpfiles/getDriverInfo.php"; //10.0.0.9//
     var response = await http.post(apiurl, body: {
       'phone': driverPhone,
     });
@@ -621,6 +631,10 @@ class _PassMapState extends State<PassMap> {
       var jsondata = json.decode(response.body);
       if (jsondata["error"] == 1) {
         errmsg = jsondata["message"];
+        Fluttertoast.showToast(
+          context,
+          msg: errmsg != null ? errmsg : 'hi',
+        );
       } else {
         theDriver.phone = driverPhone;
         theDriver.name = jsondata["name"];
@@ -638,11 +652,11 @@ class _PassMapState extends State<PassMap> {
       }
     } else {
       errmsg = "حدث خطأ أثناء الاتصال بالشبكة";
+      Fluttertoast.showToast(
+        context,
+        msg: errmsg != null ? errmsg : 'hi',
+      );
     }
-    Fluttertoast.showToast(
-      context,
-      msg: errmsg != null ? errmsg : 'hi',
-    );
 
     setState(() {
       driversDetailes = 400;
@@ -650,6 +664,128 @@ class _PassMapState extends State<PassMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  void creatMarker() {
+    if (movingMarkerIcon == null) {
+      BitmapDescriptor.fromAssetImage(
+              ImageConfiguration(size: Size(1, 1)), 'lib/Images/icon2.png')
+          .then((onValue) {
+        movingMarkerIcon = onValue;
+      });
+    }
+  }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void updateRideLocation() {
+    pridePosStream = Geolocator.getPositionStream(
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
+    ).listen((Position position) {
+      currltlg = LatLng(position.latitude, position.longitude);
+      myPos = position;
+      currentPosition = position;
+      LatLng pos = LatLng(position.latitude, position.longitude);
+
+      Marker currmr = Marker(
+        markerId: MarkerId('current'),
+        position: pos,
+        icon: BitmapDescriptor.defaultMarkerWithHue(90),
+        infoWindow: InfoWindow(title: 'الموقع الحالي'),
+      );
+      setState(() {
+        markers.removeWhere((marker) => marker.markerId.value == 'current');
+        markers.add(currmr);
+      });
+
+      Map locationMap = {
+        'latitude': myPos.latitude,
+        'longitude': myPos.longitude,
+      };
+      rideReq.child('location').set(locationMap);
+    });
+  }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  updateDriverLocation(LatLng loc) async {
+    Marker movingMarker = Marker(
+      markerId: MarkerId('moving'),
+      position: loc,
+      icon: movingMarkerIcon,
+      infoWindow: InfoWindow(title: 'الباص المتحرك '),
+    );
+    setState(() {
+      markers.removeWhere((marker) => marker.markerId.value == 'moving');
+
+      markers.add(movingMarker);
+    });
+
+    List<LatLng> polylineCoordinates = [];
+
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4",
+      PointLatLng(currltlg.latitude, currltlg.longitude),
+      PointLatLng(loc.latitude, loc.longitude),
+      travelMode: TravelMode.driving,
+    );
+    if (result.points.isNotEmpty) {
+      result.points.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    } else {
+      print(result.errorMessage);
+    }
+
+    PolylineId id = PolylineId("moving");
+    Polyline polyline = Polyline(
+      polylineId: id,
+      points: polylineCoordinates,
+      width: 3,
+      color: myblue,
+    );
+    polylines[id] = polyline;
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  driverPoly(LatLng loc, LatLng dest) async {
+    Marker driverDesMarker = Marker(
+      markerId: MarkerId('driverDes'),
+      position: dest,
+      icon: BitmapDescriptor.defaultMarkerWithHue(190),
+      infoWindow: InfoWindow(title: 'الباص'),
+    );
+    Marker driverlocMarker = Marker(
+      markerId: MarkerId('driverloc'),
+      position: loc,
+      icon: BitmapDescriptor.defaultMarkerWithHue(190),
+      infoWindow: InfoWindow(title: 'وجهة الباص'),
+    );
+    setState(() {
+      markers.removeWhere((marker) => marker.markerId.value == 'driverDes');
+      markers.removeWhere((marker) => marker.markerId.value == 'driverloc');
+      markers.add(driverDesMarker);
+      markers.add(driverlocMarker);
+    });
+
+    List<LatLng> polylineCoordinates = [];
+
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      "AIzaSyDpIlaxbh4WTp4_Ecnz4lupswaRqyNcTv4",
+      PointLatLng(loc.latitude, loc.longitude),
+      PointLatLng(dest.latitude, dest.longitude),
+      travelMode: TravelMode.driving,
+    );
+    if (result.points.isNotEmpty) {
+      result.points.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    } else {
+      print(result.errorMessage);
+    }
+    _addPolyLine(polylineCoordinates);
+  }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void createRequest() {
     //print(email);print(name);print(phone);
     rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
@@ -693,11 +829,30 @@ class _PassMapState extends State<PassMap> {
             event.snapshot.value['driver_location']['longitude'].toString());
         LatLng driverCurrLoc = LatLng(driverLat, driverLong);
         driverPhone = '';
+        LatLng driverLoc;
+        LatLng driverDest;
         if (event.snapshot.value['driver_phone'] != null) {
           driverPhone = event.snapshot.value['driver_phone'].toString();
         }
+        if (event.snapshot.value['driver_loc'] != null) {
+          double driverLat = double.parse(
+              event.snapshot.value['driver_loc']['latitude'].toString());
+          double driverLong = double.parse(
+              event.snapshot.value['driver_loc']['longitude'].toString());
+          driverLoc = LatLng(driverLat, driverLong);
+        }
+        if (event.snapshot.value['driver_dest'] != null) {
+          double driverLat = double.parse(
+              event.snapshot.value['driver_dest']['latitude'].toString());
+          double driverLong = double.parse(
+              event.snapshot.value['driver_dest']['longitude'].toString());
+          driverDest = LatLng(driverLat, driverLong);
+        }
         if (statusRide == 'accepted') {
           updateDriTime(driverCurrLoc); //bbbbbbbaaaaaaaccckkkk
+          updateRideLocation();
+          updateDriverLocation(driverCurrLoc);
+          driverPoly(driverLoc, driverDest);
         } else if (statusRide == 'onTrip') {
           updateTripTime(driverCurrLoc);
         } else if (statusRide == 'arrived') {
@@ -723,9 +878,13 @@ class _PassMapState extends State<PassMap> {
                 Rating(driverPhone: driverPhone));
 
         rideReq.onDisconnect();
+        rideReq.remove();
+
         rideReq = null;
         ridestreams.cancel();
         ridestreams = null;
+        pridePosStream.cancel();
+        setState(() {});
         //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
 
         driversDetailes = 0;
@@ -1295,10 +1454,14 @@ class _PassMapState extends State<PassMap> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              arrivalStatus,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 20),
+                            Expanded(
+                              child: Text(
+                                arrivalStatus,
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.clip,
+                                textDirection: TextDirection.rtl,
+                                style: TextStyle(fontSize: 20),
+                              ),
                             ),
                           ],
                         ),
@@ -1322,7 +1485,7 @@ class _PassMapState extends State<PassMap> {
                               TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
                         ),
                         SizedBox(
-                          height: 22,
+                          height: 12,
                         ),
                         Divider(),
                         SizedBox(

@@ -181,10 +181,12 @@ class PassengerPageState extends State<PassengerPage> {
             width: 300.0,
             height: 300.0,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 SizedBox(height: 10),
                 Expanded(
-                  child: Theme(
+                   child: Theme(
                     data: Theme.of(context).copyWith(primaryColor: apcolor),
                     child: TextField(
                       textAlign: TextAlign.end,
@@ -201,6 +203,7 @@ class PassengerPageState extends State<PassengerPage> {
                   ),
                 ),
                 Row(
+                
                   children: [
                     Expanded(
                       child: Theme(
@@ -250,7 +253,7 @@ class PassengerPageState extends State<PassengerPage> {
                       ),
                     ),
                     (startPointController.text == "")
-                        ? Container()
+                        ? Container(height: 0,)
                         : IconButton(
                             icon: Icon(
                               Icons.star_sharp,

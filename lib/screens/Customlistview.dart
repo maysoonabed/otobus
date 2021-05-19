@@ -90,7 +90,7 @@ class _CustomListViewState extends State<CustomListView> {
 //Future is n object representing a delayed computation.
 Future<List<Spacecraft>> downloadJSON() async {
   final jsonEndpoint =
-      "http://192.168.1.108:8089/otobus/phpfiles/feedbacK.php"; //10.0.0.9
+      "http://192.168.1.7/otobus/phpfiles/feedbacK.php"; //10.0.0.9
 
   final response = await get(jsonEndpoint);
 
