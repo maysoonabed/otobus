@@ -1,11 +1,13 @@
 <?php 
              $connect = new mysqli("localhost","root","","otobus");      
              $Passid = $_POST['passid'];
+			 $PassP = $_POST['passphone'];
+
              $Driverid = $_POST['driverid'];
              $Taq = $_POST['taq'];
              $Comment = $_POST['comment'];
              $Report = $_POST['report'];
-    			$query = "INSERT INTO feedback (passid, driverid,taq,comment,report	) VALUES ('$Passid','$Driverid','$Taq','$Comment', '$Report')";
+    			$query = "INSERT INTO feedback (passid, driverid,taq,comment,report,passphone ) VALUES ('$Passid','$Driverid','$Taq','$Comment', '$Report','$PassP')";
     			$inserted = mysqli_query($connect, $query);
     			
     			if($inserted == 1 ){  
