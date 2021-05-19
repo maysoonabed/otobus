@@ -857,10 +857,8 @@ class _PassMapState extends State<PassMap> {
           updateTripTime(driverCurrLoc);
           setState(() {
             markers.removeWhere((marker) => marker.markerId.value == 'current');
-
-            markers
-                .removeWhere((marker) => marker.markerId.value == 'driverloc');
             polylines.clear();
+            driverPoly(driverLoc, driverDest);
           });
         } else if (statusRide == 'arrived') {
           setState(() {
