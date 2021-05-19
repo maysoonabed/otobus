@@ -39,6 +39,8 @@ class DriverMap extends StatefulWidget {
   DriverMapState createState() => globalState;
 }
 
+StreamSubscription<Event> passstreams;
+
 TextEditingController _txtCtrl = TextEditingController();
 Position currentPosition;
 double destLongitude;
@@ -105,7 +107,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
+        "http://192.168.1.7/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.7
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -195,26 +197,50 @@ class DriverMapState extends State<DriverMap> {
       gMarkers.removeWhere(
           (marker) => marker.markerId.value == item[i]['ridrReqId']);
     }
+    gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
     nnum.set(thisDriver.numOfPass);
     setState(() {
       accHeight = 0;
     });
     ridePosStream.cancel();
-    gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
     setState(() {});
   }
 
   //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void reqMarker() {
-    Marker reqMarker = Marker(
-      markerId: MarkerId(tripInfo.ridrReqId),
-      position: tripInfo.pickUp,
-      icon: BitmapDescriptor.defaultMarkerWithHue(200),
-      infoWindow: InfoWindow(
-          title: tripInfo.pickUpAdd,
-          snippet: tripInfo.numb.toString() + 'ركاب'),
-    );
-    gMarkers.add(reqMarker);
+    for (int i = 0; i < item.length; i++) {
+      DatabaseReference reqq = FirebaseDatabase.instance
+          .reference()
+          .child('rideRequest/${item[i]['ridrReqId']}');
+
+      passstreams = reqq.onValue.listen((event) {
+        if (event.snapshot.value == null) {
+          return;
+        }
+        if (event.snapshot.value['status'] != null) {
+          if (event.snapshot.value['status'].toString() == 'accepted') {
+            if (event.snapshot.value['location'] != null) {
+              double driverLat = double.parse(
+                  event.snapshot.value['location']['latitude'].toString());
+              double driverLong = double.parse(
+                  event.snapshot.value['location']['longitude'].toString());
+              LatLng driverCurrLoc = LatLng(driverLat, driverLong);
+
+              Marker reqMarker = Marker(
+                markerId: MarkerId(item[i]['ridrReqId']),
+                position: driverCurrLoc,
+                icon: BitmapDescriptor.defaultMarkerWithHue(200),
+                infoWindow: InfoWindow(
+                    title: 'passenger',
+                    snippet:
+                        event.snapshot.value['passengers'].toString() + 'ركاب'),
+              );
+              gMarkers.add(reqMarker);
+            }
+          }
+        }
+      });
+    }
   }
 //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -331,7 +357,7 @@ class DriverMapState extends State<DriverMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.7/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -347,7 +373,7 @@ class DriverMapState extends State<DriverMap> {
     insur = Io.File(img.path).readAsBytesSync();
     base64insu = base64Encode(insur);
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.7/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'insimg': base64insu,
       'insname': imgname,
@@ -369,7 +395,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future updateinsdate(String formatted) async {
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.7/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
     var response =
         await http.post(url, body: {'endate': formatted, 'email': email});
     if (response.statusCode == 200) {
@@ -382,7 +408,7 @@ class DriverMapState extends State<DriverMap> {
   var onoff;
   Future insphp() async {
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.7/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {'email': email});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -983,6 +1009,7 @@ class DriverMapState extends State<DriverMap> {
                                     shrinkWrap: true,
                                     itemCount: item.length,
                                     itemBuilder: (context, index) {
+                                      reqMarker();
                                       /*              return ListTile(
       contentPadding: EdgeInsets.all(10.0),
       leading: _thumbnail(item),
@@ -1017,10 +1044,14 @@ class DriverMapState extends State<DriverMap> {
                                                 reqq
                                                     .child('status')
                                                     .set('arrived');
-                                                setState(() {
+                                                /*  
+     
+                                               
+                                               setState(() {
                                                   getPolyline();
                                                   //updMark();
-                                                });
+                                                }); */
+
                                               } else if (ss == 'arrived') {
                                                 reqq
                                                     .child('status')
@@ -1258,6 +1289,8 @@ class DriverMapState extends State<DriverMap> {
     nnum = FirebaseDatabase.instance
         .reference()
         .child('Drivers/${currUser.uid}/passengers');
+    driverNum == null ? driverNum = thisDriver.numOfPass : null;
+
     nnum.set(driverNum);
     whereTo = FirebaseDatabase.instance
         .reference()
@@ -1290,11 +1323,14 @@ class DriverMapState extends State<DriverMap> {
     whereTo.onDisconnect();
     whereTo.remove();
     whereTo = null;
-    gMarkers
-        .removeWhere((marker) => marker.markerId.value == 'Final_Destination');
-    gMarkers.removeWhere((marker) => marker.markerId.value == 'Current');
-    gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
-    polylines.clear();
+
+    if (item.isEmpty) {
+      gMarkers.removeWhere(
+          (marker) => marker.markerId.value == 'Final_Destination');
+      gMarkers.removeWhere((marker) => marker.markerId.value == 'Current');
+      gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
+      polylines.clear();
+    }
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1375,6 +1411,13 @@ class DriverMapState extends State<DriverMap> {
       'longitude': currentPosition.longitude.toString(),
     };
     ridRef.child('driver_location').set(locationMap);
+    ridRef.child('driver_loc').set(locationMap);
+
+    Map toMap = {
+      'latitude': thisDriver.begLoc.latitude,
+      'longitude': thisDriver.begLoc.longitude
+    };
+    ridRef.child('driver_dest')..set(toMap);
     ridRef.child('driver_id').set(currUser.uid);
     ridRef.child('driver_phone').set(phone);
     driverNum = driverNum - tripInfo.numb;

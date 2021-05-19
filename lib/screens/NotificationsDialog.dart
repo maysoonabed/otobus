@@ -223,7 +223,7 @@ class NotificationsDialog extends StatelessWidget {
         }
         globalState.acceptTrip();
         globalState.setState(() {
-          globalState.reqMarker();
+         
           globalState.creatMarker();
           globalState.updateRideLocation();
         });

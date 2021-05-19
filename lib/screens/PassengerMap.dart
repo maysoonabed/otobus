@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:OtoBus/chat/NotificChat.dart';
 import 'package:OtoBus/chat/PassChatDetailes.dart';
 import 'package:OtoBus/chat/globalFunctions.dart';
+import 'package:OtoBus/screens/LineString.dart';
+import 'package:OtoBus/screens/NetworkHelper.dart';
 import 'package:cube_transition/cube_transition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,6 +51,7 @@ final List<latLng.LatLng> points = [
 ];
 final List<Polyline> polyLines = [];
 final List<Marker> markers = [];
+Map<String, Marker> marks = {};
 var data;
 latLng.LatLng currLatLng;
 DatabaseReference rideReq;
@@ -62,7 +65,7 @@ String profname;
 var profile;
 String base64prof = "";
 var fileImg;
-
+Position myPos;
 String roomId = "";
 String drivEmail = "";
 String drivName = "";
@@ -107,7 +110,7 @@ class PassengerMapState extends State<PassengerMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.7/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -119,7 +122,7 @@ class PassengerMapState extends State<PassengerMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
+        "http://192.168.1.7/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.7
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -140,7 +143,7 @@ class PassengerMapState extends State<PassengerMap> {
   getRatings() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+        "http://192.168.1.7/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': theDriver.phone, //get the username text
     });
@@ -149,6 +152,10 @@ class PassengerMapState extends State<PassengerMap> {
       var jsondata = json.decode(response.body);
       if (jsondata["error"] == 1) {
         errormsg = jsondata["message"];
+        Fluttertoast.showToast(
+          context,
+          msg: errormsg,
+        );
       } else {
         if (jsondata["success"] == 1) {
           print(jsondata['cou']);
@@ -162,22 +169,26 @@ class PassengerMapState extends State<PassengerMap> {
           errormsg = jsondata["message"];
         } else {
           errormsg = "حدث خطأ";
+          Fluttertoast.showToast(
+            context,
+            msg: errormsg,
+          );
         }
       }
     } else {
       errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
+      Fluttertoast.showToast(
+        context,
+        msg: errormsg,
+      );
     }
-    Fluttertoast.showToast(
-      context,
-      msg: errormsg,
-    );
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future<void> displayDriverDetails() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
+        "http://192.168.1.7/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': driverPhone,
     });
@@ -185,6 +196,10 @@ class PassengerMapState extends State<PassengerMap> {
       var jsondata = json.decode(response.body);
       if (jsondata["error"] == 1) {
         errmsg = jsondata["message"];
+        Fluttertoast.showToast(
+          context,
+          msg: errmsg != null ? errmsg : 'hi',
+        );
       } else {
         theDriver.phone = driverPhone;
         theDriver.name = jsondata["name"];
@@ -202,11 +217,11 @@ class PassengerMapState extends State<PassengerMap> {
       }
     } else {
       errmsg = "حدث خطأ أثناء الاتصال بالشبكة";
+      Fluttertoast.showToast(
+        context,
+        msg: errmsg != null ? errmsg : 'hi',
+      );
     }
-    Fluttertoast.showToast(
-      context,
-      msg: errmsg != null ? errmsg : 'hi',
-    );
 
     setState(() {
       driversDetailes = 400;
@@ -214,6 +229,148 @@ class PassengerMapState extends State<PassengerMap> {
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  void updateRideLocation() {
+    latLng.LatLng oldP = latLng.LatLng(0, 0);
+    pridePosStream = Geolocator.getPositionStream(
+      desiredAccuracy: LocationAccuracy.bestForNavigation,
+    ).listen((Position position) {
+      currLatLng = latLng.LatLng(position.latitude, position.longitude);
+      myPos = position;
+      currentPosition = position;
+      latLng.LatLng pos = latLng.LatLng(position.latitude, position.longitude);
+      markers.clear();
+      marks['current'] = Marker(
+        width: 80.0,
+        height: 80.0,
+        point: pos,
+        builder: (ctx) => Container(
+            child: Icon(
+          Icons.location_on,
+          color: mypink,
+          size: 40,
+        )),
+      );
+      marks.values.forEach((element) {
+        markers.add(element);
+      });
+      oldP = pos;
+      Map locationMap = {
+        'latitude': myPos.latitude,
+        'longitude': myPos.longitude,
+      };
+      rideReq.child('location').set(locationMap);
+    });
+  }
+
+  updateDriverLocation(latLng.LatLng loc) async {
+    markers.clear();
+    polyLines.isEmpty ? null : polyLines.clear();
+    marks['driver'] = Marker(
+      width: 50.0,
+      height: 50.0,
+      point: loc,
+      builder: (ctx) => Container(
+          child: Icon(
+        Icons.directions_bus,
+        color: Colors.black,
+        size: 30,
+      )),
+    );
+    points.isNotEmpty ? points.clear() : null;
+    NetworkHelper network = NetworkHelper(
+      startLat: currLatLng.latitude,
+      startLng: currLatLng.longitude,
+      endLat: loc.latitude,
+      endLng: loc.longitude,
+    );
+
+    try {
+      // getData() returns a json Decoded data
+      data = await network.getData();
+
+      // We can reach to our desired JSON data manually as following
+      LineString ls =
+          LineString(data['features'][0]['geometry']['coordinates']);
+
+      for (int i = 0; i < ls.lineString.length; i++) {
+        points.add(latLng.LatLng(ls.lineString[i][1], ls.lineString[i][0]));
+      }
+
+      Polyline polyline = Polyline(
+        points: points,
+        strokeWidth: 6.0,
+        color: myblue,
+      );
+      polyLines.add(polyline);
+      setState(() {});
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  driverPoly(latLng.LatLng loc, latLng.LatLng dest) async {
+    List<latLng.LatLng> pts = [];
+    marks['driverDes'] = Marker(
+      width: 50.0,
+      height: 50.0,
+      point: dest,
+      builder: (ctx) => Container(
+          child: Icon(
+        Icons.location_on,
+        color: Colors.black,
+        size: 30,
+      )),
+    );
+    marks['driverloc'] = Marker(
+      width: 50.0,
+      height: 50.0,
+      point: loc,
+      builder: (ctx) => Container(
+          child: Icon(
+        Icons.location_on,
+        color: Colors.black38,
+        size: 30,
+      )),
+    );
+
+    marks.values.forEach((element) {
+      markers.add(element);
+    });
+
+    NetworkHelper network = NetworkHelper(
+      startLat: loc.latitude,
+      startLng: loc.longitude,
+      endLat: dest.latitude,
+      endLng: dest.longitude,
+    );
+
+    try {
+      // getData() returns a json Decoded data
+      data = await network.getData();
+
+      // We can reach to our desired JSON data manually as following
+      LineString ls =
+          LineString(data['features'][0]['geometry']['coordinates']);
+
+      for (int i = 0; i < ls.lineString.length; i++) {
+        pts.add(latLng.LatLng(ls.lineString[i][1], ls.lineString[i][0]));
+      }
+
+      Polyline polyline = Polyline(
+        points: pts,
+        strokeWidth: 4.0,
+        color: Colors.blueAccent,
+      );
+      polyLines.add(polyline);
+      setState(() {});
+    } catch (e) {
+      print(e);
+    }
+  }
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
   void createRequest() {
     rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
     numCont != null ? null : numCont = 1;
@@ -256,14 +413,35 @@ class PassengerMapState extends State<PassengerMap> {
             event.snapshot.value['driver_location']['longitude'].toString());
         latLng.LatLng driverCurrLoc = latLng.LatLng(driverLat, driverLong);
         driverPhone = '';
+        latLng.LatLng driverLoc;
+        latLng.LatLng driverDest;
         if (event.snapshot.value['driver_phone'] != null) {
           driverPhone = event.snapshot.value['driver_phone'].toString();
         }
+        if (event.snapshot.value['driver_loc'] != null) {
+          double driverLat = double.parse(
+              event.snapshot.value['driver_loc']['latitude'].toString());
+          double driverLong = double.parse(
+              event.snapshot.value['driver_loc']['longitude'].toString());
+          driverLoc = latLng.LatLng(driverLat, driverLong);
+        }
+        if (event.snapshot.value['driver_dest'] != null) {
+          double driverLat = double.parse(
+              event.snapshot.value['driver_dest']['latitude'].toString());
+          double driverLong = double.parse(
+              event.snapshot.value['driver_dest']['longitude'].toString());
+          driverDest = latLng.LatLng(driverLat, driverLong);
+        }
         if (statusRide == 'accepted') {
           updateDriTime(driverCurrLoc);
+          updateRideLocation();
+          updateDriverLocation(driverCurrLoc);
+          driverPoly(driverLoc, driverDest);
         } else if (statusRide == 'onTrip') {
           updateTripTime(driverCurrLoc);
+          //resetApp: polylines and such
         } else if (statusRide == 'arrived') {
+
           setState(() {
             arrivalStatus = 'وصل الباص';
           });
@@ -286,9 +464,12 @@ class PassengerMapState extends State<PassengerMap> {
                 Rating(driverPhone: driverPhone));
 
         rideReq.onDisconnect();
+        rideReq.remove();
         rideReq = null;
         ridestreams.cancel();
         ridestreams = null;
+        pridePosStream.cancel();
+        setState(() {});
         //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
 
         driversDetailes = 0;
@@ -305,7 +486,8 @@ class PassengerMapState extends State<PassengerMap> {
       var pos = latLng.LatLng(currLatLng.latitude, currLatLng.longitude);
       String time = await calcTime(pos, driverCurrLoc);
       setState(() {
-        arrivalStatus = ' سيصل الباص بحدود ' + time /* + " دقائق " */;
+        arrivalStatus = ' الرجاء التوجه إلى مسار الباص, الباص يبعد ' +
+            time /* + " دقائق " */;
       });
       reqPosDet = false;
     }
@@ -347,9 +529,10 @@ class PassengerMapState extends State<PassengerMap> {
     rideReq.remove();
     setState(() {
       stat = 'normal';
-      markers.length > 1 ? markers.removeRange(1, markers.length) : null;
+      markers.clear();
       points.clear();
       polyLines.clear();
+      markers.add(marks['current']);
     });
   }
 
@@ -389,26 +572,27 @@ class PassengerMapState extends State<PassengerMap> {
       pickUp.long = currentPosition.longitude;
       Provider.of<AppData>(context, listen: false).updatePickAddress(pickUp);
     });
-    markers.add(
-      Marker(
-        width: 80.0,
-        height: 80.0,
-        point: currLatLng,
-        builder: (ctx) => Container(
-            child: Icon(
-          Icons.location_on,
-          color: mypink,
-          size: 40,
-        )),
-      ),
+
+    marks['current'] = Marker(
+      width: 80.0,
+      height: 80.0,
+      point: currLatLng,
+      builder: (ctx) => Container(
+          child: Icon(
+        Icons.location_on,
+        color: mypink,
+        size: 40,
+      )),
     );
+    markers.add(marks['current']);
+
     getData(currentPosition.latitude, currentPosition.longitude);
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void startGeoListen() {
+  void startGeoListen() async {
     Geofire.initialize('availableDrivers');
-    Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
+    await Geofire.queryAtLocation(currLatLng.latitude, currLatLng.longitude, 5)
         .listen((map) {
       print(map);
       if (map != null) {
@@ -480,28 +664,32 @@ class PassengerMapState extends State<PassengerMap> {
         }
       }
     });
+    Future.delayed(const Duration(seconds: 2), () {});
+    availableDrivers = FireDrivers.nDrivers;
+    searchNearestDriver();
   }
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void driversMarkers() {
     setState(() {
-      markers.length > 1 ? markers.removeRange(1, markers.length) : null;
+      markers.clear();
       points.clear();
       polyLines.clear();
+      markers.add(marks['current']);
     });
     for (NearDrivers driver in FireDrivers.nDrivers) {
       setState(() {
         latLng.LatLng driverPos = latLng.LatLng(driver.lat, driver.long);
         markers.add(
           Marker(
-            width: 80.0,
-            height: 80.0,
+            width: 40.0,
+            height: 40.0,
             point: driverPos,
             builder: (ctx) => Container(
                 child: Icon(
               Icons.directions_bus,
               color: Colors.black,
-              size: 40,
+              size: 20,
             )),
           ),
         );
@@ -601,10 +789,6 @@ class PassengerMapState extends State<PassengerMap> {
                     if (isExtended == 1) {
                       createRequest();
                       startGeoListen();
-                      Future.delayed(const Duration(seconds: 2), () {});
-
-                      availableDrivers = FireDrivers.nDrivers;
-                      searchNearestDriver();
                     } else if (isExtended == 2) {
                       cancelReq();
                     }
@@ -659,15 +843,16 @@ class PassengerMapState extends State<PassengerMap> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      arrivalStatus,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20),
+                    Expanded(
+                      child: Text(
+                        arrivalStatus,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.clip,
+                        textDirection: TextDirection.rtl,
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ),
                   ],
-                ),
-                SizedBox(
-                  height: 22,
                 ),
                 Divider(),
                 Text(
@@ -681,7 +866,7 @@ class PassengerMapState extends State<PassengerMap> {
                   style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
                 ),
                 SizedBox(
-                  height: 22,
+                  height: 12,
                 ),
                 Divider(),
                 SizedBox(
@@ -800,9 +985,10 @@ class PassengerMapState extends State<PassengerMap> {
       );
     } else {
       setState(() {
-        markers.length > 1 ? markers.removeRange(1, markers.length) : null;
+        markers.clear();
         points.clear();
         polyLines.clear();
+        setupPositionLocator();
       });
       var driver = availableDrivers[0];
 
