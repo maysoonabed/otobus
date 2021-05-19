@@ -855,6 +855,13 @@ class _PassMapState extends State<PassMap> {
           driverPoly(driverLoc, driverDest);
         } else if (statusRide == 'onTrip') {
           updateTripTime(driverCurrLoc);
+          setState(() {
+            markers.removeWhere((marker) => marker.markerId.value == 'current');
+
+            markers
+                .removeWhere((marker) => marker.markerId.value == 'driverloc');
+            polylines.clear();
+          });
         } else if (statusRide == 'arrived') {
           setState(() {
             arrivalStatus = 'وصل الباص';
