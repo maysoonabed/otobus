@@ -1010,16 +1010,6 @@ class DriverMapState extends State<DriverMap> {
                                     itemCount: item.length,
                                     itemBuilder: (context, index) {
                                       reqMarker();
-                                      /*              return ListTile(
-      contentPadding: EdgeInsets.all(10.0),
-      leading: _thumbnail(item),
-      title: _title(
-          item.title, TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold)),
-      subtitle: _title(item.subtitle, TextStyle(fontSize: 14.0)),
-      onTap: () {
-        Scaffold.of(context).showSnackBar(SnackBar(
-          content: Text("Tile ${item.title} clicked"),
-        )); */
                                       return ListTile(
                                         leading: Wrap(
                                           alignment: WrapAlignment.center,
