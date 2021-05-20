@@ -53,9 +53,17 @@
 
     			if($inserted2 == 1 ){ //&& 
                     if($inserted1==1){  
-    				$json['value'] = 1;
-					$json['error'] =0;
-    				$json['message'] = 'تم تسجيل معلوماتك بنجاح في انتظار موافقة المسؤول';
+                        //************/
+                        $que1= "INSERT INTO places(PlaceName) VALUES ('$begname')";
+    			        $insert1 = mysqli_query($connect, $que1);
+                        //if($insert1 == 1 ){}
+                        $que2= "INSERT INTO places(PlaceName) VALUES ('$endname')";
+    			        $insert2 = mysqli_query($connect, $que2);
+                        //if($insert2 == 1 ){}
+                        //************/
+    				    $json['value'] = 1;
+					    $json['error'] =0;
+    				    $json['message'] = 'تم تسجيل معلوماتك بنجاح في انتظار موافقة المسؤول';
                     }
                     else{
                         $json['value'] = 1;
