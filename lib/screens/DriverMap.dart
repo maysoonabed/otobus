@@ -958,8 +958,8 @@ class DriverMapState extends State<DriverMap> {
                         ? Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'الوجهة',
@@ -1021,8 +1021,29 @@ class DriverMapState extends State<DriverMap> {
           content: Text("Tile ${item.title} clicked"),
         )); */
                                       return ListTile(
-                                        contentPadding: EdgeInsets.only(
-                                            left: 90, right: 60),
+                                        leading: Wrap(
+                                          alignment: WrapAlignment.center,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            IconButton(
+                                                icon: Icon(Icons.flag),
+                                                iconSize: 20,
+                                                padding: EdgeInsets.all(0),
+                                                onPressed: () {
+                                                  print('report');
+                                                }),
+                                            IconButton(
+                                                icon: Icon(Icons.message),
+                                                iconSize: 20,
+                                                padding: EdgeInsets.all(0),
+                                                onPressed: () {
+                                                  print(item[index]
+                                                      ['passengerPhone']);
+                                                }),
+                                          ],
+                                        ),
+                                        contentPadding:
+                                            EdgeInsets.only(left: 0, right: 60),
                                         title: Text(
                                             getFstWord(item[index]['destAdd'])),
                                         trailing: Text(getSndWord(

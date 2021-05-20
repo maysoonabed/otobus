@@ -8,13 +8,14 @@ class TripInfo {
   int numb;
   String ridrReqId;
   String riderPhone;
-  TripInfo({
-    this.dest,
-    this.destAdd,
-    this.pickUp,
-    this.pickUpAdd,
-    this.riderPhone,
-    this.ridrReqId,
-    this.numb
-  });
+  String passPhone;
+  TripInfo(
+      {this.dest,
+      this.destAdd,
+      this.pickUp,
+      this.pickUpAdd,
+      this.riderPhone,
+      this.ridrReqId,
+      this.numb,
+      this.passPhone});
 }

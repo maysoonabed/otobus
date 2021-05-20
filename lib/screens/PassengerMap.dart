@@ -439,9 +439,11 @@ class PassengerMapState extends State<PassengerMap> {
           driverPoly(driverLoc, driverDest);
         } else if (statusRide == 'onTrip') {
           updateTripTime(driverCurrLoc);
+          polyLines.isEmpty ? null : polyLines.clear();
+          updateRideLocation();
+          driverPoly(driverLoc, driverDest);
           //resetApp: polylines and such
         } else if (statusRide == 'arrived') {
-
           setState(() {
             arrivalStatus = 'وصل الباص';
           });
@@ -469,6 +471,7 @@ class PassengerMapState extends State<PassengerMap> {
         ridestreams.cancel();
         ridestreams = null;
         pridePosStream.cancel();
+        pridePosStream = null;
         setState(() {});
         //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
 

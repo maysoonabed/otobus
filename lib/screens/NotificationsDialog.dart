@@ -216,14 +216,14 @@ class NotificationsDialog extends StatelessWidget {
           'numb': trip.numb.toString(),
           'ridrReqId': trip.ridrReqId,
           'destAdd': trip.destAdd,
-          'pickUpAdd': trip.pickUpAdd
+          'pickUpAdd': trip.pickUpAdd,
+          'passengerPhone': trip.passPhone
         });
         if (trip.numb == driverNum) {
           Funcs.disbleLocUpdate();
         }
         globalState.acceptTrip();
         globalState.setState(() {
-         
           globalState.creatMarker();
           globalState.updateRideLocation();
         });
