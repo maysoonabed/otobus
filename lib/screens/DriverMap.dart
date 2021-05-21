@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_session/flutter_session.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,7 @@ class DriverMap extends StatefulWidget {
   DriverMapState createState() => globalState;
 }
 
-StreamSubscription<Event> passstreams;
+Map<String, StreamSubscription<Event>> passstreams = {};
 
 TextEditingController _txtCtrl = TextEditingController();
 Position currentPosition;
@@ -59,6 +60,7 @@ GoogleMapController newGoogleMapController;
 BitmapDescriptor movingMarkerIcon;
 Position myPos;
 
+Map<String, StreamSubscription<Position>> rideposstreams = {};
 //////////////////////////////////////////////////////////////////
 final GlobalKey _photopickey = GlobalKey();
 File _prof;
@@ -107,7 +109,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.7/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.7
+        "http://192.168.1.8/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.8
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -193,54 +195,64 @@ class DriverMapState extends State<DriverMap> {
           .child('rideRequest/${item[i]['ridrReqId']}');
       reqq.child('status').set('ended');
       deletePassenger(item[i]['key'].toString());
-      Funcs.enableLocUpdate();
+      status ? Funcs.enableLocUpdate() : null;
       gMarkers.removeWhere(
           (marker) => marker.markerId.value == item[i]['ridrReqId']);
+      rideposstreams[item[i]['ridrReqId']].cancel();
     }
     gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
     nnum.set(thisDriver.numOfPass);
     setState(() {
       accHeight = 0;
     });
-    ridePosStream.cancel();
     setState(() {});
   }
 
   //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void reqMarker() {
-    for (int i = 0; i < item.length; i++) {
-      DatabaseReference reqq = FirebaseDatabase.instance
-          .reference()
-          .child('rideRequest/${item[i]['ridrReqId']}');
+  void reqMarker(String id, int numb) {
+    DatabaseReference reqq =
+        FirebaseDatabase.instance.reference().child('rideRequest/$id');
 
-      passstreams = reqq.onValue.listen((event) {
-        if (event.snapshot.value == null) {
-          return;
-        }
-        if (event.snapshot.value['status'] != null) {
-          if (event.snapshot.value['status'].toString() == 'accepted') {
-            if (event.snapshot.value['location'] != null) {
-              double driverLat = double.parse(
-                  event.snapshot.value['location']['latitude'].toString());
-              double driverLong = double.parse(
-                  event.snapshot.value['location']['longitude'].toString());
-              LatLng driverCurrLoc = LatLng(driverLat, driverLong);
+    passstreams[id] = reqq.onValue.listen((event) {
+      if (event.snapshot.value == null) {
+        return;
+      }
+      if (event.snapshot.value['status'] != null) {
+        if (event.snapshot.value['status'].toString() == 'accepted') {
+          if (event.snapshot.value['location'] != null) {
+            double driverLat = double.parse(
+                event.snapshot.value['location']['latitude'].toString());
+            double driverLong = double.parse(
+                event.snapshot.value['location']['longitude'].toString());
+            LatLng driverCurrLoc = LatLng(driverLat, driverLong);
 
-              Marker reqMarker = Marker(
-                markerId: MarkerId(item[i]['ridrReqId']),
-                position: driverCurrLoc,
-                icon: BitmapDescriptor.defaultMarkerWithHue(200),
-                infoWindow: InfoWindow(
-                    title: 'passenger',
-                    snippet:
-                        event.snapshot.value['passengers'].toString() + 'ركاب'),
-              );
-              gMarkers.add(reqMarker);
-            }
+            Marker reqMarker = Marker(
+              markerId: MarkerId(id),
+              position: driverCurrLoc,
+              icon: BitmapDescriptor.defaultMarkerWithHue(200),
+              infoWindow: InfoWindow(
+                  title: 'passenger',
+                  snippet:
+                      event.snapshot.value['passengers'].toString() + 'ركاب'),
+            );
+            gMarkers.add(reqMarker);
           }
         }
-      });
-    }
+        if (event.snapshot.value['status'].toString() == 'cancelled') {
+          event.snapshot.value['status'].set('done');
+          Fluttertoast.showToast(
+            context,
+            msg: 'تم إلغاء الطلب',
+          );
+          gMarkers.removeWhere((marker) => marker.markerId.value == id);
+          deletePassenger(id);
+          driverNum = driverNum + numb;
+          nnum.set(driverNum);
+          status ? Funcs.enableLocUpdate() : null;
+          passstreams[id].cancel();
+        }
+      }
+    });
   }
 //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -357,7 +369,7 @@ class DriverMapState extends State<DriverMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.7/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.8/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -373,7 +385,7 @@ class DriverMapState extends State<DriverMap> {
     insur = Io.File(img.path).readAsBytesSync();
     base64insu = base64Encode(insur);
     String url =
-        "http://192.168.1.7/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.8/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'insimg': base64insu,
       'insname': imgname,
@@ -395,7 +407,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future updateinsdate(String formatted) async {
     String url =
-        "http://192.168.1.7/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.8/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
     var response =
         await http.post(url, body: {'endate': formatted, 'email': email});
     if (response.statusCode == 200) {
@@ -408,7 +420,7 @@ class DriverMapState extends State<DriverMap> {
   var onoff;
   Future insphp() async {
     String url =
-        "http://192.168.1.7/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.8/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {'email': email});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -990,8 +1002,8 @@ class DriverMapState extends State<DriverMap> {
                                   data.forEach((index, data) {
                                     item.add({"key": index, ...data});
                                   });
-                                  /*    for (int i = 0; i < item.length; i++) {
-                                    gMarkers.add(Marker(
+
+                                  /*  gMarkers.add(Marker(
                                       markerId: MarkerId(item[i]['ridrReqId']),
                                       position: LatLng(
                                           double.parse(item[i]['pickUpLat']),
@@ -1002,18 +1014,17 @@ class DriverMapState extends State<DriverMap> {
                                       infoWindow: InfoWindow(
                                           title: destName,
                                           snippet: 'passenger' + i.toString()),
-                                    ));
-                                  } */
+                                    )); */
 
                                   return ListView.builder(
                                     shrinkWrap: true,
                                     itemCount: item.length,
                                     itemBuilder: (context, index) {
-                                      reqMarker();
                                       return ListTile(
                                         leading: Wrap(
                                           alignment: WrapAlignment.center,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
                                           children: <Widget>[
                                             IconButton(
                                                 icon: Icon(Icons.flag),
@@ -1064,6 +1075,10 @@ class DriverMapState extends State<DriverMap> {
                                                 }); */
 
                                               } else if (ss == 'arrived') {
+                                                passstreams[item[index]
+                                                        ['ridrReqId']]
+                                                    .cancel();
+
                                                 reqq
                                                     .child('status')
                                                     .set('onTrip');
@@ -1074,14 +1089,21 @@ class DriverMapState extends State<DriverMap> {
                                                 reqq
                                                     .child('status')
                                                     .set('ended');
+                                                rideposstreams[item[index]
+                                                            ['key']
+                                                        .toString()]
+                                                    .cancel();
                                                 deletePassenger(item[index]
                                                         ['key']
                                                     .toString());
+
                                                 driverNum = driverNum +
                                                     int.parse(
                                                         item[index]['numb']);
                                                 nnum.set(driverNum);
-                                                Funcs.enableLocUpdate();
+                                                status
+                                                    ? Funcs.enableLocUpdate()
+                                                    : null;
                                               }
                                             }
                                           });
@@ -1361,9 +1383,12 @@ class DriverMapState extends State<DriverMap> {
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  void updateRideLocation() {
+  void updateRideLocation(String id) {
+    DatabaseReference up =
+        FirebaseDatabase.instance.reference().child('rideRequest/$id');
+
     LatLng oldP = LatLng(0, 0);
-    ridePosStream = Geolocator.getPositionStream(
+    rideposstreams[id] = Geolocator.getPositionStream(
       desiredAccuracy: LocationAccuracy.bestForNavigation,
     ).listen((Position position) {
       myPos = position;
@@ -1390,7 +1415,7 @@ class DriverMapState extends State<DriverMap> {
         'latitude': myPos.latitude,
         'longitude': myPos.longitude,
       };
-      ridRef.child('driver_location').set(locationMap);
+      up.child('driver_location').set(locationMap);
     });
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

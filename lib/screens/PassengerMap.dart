@@ -60,6 +60,7 @@ DatabaseReference driverRef =
 bool nearLoaded = false;
 String errmsg;
 String driverPhone;
+String driverId;
 File prof;
 String profname;
 var profile;
@@ -110,7 +111,7 @@ class PassengerMapState extends State<PassengerMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.7/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.8/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -122,7 +123,7 @@ class PassengerMapState extends State<PassengerMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.7/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.7
+        "http://192.168.1.8/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.8
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -143,7 +144,7 @@ class PassengerMapState extends State<PassengerMap> {
   getRatings() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.7/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': theDriver.phone, //get the username text
     });
@@ -188,7 +189,7 @@ class PassengerMapState extends State<PassengerMap> {
   Future<void> displayDriverDetails() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.7/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': driverPhone,
     });
@@ -418,6 +419,9 @@ class PassengerMapState extends State<PassengerMap> {
         if (event.snapshot.value['driver_phone'] != null) {
           driverPhone = event.snapshot.value['driver_phone'].toString();
         }
+        if (event.snapshot.value['driver_id'] != null) {
+          driverId = event.snapshot.value['driver_id'].toString();
+        }
         if (event.snapshot.value['driver_loc'] != null) {
           double driverLat = double.parse(
               event.snapshot.value['driver_loc']['latitude'].toString());
@@ -433,6 +437,12 @@ class PassengerMapState extends State<PassengerMap> {
           driverDest = latLng.LatLng(driverLat, driverLong);
         }
         if (statusRide == 'accepted') {
+          setState(() {
+            markers.clear();
+            points.clear();
+            polyLines.clear();
+            setupPositionLocator();
+          });
           updateDriTime(driverCurrLoc);
           updateRideLocation();
           updateDriverLocation(driverCurrLoc);
@@ -674,12 +684,6 @@ class PassengerMapState extends State<PassengerMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void driversMarkers() {
-    setState(() {
-      markers.clear();
-      points.clear();
-      polyLines.clear();
-      markers.add(marks['current']);
-    });
     for (NearDrivers driver in FireDrivers.nDrivers) {
       setState(() {
         latLng.LatLng driverPos = latLng.LatLng(driver.lat, driver.long);
@@ -881,14 +885,42 @@ class PassengerMapState extends State<PassengerMap> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Container(
-                          height: 55,
-                          width: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(26)),
-                            border: Border.all(width: 2, color: Colors.grey),
+                        InkWell(
+                          child: Container(
+                            height: 55,
+                            width: 55,
+                            decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(26)),
+                              border: Border.all(width: 2, color: Colors.grey),
+                            ),
+                            child: Icon(Icons.cancel),
                           ),
-                          child: Icon(Icons.cancel),
+                          onTap: () {
+                            //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
+                            statusRide = '';
+                            arrivalStatus = ' الباص على الطريق ';
+                            setState(() {
+                              stat = 'normal';
+                              driversDetailes = 0;
+                              isExtended = 0;
+                              markers.clear();
+                              points.clear();
+                              polyLines.clear();
+                              markers.add(marks['current']);
+                            });
+                            rideReq.child('status').set('cancelled');
+                            Future.delayed(const Duration(seconds: 2), () {});
+                            rideReq.onDisconnect();
+                            rideReq.remove();
+                            rideReq = null;
+
+                            ridestreams.cancel();
+                            ridestreams = null;
+                            pridePosStream.cancel();
+                            pridePosStream = null;
+                            driversDetailes = 0;
+                          },
                         ),
                         SizedBox(
                           height: 10,
@@ -978,6 +1010,8 @@ class PassengerMapState extends State<PassengerMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void searchNearestDriver() {
+    print('search');
+
     if (availableDrivers.length == 0) {
       isExtended = 0;
       cancelReq();
@@ -987,12 +1021,6 @@ class PassengerMapState extends State<PassengerMap> {
         builder: (BuildContext context) => NoDriverDialog(),
       );
     } else {
-      setState(() {
-        markers.clear();
-        points.clear();
-        polyLines.clear();
-        setupPositionLocator();
-      });
       var driver = availableDrivers[0];
 
       print(driver.key);
@@ -1034,6 +1062,8 @@ class PassengerMapState extends State<PassengerMap> {
           driverRef.child(driver.key).child('newTrip').onDisconnect();
           dReqTimeout = 10;
           timer.cancel();
+          print('timeout');
+
           searchNearestDriver();
         }
       });
