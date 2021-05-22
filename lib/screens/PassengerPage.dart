@@ -778,7 +778,7 @@ class PassengerPageState extends State<PassengerPage> {
                                   shape: CircleBorder(),
                                   clipBehavior: Clip.hardEdge,
                                   child: IconButton(
-                                      icon: Icon(Icons.notifications),
+                                      icon: Icon(Icons.date_range),
                                       color:
                                           (notispress) ? mypink : Colors.white,
                                       onPressed: () {

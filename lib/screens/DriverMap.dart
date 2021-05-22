@@ -1186,7 +1186,7 @@ class DriverMapState extends State<DriverMap> {
               BottomNavigationBarItem(
                   icon: Icon(Icons.home), title: Text('الخريطة')),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.notifications), title: Text('الإشعارات')),
+                  icon: Icon(Icons.date_range), title: Text('التقويم')),
               BottomNavigationBarItem(
                   icon: new Stack(
                     children: <Widget>[
