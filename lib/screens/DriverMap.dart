@@ -495,6 +495,7 @@ class DriverMapState extends State<DriverMap> {
     pic();
     numUnredMsgs();
     insphp();
+ 
     //driverInsDate <= 15 ? print(driverInsDate) : print("No");
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
@@ -977,34 +978,37 @@ class DriverMapState extends State<DriverMap> {
                     firebaseRef != null
                         ? Container(
                             padding: EdgeInsets.all(1.0),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(16),
-                        topLeft: Radius.circular(16)),
-                    color: apBcolor,
-                 ),
-                          child: Padding(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(16),
+                                  topLeft: Radius.circular(16)),
+                              color: apBcolor,
+                            ),
+                            child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'الوجهة',style: TextStyle(color: Colors.white),
+                                    'الوجهة',
+                                    style: TextStyle(color: Colors.white),
                                     textAlign: TextAlign.end,
                                   ),
                                   Text(
-                                    'الموقع',style: TextStyle(color: Colors.white),
+                                    'الموقع',
+                                    style: TextStyle(color: Colors.white),
                                     textAlign: TextAlign.start,
                                   ),
                                 ],
                               ),
                             ),
-                        )
+                          )
                         : Container(
                             height: 0,
                           ),
-                     Flexible(
+                    Flexible(
                       child: firebaseRef != null
                           ? StreamBuilder(
                               stream: firebaseRef.onValue,
@@ -1044,10 +1048,15 @@ class DriverMapState extends State<DriverMap> {
                                               WrapCrossAlignment.center,
                                           children: <Widget>[
                                             IconButton(
-                                                icon: Icon(Icons.flag),
+                                                icon:  Icon(
+                                                 Icons.flag,
+                                                  color: Colors.red,
+                                                ),
+
                                                 iconSize: 20,
                                                 padding: EdgeInsets.all(0),
                                                 onPressed: () {
+                                                  
                                                   print('report');
                                                 }),
                                             IconButton(
