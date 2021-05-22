@@ -40,7 +40,7 @@ class DriverMap extends StatefulWidget {
   DriverMapState createState() => globalState;
 }
 
-Map<String, StreamSubscription<Event>> passstreams = {};
+StreamSubscription<Event> passstreams;
 
 TextEditingController _txtCtrl = TextEditingController();
 Position currentPosition;
@@ -59,7 +59,6 @@ const keyPoStack = 'b302ddec67beb4a453f6a3b36393cdf0';
 GoogleMapController newGoogleMapController;
 BitmapDescriptor movingMarkerIcon;
 Position myPos;
-
 Map<String, StreamSubscription<Position>> rideposstreams = {};
 //////////////////////////////////////////////////////////////////
 final GlobalKey _photopickey = GlobalKey();
@@ -209,50 +208,59 @@ class DriverMapState extends State<DriverMap> {
   }
 
   //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  void reqMarker(String id, int numb) {
-    DatabaseReference reqq =
-        FirebaseDatabase.instance.reference().child('rideRequest/$id');
+  void reqMarker() {
+    for (int i = 0; i < item.length; i++) {
+      DatabaseReference reqq = FirebaseDatabase.instance
+          .reference()
+          .child('rideRequest/${item[i]['ridrReqId']}');
 
-    passstreams[id] = reqq.onValue.listen((event) {
-      if (event.snapshot.value == null) {
-        return;
-      }
-      if (event.snapshot.value['status'] != null) {
-        if (event.snapshot.value['status'].toString() == 'accepted') {
-          if (event.snapshot.value['location'] != null) {
-            double driverLat = double.parse(
-                event.snapshot.value['location']['latitude'].toString());
-            double driverLong = double.parse(
-                event.snapshot.value['location']['longitude'].toString());
-            LatLng driverCurrLoc = LatLng(driverLat, driverLong);
+      passstreams = reqq.onValue.listen((event) {
+        if (event.snapshot.value == null) {
+          return;
+        }
+        if (event.snapshot.value['status'] != null) {
+          if (event.snapshot.value['status'].toString() == 'accepted') {
+            if (event.snapshot.value['location'] != null) {
+              double driverLat = double.parse(
+                  event.snapshot.value['location']['latitude'].toString());
+              double driverLong = double.parse(
+                  event.snapshot.value['location']['longitude'].toString());
+              LatLng driverCurrLoc = LatLng(driverLat, driverLong);
 
-            Marker reqMarker = Marker(
-              markerId: MarkerId(id),
-              position: driverCurrLoc,
-              icon: BitmapDescriptor.defaultMarkerWithHue(200),
-              infoWindow: InfoWindow(
-                  title: 'passenger',
-                  snippet:
-                      event.snapshot.value['passengers'].toString() + 'ركاب'),
+              Marker reqMarker = Marker(
+                markerId: MarkerId(item[i]['ridrReqId']),
+                position: driverCurrLoc,
+                icon: BitmapDescriptor.defaultMarkerWithHue(200),
+                infoWindow: InfoWindow(
+                    title: 'passenger',
+                    snippet:
+                        event.snapshot.value['passengers'].toString() + 'ركاب'),
+              );
+              gMarkers.add(reqMarker);
+            }
+          }
+          if (event.snapshot.value['status'].toString() == 'cancelled') {
+            passstreams.cancel();
+            Fluttertoast.showToast(
+              context,
+              msg: ' تم إلغاء الطلب' +
+                  event.snapshot.value['pickUpAddress'].toString(),
             );
-            gMarkers.add(reqMarker);
+            gMarkers.removeWhere(
+                (marker) => marker.markerId.value == item[i]['ridrReqId']);
+            deletePassenger(item[i]['key'].toString());
+            int x = 0;
+            for (int j = 0; j < item.length; j++) {
+              x = x + int.parse(item[j]['numb']);
+            }
+            driverNum = thisDriver.numOfPass - x + int.parse(item[i]['numb']);
+            nnum.set(driverNum);
+            status ? Funcs.enableLocUpdate() : null;
+            return;
           }
         }
-        if (event.snapshot.value['status'].toString() == 'cancelled') {
-          event.snapshot.value['status'].set('done');
-          Fluttertoast.showToast(
-            context,
-            msg: 'تم إلغاء الطلب',
-          );
-          gMarkers.removeWhere((marker) => marker.markerId.value == id);
-          deletePassenger(id);
-          driverNum = driverNum + numb;
-          nnum.set(driverNum);
-          status ? Funcs.enableLocUpdate() : null;
-          passstreams[id].cancel();
-        }
-      }
-    });
+      });
+    }
   }
 //  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1020,6 +1028,7 @@ class DriverMapState extends State<DriverMap> {
                                     shrinkWrap: true,
                                     itemCount: item.length,
                                     itemBuilder: (context, index) {
+                                      reqMarker();
                                       return ListTile(
                                         leading: Wrap(
                                           alignment: WrapAlignment.center,
@@ -1075,9 +1084,7 @@ class DriverMapState extends State<DriverMap> {
                                                 }); */
 
                                               } else if (ss == 'arrived') {
-                                                passstreams[item[index]
-                                                        ['ridrReqId']]
-                                                    .cancel();
+                                                passstreams.cancel();
 
                                                 reqq
                                                     .child('status')

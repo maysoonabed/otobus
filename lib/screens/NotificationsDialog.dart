@@ -226,7 +226,7 @@ class NotificationsDialog extends StatelessWidget {
         globalState.setState(() {
           globalState.creatMarker();
           globalState.updateRideLocation(trip.ridrReqId);
-          globalState.reqMarker(trip.ridrReqId, trip.numb);
+      //    globalState.reqMarker();
         });
       } else if (thisRideId == 'cancelled') {
         Fluttertoast.showToast(
