@@ -914,13 +914,11 @@ class PassengerMapState extends State<PassengerMap> {
                             rideReq.onDisconnect();
                             rideReq.remove();
                             rideReq = null;
-
                             ridestreams.cancel();
                             ridestreams = null;
                             pridePosStream.cancel();
                             pridePosStream = null;
-                            driversDetailes = 0;
-                          },
+                           },
                         ),
                         SizedBox(
                           height: 10,

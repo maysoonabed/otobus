@@ -975,28 +975,36 @@ class DriverMapState extends State<DriverMap> {
                 child: Column(
                   children: [
                     firebaseRef != null
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'الوجهة',
-                                  textAlign: TextAlign.end,
-                                ),
-                                Text(
-                                  'الموقع',
-                                  textAlign: TextAlign.start,
-                                ),
-                              ],
+                        ? Container(
+                            padding: EdgeInsets.all(1.0),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(16),
+                        topLeft: Radius.circular(16)),
+                    color: apBcolor,
+                 ),
+                          child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'الوجهة',style: TextStyle(color: Colors.white),
+                                    textAlign: TextAlign.end,
+                                  ),
+                                  Text(
+                                    'الموقع',style: TextStyle(color: Colors.white),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                ],
+                              ),
                             ),
-                          )
+                        )
                         : Container(
                             height: 0,
                           ),
-                    Divider(),
-                    Flexible(
+                     Flexible(
                       child: firebaseRef != null
                           ? StreamBuilder(
                               stream: firebaseRef.onValue,
