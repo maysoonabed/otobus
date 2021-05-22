@@ -204,8 +204,14 @@ class _CalendarState extends State<Calendar> {
                                 calendarClient.insert('going to ' + _dest.text,
                                     startTime, startTime);
                                 setState(() {
-                                  events[startTime]
-                                      .add('going to ' + _dest.text);
+                                  if (events[startTime] != null) {
+                                    events[startTime]
+                                        .add('going to ' + _dest.text);
+                                  } else {
+                                    events[startTime] = [
+                                      'going to ' + _dest.text
+                                    ];
+                                  }
                                 });
 
                                 Navigator.pop(context);
