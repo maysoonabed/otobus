@@ -108,7 +108,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -377,7 +377,7 @@ class DriverMapState extends State<DriverMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.8/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -393,7 +393,7 @@ class DriverMapState extends State<DriverMap> {
     insur = Io.File(img.path).readAsBytesSync();
     base64insu = base64Encode(insur);
     String url =
-        "http://192.168.1.8/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'insimg': base64insu,
       'insname': imgname,
@@ -415,7 +415,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future updateinsdate(String formatted) async {
     String url =
-        "http://192.168.1.8/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
     var response =
         await http.post(url, body: {'endate': formatted, 'email': email});
     if (response.statusCode == 200) {
@@ -428,7 +428,7 @@ class DriverMapState extends State<DriverMap> {
   var onoff;
   Future insphp() async {
     String url =
-        "http://192.168.1.8/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {'email': email});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -495,7 +495,7 @@ class DriverMapState extends State<DriverMap> {
     pic();
     numUnredMsgs();
     insphp();
- 
+
     //driverInsDate <= 15 ? print(driverInsDate) : print("No");
     return MaterialApp(
         debugShowCheckedModeBanner: false, //لإخفاء شريط depug
@@ -1048,15 +1048,13 @@ class DriverMapState extends State<DriverMap> {
                                               WrapCrossAlignment.center,
                                           children: <Widget>[
                                             IconButton(
-                                                icon:  Icon(
-                                                 Icons.flag,
+                                                icon: Icon(
+                                                  Icons.flag,
                                                   color: Colors.red,
                                                 ),
-
                                                 iconSize: 20,
                                                 padding: EdgeInsets.all(0),
                                                 onPressed: () {
-                                                  
                                                   print('report');
                                                 }),
                                             IconButton(
@@ -1064,8 +1062,30 @@ class DriverMapState extends State<DriverMap> {
                                                 iconSize: 20,
                                                 padding: EdgeInsets.all(0),
                                                 onPressed: () {
-                                                  print(item[index]
-                                                      ['passengerPhone']);
+                                                  passPhone = item[index]
+                                                      ['passengerPhone'];
+                                                  getInfoForChat(passPhone);
+                                                  roomId = globalFunctions()
+                                                      .creatChatRoomInfo(
+                                                          thisDriver.email,
+                                                          passEmail);
+                                                  //print(roomId);
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              PassChatDetailes(
+                                                                username:
+                                                                    passName,
+                                                                imageURL:
+                                                                    passImgPath,
+                                                                useremail:
+                                                                    passEmail,
+                                                                roomID: roomId,
+                                                                sendername:
+                                                                    thisDriver
+                                                                        .name,
+                                                              )));
                                                 }),
                                           ],
                                         ),
@@ -1259,20 +1279,6 @@ class DriverMapState extends State<DriverMap> {
       _selectedIndex = index;
     });
     if (_selectedIndex == 1) {
-      passPhone = "187";
-      getInfoForChat(passPhone);
-      roomId = globalFunctions().creatChatRoomInfo(thisDriver.email, passEmail);
-      //print(roomId);
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PassChatDetailes(
-                    username: passName,
-                    imageURL: passImgPath,
-                    useremail: passEmail,
-                    roomID: roomId,
-                    sendername: thisDriver.name,
-                  )));
     } else if (_selectedIndex == 2) {
       Navigator.push(
           context,

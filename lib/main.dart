@@ -129,8 +129,8 @@ void main() {
     statusBarColor: Colors.transparent,
   ));
   //*******************************
-  
-    //*******************************
+
+  //*******************************
   runApp(ChangeNotifierProvider(
       create: (context) => AppData(),
       child: MaterialApp(
@@ -243,30 +243,6 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ),*/
                         //*********************************
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20.0, right: 20),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DriverMap()),
-                                );
-                              },
-                              child: Text('driver')),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20.0, right: 20),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => PassengerPage()),
-                                );
-                              },
-                              child: Text('passenger')),
-                        ),
                         Center(
                           child: Builder(builder: (BuildContext mContext) {
                             return Padding(
