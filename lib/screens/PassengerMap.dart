@@ -226,7 +226,7 @@ class PassengerMapState extends State<PassengerMap> {
     }
 
     setState(() {
-      driversDetailes = 400;
+      driversDetailes = 280;
     });
   }
 
@@ -900,7 +900,7 @@ class PassengerMapState extends State<PassengerMap> {
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.clip,
                         textDirection: TextDirection.rtl,
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(fontSize: 15),
                       ),
                     ),
                   ],
@@ -909,20 +909,19 @@ class PassengerMapState extends State<PassengerMap> {
                 Text(
                   theDriver.busType != null ? theDriver.busType : ' نوع الباص',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 10,
+                  ),
                 ),
                 Text(
                   theDriver.name != null ? theDriver.name : 'اسم السائق',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                  style: TextStyle(fontSize: 15, fontFamily: 'Lemonada'),
                 ),
-                SizedBox(
-                  height: 12,
-                ),
+               
                 Divider(),
-                SizedBox(
-                  height: 22,
-                ),
+                
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -931,14 +930,17 @@ class PassengerMapState extends State<PassengerMap> {
                       children: [
                         InkWell(
                           child: Container(
-                            height: 55,
-                            width: 55,
+                            height: 40,
+                            width: 40,
                             decoration: BoxDecoration(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(26)),
                               border: Border.all(width: 2, color: Colors.grey),
                             ),
-                            child: Icon(Icons.cancel),
+                            child: Icon(
+                              Icons.cancel,
+                              size: 23,
+                            ),
                           ),
                           onTap: () {
                             //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
@@ -967,7 +969,10 @@ class PassengerMapState extends State<PassengerMap> {
                         SizedBox(
                           height: 10,
                         ),
-                        Text('إلغاء طلب الرحلة'),
+                        Text(
+                          'إلغاء طلب الرحلة',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                     Column(
@@ -995,20 +1000,26 @@ class PassengerMapState extends State<PassengerMap> {
                               );
                             },
                             child: Container(
-                              height: 55,
-                              width: 55,
+                              height: 40,
+                              width: 40,
                               decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(26)),
                                 border:
                                     Border.all(width: 2, color: Colors.grey),
                               ),
-                              child: Icon(Icons.message),
+                              child: Icon(
+                                Icons.message,
+                                size: 23,
+                              ),
                             )),
                         SizedBox(
                           height: 10,
                         ),
-                        Text('تواصل مع السائق'),
+                        Text(
+                          'تواصل مع السائق',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                     Column(
@@ -1024,20 +1035,26 @@ class PassengerMapState extends State<PassengerMap> {
                                 });
                           },
                           child: Container(
-                            height: 55,
-                            width: 55,
+                            height: 40,
+                            width: 40,
                             decoration: BoxDecoration(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(26)),
                               border: Border.all(width: 2, color: Colors.grey),
                             ),
-                            child: Icon(Icons.list),
+                            child: Icon(
+                              Icons.list,
+                              size: 23,
+                            ),
                           ),
                         ),
                         SizedBox(
                           height: 10,
                         ),
-                        Text(' معلومات السائق'),
+                        Text(
+                          ' معلومات السائق',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                   ],
