@@ -10,6 +10,7 @@ import 'package:page_transition/page_transition.dart';
 import '../main.dart';
 import 'LoginPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'MapTy.dart';
 import 'PassMap.dart';
 import 'PassengerPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -118,7 +119,7 @@ class _SignupPageState extends State<SignupPage> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => PassMap())); //PassengerPage()
+                  builder: (context) => MapTy())); //PassengerPage()
         } else {
           setState(() {
             showprogress = false; //don't show progress indicator
