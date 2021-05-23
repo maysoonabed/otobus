@@ -186,7 +186,7 @@ class PassengerPageState extends State<PassengerPage> {
               children: <Widget>[
                 SizedBox(height: 10),
                 Expanded(
-                   child: Theme(
+                  child: Theme(
                     data: Theme.of(context).copyWith(primaryColor: apcolor),
                     child: TextField(
                       textAlign: TextAlign.end,
@@ -203,7 +203,6 @@ class PassengerPageState extends State<PassengerPage> {
                   ),
                 ),
                 Row(
-                
                   children: [
                     Expanded(
                       child: Theme(
@@ -253,7 +252,9 @@ class PassengerPageState extends State<PassengerPage> {
                       ),
                     ),
                     (startPointController.text == "")
-                        ? Container(height: 0,)
+                        ? Container(
+                            height: 0,
+                          )
                         : IconButton(
                             icon: Icon(
                               Icons.star_sharp,
@@ -318,10 +319,7 @@ class PassengerPageState extends State<PassengerPage> {
                                 color: Colors.black, fontFamily: 'Lemonada'),
                           ),
                           onPressed: () {
-                            setState(() {
-                              markers.length == 2 ? markers.removeAt(1) : null;
-                            });
-
+                           
                             markers.insert(
                               1,
                               Marker(

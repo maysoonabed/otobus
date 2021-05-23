@@ -74,6 +74,7 @@ String drivImgPath = "lib/Images/Defultprof.jpg";
 String drivPhone = "";
 String path;
 String oneNamePlace;
+int isExtended;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -240,33 +241,33 @@ class PassengerMapState extends State<PassengerMap> {
       myPos = position;
       currentPosition = position;
       latLng.LatLng pos = latLng.LatLng(position.latitude, position.longitude);
-      markers.clear();
-      marks['current'] = Marker(
-        width: 80.0,
-        height: 80.0,
-        point: pos,
-        builder: (ctx) => Container(
-            child: Icon(
-          Icons.location_on,
-          color: mypink,
-          size: 40,
-        )),
-      );
-      marks.values.forEach((element) {
-        markers.add(element);
+      setState(() {
+        marks['current'] = Marker(
+          width: 80.0,
+          height: 80.0,
+          point: pos,
+          builder: (ctx) => Container(
+              child: Icon(
+            Icons.location_on,
+            color: mypink,
+            size: 40,
+          )),
+        );
+        markers.insert(0, marks['current']);
       });
+
       oldP = pos;
       Map locationMap = {
         'latitude': myPos.latitude,
         'longitude': myPos.longitude,
       };
-      rideReq.child('location').set(locationMap);
+      if (rideReq != null) {
+        rideReq.child('location').set(locationMap);
+      }
     });
   }
 
   updateDriverLocation(latLng.LatLng loc) async {
-    markers.clear();
-    polyLines.isEmpty ? null : polyLines.clear();
     marks['driver'] = Marker(
       width: 50.0,
       height: 50.0,
@@ -278,6 +279,7 @@ class PassengerMapState extends State<PassengerMap> {
         size: 30,
       )),
     );
+    markers.insert(3, marks['driver']);
     points.isNotEmpty ? points.clear() : null;
     NetworkHelper network = NetworkHelper(
       startLat: currLatLng.latitude,
@@ -303,7 +305,7 @@ class PassengerMapState extends State<PassengerMap> {
         strokeWidth: 6.0,
         color: myblue,
       );
-      polyLines.add(polyline);
+      polyLines.insert(1, polyline);
       setState(() {});
     } catch (e) {
       print(e);
@@ -335,10 +337,8 @@ class PassengerMapState extends State<PassengerMap> {
         size: 30,
       )),
     );
-
-    marks.values.forEach((element) {
-      markers.add(element);
-    });
+    markers.insert(1, marks['driverDes']);
+    markers.insert(2, marks['driverloc']);
 
     NetworkHelper network = NetworkHelper(
       startLat: loc.latitude,
@@ -364,7 +364,7 @@ class PassengerMapState extends State<PassengerMap> {
         strokeWidth: 4.0,
         color: Colors.blueAccent,
       );
-      polyLines.add(polyline);
+      polyLines.insert(0, polyline);
       setState(() {});
     } catch (e) {
       print(e);
@@ -437,21 +437,20 @@ class PassengerMapState extends State<PassengerMap> {
           driverDest = latLng.LatLng(driverLat, driverLong);
         }
         if (statusRide == 'accepted') {
-          setState(() {
-            markers.clear();
-            points.clear();
-            polyLines.clear();
-            setupPositionLocator();
-          });
           updateDriTime(driverCurrLoc);
           updateRideLocation();
-          updateDriverLocation(driverCurrLoc);
           driverPoly(driverLoc, driverDest);
+          updateDriverLocation(driverCurrLoc);
         } else if (statusRide == 'onTrip') {
           updateTripTime(driverCurrLoc);
-          polyLines.isEmpty ? null : polyLines.clear();
+
+          setState(() {
+            polyLines.removeAt(1);
+            markers.removeAt(3);
+          });
           updateRideLocation();
           driverPoly(driverLoc, driverDest);
+
           //resetApp: polylines and such
         } else if (statusRide == 'arrived') {
           setState(() {
@@ -463,7 +462,8 @@ class PassengerMapState extends State<PassengerMap> {
       if (statusRide == 'accepted') {
         displayDriverDetails();
         Geofire.stopListener();
-        //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
+        isExtended = 0;
+        //DELETE MARKS : لازم تشوفي مشكلة هاد و ترتبيها
       }
       if (statusRide == 'ended') {
         if (event.snapshot.value['driver_phone'] != null) {
@@ -482,12 +482,29 @@ class PassengerMapState extends State<PassengerMap> {
         ridestreams = null;
         pridePosStream.cancel();
         pridePosStream = null;
-        setState(() {});
+        setState(() {
+          stat = 'normal';
+          markers.clear();
+          points.clear();
+          polyLines.clear();
+          marks['current'] = Marker(
+            width: 80.0,
+            height: 80.0,
+            point: currLatLng,
+            builder: (ctx) => Container(
+                child: Icon(
+              Icons.location_on,
+              color: mypink,
+              size: 40,
+            )),
+          );
+          markers.insert(0, marks['current']);
+          driversDetailes = 0;
+          statusRide = '';
+          arrivalStatus = ' الباص على الطريق ';
+        });
         //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
 
-        driversDetailes = 0;
-        statusRide = '';
-        arrivalStatus = ' الباص على الطريق ';
       }
     });
   }
@@ -545,7 +562,18 @@ class PassengerMapState extends State<PassengerMap> {
       markers.clear();
       points.clear();
       polyLines.clear();
-      markers.add(marks['current']);
+      marks['current'] = Marker(
+        width: 80.0,
+        height: 80.0,
+        point: currLatLng,
+        builder: (ctx) => Container(
+            child: Icon(
+          Icons.location_on,
+          color: mypink,
+          size: 40,
+        )),
+      );
+      markers.insert(0, marks['current']);
     });
   }
 
@@ -597,7 +625,7 @@ class PassengerMapState extends State<PassengerMap> {
         size: 40,
       )),
     );
-    markers.add(marks['current']);
+    markers.insert(0, marks['current']);
 
     getData(currentPosition.latitude, currentPosition.longitude);
   }
@@ -749,7 +777,6 @@ class PassengerMapState extends State<PassengerMap> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  int isExtended = 0;
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   void logFire() async {
@@ -795,6 +822,23 @@ class PassengerMapState extends State<PassengerMap> {
                   onPressed: () {
                     if (isExtended == 1) {
                       createRequest();
+                      setState(() {
+                        markers.clear();
+                        points.clear();
+                        polyLines.clear();
+                        marks['current'] = Marker(
+                          width: 80.0,
+                          height: 80.0,
+                          point: currLatLng,
+                          builder: (ctx) => Container(
+                              child: Icon(
+                            Icons.location_on,
+                            color: mypink,
+                            size: 40,
+                          )),
+                        );
+                        markers.add(marks['current']);
+                      });
                       startGeoListen();
                     } else if (isExtended == 2) {
                       cancelReq();
@@ -918,7 +962,7 @@ class PassengerMapState extends State<PassengerMap> {
                             ridestreams = null;
                             pridePosStream.cancel();
                             pridePosStream = null;
-                           },
+                          },
                         ),
                         SizedBox(
                           height: 10,
@@ -1102,6 +1146,8 @@ class PassengerMapState extends State<PassengerMap> {
 
   @override
   void initState() {
+    isExtended = 0;
+
     homeispress = true;
     msgispress = false;
     notispress = false;
