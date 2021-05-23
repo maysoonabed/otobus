@@ -319,7 +319,8 @@ class PassengerPageState extends State<PassengerPage> {
                                 color: Colors.black, fontFamily: 'Lemonada'),
                           ),
                           onPressed: () {
-                           
+                            isExtended = 0;
+                            btn = true;
                             markers.insert(
                               1,
                               Marker(
@@ -335,6 +336,7 @@ class PassengerPageState extends State<PassengerPage> {
                                 )),
                               ),
                             );
+                            
                             getJsonData();
                             Navigator.pop(context);
                           })

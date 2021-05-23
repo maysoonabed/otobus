@@ -101,6 +101,8 @@ DatabaseReference rideReq;
 DatabaseReference driverRef =
     FirebaseDatabase.instance.reference().child('Drivers');
 String stat = 'normal';
+int isExtended;
+bool btn;
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 class _PassMapState extends State<PassMap> {
@@ -128,6 +130,8 @@ class _PassMapState extends State<PassMap> {
     email = ""; //thisUser.email != null ? thisUser.email :
     errormsg = "";
     error = false;
+    isExtended = 0;
+    btn = false;
     BitmapDescriptor.fromAssetImage(
             ImageConfiguration(size: Size(1, 1)), 'lib/Images/icon2.png')
         .then((onValue) {
@@ -515,6 +519,8 @@ class _PassMapState extends State<PassMap> {
           new FlatButton(
               child: const Text('اختيار'),
               onPressed: () {
+                isExtended = 0;
+                btn = true;
                 setState(() {
                   _getPolyline();
                   butMarker();
@@ -659,7 +665,7 @@ class _PassMapState extends State<PassMap> {
     }
 
     setState(() {
-      driversDetailes = 400;
+      driversDetailes = 280;
     });
   }
 
@@ -700,7 +706,9 @@ class _PassMapState extends State<PassMap> {
         'latitude': myPos.latitude,
         'longitude': myPos.longitude,
       };
-      rideReq.child('location').set(locationMap);
+      if (rideReq != null) {
+        rideReq.child('location').set(locationMap);
+      }
     });
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -789,6 +797,7 @@ class _PassMapState extends State<PassMap> {
   void createRequest() {
     //print(email);print(name);print(phone);
     rideReq = FirebaseDatabase.instance.reference().child('rideRequest').push();
+    numCont != null ? null : numCont = 1;
     var pickUp = Provider.of<AppData>(context, listen: false).pickUpAdd;
     var destination =
         Provider.of<AppData>(context, listen: false).destinationAddress;
@@ -870,6 +879,8 @@ class _PassMapState extends State<PassMap> {
       if (statusRide == 'accepted') {
         displayDriverDetails();
         Geofire.stopListener();
+        isExtended = 0;
+
         //DELETE MARKERS : لازم تشوفي مشكلة هاد و ترتبيها
       }
       if (statusRide == 'ended') {
@@ -884,17 +895,24 @@ class _PassMapState extends State<PassMap> {
 
         rideReq.onDisconnect();
         rideReq.remove();
-
         rideReq = null;
         ridestreams.cancel();
         ridestreams = null;
         pridePosStream.cancel();
-        setState(() {});
+        pridePosStream = null;
         //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
 
-        driversDetailes = 0;
-        statusRide = '';
-        arrivalStatus = ' الباص على الطريق ';
+        setState(() {
+          isExtended = 0;
+          btn = false;
+          driversDetailes = 0;
+          stat = 'normal';
+          markers.clear();
+          circles.clear();
+          polylines.clear();
+          statusRide = '';
+          arrivalStatus = ' الباص على الطريق ';
+        });
       }
     });
   }
@@ -903,6 +921,9 @@ class _PassMapState extends State<PassMap> {
   void cancelReq() {
     rideReq.remove();
     setState(() {
+      isExtended = 0;
+      btn = false;
+      stat = 'normal';
       markers.clear();
       circles.clear();
       polylines.clear();
@@ -1059,8 +1080,6 @@ class _PassMapState extends State<PassMap> {
         break;
     }
   }
-
-  int isExtended = 0;
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void logFire() async {
@@ -1388,7 +1407,7 @@ class _PassMapState extends State<PassMap> {
                   setupPositionLocator();
                 },
               ),
-              markers.length > 1
+              btn
                   ? Padding(
                       padding: const EdgeInsets.only(bottom: 90, right: 10),
                       child: Align(
@@ -1465,21 +1484,19 @@ class _PassMapState extends State<PassMap> {
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.clip,
                                 textDirection: TextDirection.rtl,
-                                style: TextStyle(fontSize: 20),
+                                style: TextStyle(fontSize: 15),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: 22,
-                        ),
+                        
                         Divider(),
                         Text(
                           theDriver.busType != null
                               ? theDriver.busType
                               : ' نوع الباص',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle( fontSize: 10,color: Colors.grey),
                         ),
                         Text(
                           theDriver.name != null
@@ -1487,36 +1504,60 @@ class _PassMapState extends State<PassMap> {
                               : 'اسم السائق',
                           textAlign: TextAlign.center,
                           style:
-                              TextStyle(fontSize: 20, fontFamily: 'Lemonada'),
+                              TextStyle(fontSize: 15, fontFamily: 'Lemonada'),
                         ),
-                        SizedBox(
-                          height: 12,
-                        ),
+                        
                         Divider(),
-                        SizedBox(
-                          height: 22,
-                        ),
+                        
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Container(
-                                  height: 55,
-                                  width: 55,
-                                  decoration: BoxDecoration(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(26)),
-                                    border: Border.all(
-                                        width: 2, color: Colors.grey),
+                                InkWell(
+                                  child: Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(26)),
+                                      border: Border.all(
+                                          width: 2, color: Colors.grey),
+                                    ),
+                                    child: Icon(Icons.cancel,
+                              size: 23,),
                                   ),
-                                  child: Icon(Icons.cancel),
+                                  onTap: () {
+                                    //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
+                                    statusRide = '';
+                                    arrivalStatus = ' الباص على الطريق ';
+                                    setState(() {
+                                      stat = 'normal';
+                                      driversDetailes = 0;
+                                      isExtended = 0;
+                                      btn = false;
+                                      markers.clear();
+                                      circles.clear();
+                                      polylines.clear();
+                                    });
+                                    rideReq.child('status').set('cancelled');
+                                    Future.delayed(
+                                        const Duration(seconds: 2), () {});
+                                    rideReq.onDisconnect();
+                                    rideReq.remove();
+                                    rideReq = null;
+                                    ridestreams.cancel();
+                                    ridestreams = null;
+                                    pridePosStream.cancel();
+                                    pridePosStream = null;
+                                  },
                                 ),
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text('إلغاء طلب الرحلة'),
+                                Text('إلغاء طلب الرحلة',
+                          style: TextStyle(fontSize: 12),),
                               ],
                             ),
                             Column(
@@ -1546,21 +1587,23 @@ class _PassMapState extends State<PassMap> {
                                     );
                                   },
                                   child: Container(
-                                    height: 55,
-                                    width: 55,
+                                    height: 40,
+                                    width: 40,
                                     decoration: BoxDecoration(
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(26)),
                                       border: Border.all(
                                           width: 2, color: Colors.grey),
                                     ),
-                                    child: Icon(Icons.message),
+                                    child: Icon(Icons.message,
+                              size: 23,),
                                   ),
                                 ),
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text('تواصل مع السائق'),
+                                Text('تواصل مع السائق',
+                          style: TextStyle(fontSize: 12),),
                               ],
                             ),
                             Column(
@@ -1574,21 +1617,23 @@ class _PassMapState extends State<PassMap> {
                                     );
                                   },
                                   child: Container(
-                                    height: 55,
-                                    width: 55,
+                                    height: 40,
+                                    width: 40,
                                     decoration: BoxDecoration(
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(26)),
                                       border: Border.all(
                                           width: 2, color: Colors.grey),
                                     ),
-                                    child: Icon(Icons.list),
+                                    child: Icon(Icons.list,
+                              size: 23,),
                                   ),
                                 ),
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text(' معلومات السائق'),
+                                Text(' معلومات السائق',
+                          style: TextStyle(fontSize: 12),),
                               ],
                             ),
                           ],

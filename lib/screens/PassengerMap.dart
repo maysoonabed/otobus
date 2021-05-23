@@ -60,7 +60,6 @@ DatabaseReference driverRef =
 bool nearLoaded = false;
 String errmsg;
 String driverPhone;
-String driverId;
 File prof;
 String profname;
 var profile;
@@ -75,6 +74,7 @@ String drivPhone = "";
 String path;
 String oneNamePlace;
 int isExtended;
+bool btn;
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 class PassengerMap extends StatefulWidget {
@@ -419,9 +419,7 @@ class PassengerMapState extends State<PassengerMap> {
         if (event.snapshot.value['driver_phone'] != null) {
           driverPhone = event.snapshot.value['driver_phone'].toString();
         }
-        if (event.snapshot.value['driver_id'] != null) {
-          driverId = event.snapshot.value['driver_id'].toString();
-        }
+      
         if (event.snapshot.value['driver_loc'] != null) {
           double driverLat = double.parse(
               event.snapshot.value['driver_loc']['latitude'].toString());
@@ -483,6 +481,8 @@ class PassengerMapState extends State<PassengerMap> {
         pridePosStream.cancel();
         pridePosStream = null;
         setState(() {
+          isExtended = 0;
+          btn = false;
           stat = 'normal';
           markers.clear();
           points.clear();
@@ -556,6 +556,8 @@ class PassengerMapState extends State<PassengerMap> {
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void cancelReq() {
+    isExtended = 0;
+    btn = false;
     rideReq.remove();
     setState(() {
       stat = 'normal';
@@ -811,7 +813,7 @@ class PassengerMapState extends State<PassengerMap> {
           ),
         ],
       ),
-      markers.length > 1
+      btn
           ? Padding(
               padding: const EdgeInsets.only(bottom: 90, right: 10),
               child: Align(
@@ -919,9 +921,7 @@ class PassengerMapState extends State<PassengerMap> {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 15, fontFamily: 'Lemonada'),
                 ),
-               
                 Divider(),
-                
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -950,6 +950,7 @@ class PassengerMapState extends State<PassengerMap> {
                               stat = 'normal';
                               driversDetailes = 0;
                               isExtended = 0;
+                              btn = false;
                               markers.clear();
                               points.clear();
                               polyLines.clear();
@@ -1164,7 +1165,7 @@ class PassengerMapState extends State<PassengerMap> {
   @override
   void initState() {
     isExtended = 0;
-
+    btn = false;
     homeispress = true;
     msgispress = false;
     notispress = false;
