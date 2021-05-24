@@ -500,16 +500,6 @@ class _PassMapState extends State<PassMap> {
                     ),
                   ),
                 ),
-                /*  new Expanded(
-                  child: new TextField(
-                    controller: distance,
-                    readOnly: true,
-                    minLines: 1,
-                    maxLines: null,
-                    autofocus: false,
-                    decoration: new InputDecoration(labelText: 'المسافة'),
-                  ),
-                ), */
               ],
             )),
         actions: <Widget>[
