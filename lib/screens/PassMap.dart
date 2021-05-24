@@ -262,6 +262,8 @@ class _PassMapState extends State<PassMap> {
         position: destltlg,
         icon: BitmapDescriptor.defaultMarkerWithHue(90), //myIcon,
         infoWindow: InfoWindow(title: _destName, snippet: 'Destination'));
+    markers.removeWhere((marker) => marker.markerId.value == 'current');
+    markers.removeWhere((marker) => marker.markerId.value == 'destination');
     markers.add(currMarker);
     markers.add(destMarker);
     Circle currCircle = Circle(
@@ -542,6 +544,10 @@ class _PassMapState extends State<PassMap> {
       var pos = LatLng(_originLatitude, _originLongitude);
       String time = await calcTime(pos, driverCurrLoc);
       setState(() {
+        if (arrivalStatus == ' الباص على الطريق ') {
+          markers.clear();
+          polylines.clear();
+        }
         arrivalStatus = ' الرجاء التوجه إلى مسار الباص, الباص يبعد ' +
             time /* + " دقائق " */;
       });
@@ -694,7 +700,7 @@ class _PassMapState extends State<PassMap> {
       Marker currmr = Marker(
         markerId: MarkerId('current'),
         position: pos,
-        icon: BitmapDescriptor.defaultMarkerWithHue(90),
+        icon: BitmapDescriptor.defaultMarker,
         infoWindow: InfoWindow(title: 'الموقع الحالي'),
       );
       setState(() {
@@ -717,7 +723,7 @@ class _PassMapState extends State<PassMap> {
     Marker movingMarker = Marker(
       markerId: MarkerId('moving'),
       position: loc,
-      icon: movingMarkerIcon,
+      icon: myIcon,
       infoWindow: InfoWindow(title: 'الباص المتحرك '),
     );
     setState(() {
@@ -860,8 +866,8 @@ class _PassMapState extends State<PassMap> {
         if (statusRide == 'accepted') {
           updateDriTime(driverCurrLoc); //bbbbbbbaaaaaaaccckkkk
           updateRideLocation();
-          updateDriverLocation(driverCurrLoc);
           driverPoly(driverLoc, driverDest);
+          updateDriverLocation(driverCurrLoc);
         } else if (statusRide == 'onTrip') {
           updateTripTime(driverCurrLoc);
           setState(() {
@@ -948,7 +954,7 @@ class _PassMapState extends State<PassMap> {
         Marker driversmark = Marker(
           markerId: MarkerId("drivmk"),
           position: driverltlg,
-          icon: BitmapDescriptor.defaultMarkerWithHue(30),
+          icon: myIcon,
         );
         markers.add(driversmark);
       });
@@ -1489,14 +1495,13 @@ class _PassMapState extends State<PassMap> {
                             ),
                           ],
                         ),
-                        
                         Divider(),
                         Text(
                           theDriver.busType != null
                               ? theDriver.busType
                               : ' نوع الباص',
                           textAlign: TextAlign.center,
-                          style: TextStyle( fontSize: 10,color: Colors.grey),
+                          style: TextStyle(fontSize: 10, color: Colors.grey),
                         ),
                         Text(
                           theDriver.name != null
@@ -1506,9 +1511,7 @@ class _PassMapState extends State<PassMap> {
                           style:
                               TextStyle(fontSize: 15, fontFamily: 'Lemonada'),
                         ),
-                        
                         Divider(),
-                        
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -1525,8 +1528,10 @@ class _PassMapState extends State<PassMap> {
                                       border: Border.all(
                                           width: 2, color: Colors.grey),
                                     ),
-                                    child: Icon(Icons.cancel,
-                              size: 23,),
+                                    child: Icon(
+                                      Icons.cancel,
+                                      size: 23,
+                                    ),
                                   ),
                                   onTap: () {
                                     //reset the app/ احزفي كل الاشياء و رجعيه كانو جديد
@@ -1556,8 +1561,10 @@ class _PassMapState extends State<PassMap> {
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text('إلغاء طلب الرحلة',
-                          style: TextStyle(fontSize: 12),),
+                                Text(
+                                  'إلغاء طلب الرحلة',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ],
                             ),
                             Column(
@@ -1595,15 +1602,19 @@ class _PassMapState extends State<PassMap> {
                                       border: Border.all(
                                           width: 2, color: Colors.grey),
                                     ),
-                                    child: Icon(Icons.message,
-                              size: 23,),
+                                    child: Icon(
+                                      Icons.message,
+                                      size: 23,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text('تواصل مع السائق',
-                          style: TextStyle(fontSize: 12),),
+                                Text(
+                                  'تواصل مع السائق',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ],
                             ),
                             Column(
@@ -1625,15 +1636,19 @@ class _PassMapState extends State<PassMap> {
                                       border: Border.all(
                                           width: 2, color: Colors.grey),
                                     ),
-                                    child: Icon(Icons.list,
-                              size: 23,),
+                                    child: Icon(
+                                      Icons.list,
+                                      size: 23,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text(' معلومات السائق',
-                          style: TextStyle(fontSize: 12),),
+                                Text(
+                                  ' معلومات السائق',
+                                  style: TextStyle(fontSize: 12),
+                                ),
                               ],
                             ),
                           ],

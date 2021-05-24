@@ -253,6 +253,10 @@ class PassengerMapState extends State<PassengerMap> {
             size: 40,
           )),
         );
+        if (markers.length >= 1) {
+          markers.removeAt(0);
+        }
+
         markers.insert(0, marks['current']);
       });
 
@@ -275,11 +279,17 @@ class PassengerMapState extends State<PassengerMap> {
       builder: (ctx) => Container(
           child: Icon(
         Icons.directions_bus,
-        color: Colors.black,
+        color: myOrange,
         size: 30,
       )),
     );
-    markers.insert(3, marks['driver']);
+    setState(() {
+      if (markers.length > 3) {
+        markers.removeRange(3, markers.length);
+      }
+      markers.insert(3, marks['driver']);
+    });
+
     points.isNotEmpty ? points.clear() : null;
     NetworkHelper network = NetworkHelper(
       startLat: currLatLng.latitude,
@@ -302,10 +312,10 @@ class PassengerMapState extends State<PassengerMap> {
 
       Polyline polyline = Polyline(
         points: points,
-        strokeWidth: 6.0,
+        strokeWidth: 3.0,
         color: myblue,
       );
-      polyLines.insert(1, polyline);
+      points.isNotEmpty ? polyLines.insert(1, polyline) : null;
       setState(() {});
     } catch (e) {
       print(e);
@@ -321,8 +331,8 @@ class PassengerMapState extends State<PassengerMap> {
       point: dest,
       builder: (ctx) => Container(
           child: Icon(
-        Icons.location_on,
-        color: Colors.black,
+        Icons.location_pin,
+        color: myPink,
         size: 30,
       )),
     );
@@ -332,11 +342,12 @@ class PassengerMapState extends State<PassengerMap> {
       point: loc,
       builder: (ctx) => Container(
           child: Icon(
-        Icons.location_on,
-        color: Colors.black38,
+        Icons.location_pin,
+        color: myPink,
         size: 30,
       )),
     );
+
     markers.insert(1, marks['driverDes']);
     markers.insert(2, marks['driverloc']);
 
@@ -361,8 +372,8 @@ class PassengerMapState extends State<PassengerMap> {
 
       Polyline polyline = Polyline(
         points: pts,
-        strokeWidth: 4.0,
-        color: Colors.blueAccent,
+        strokeWidth: 5.0,
+        color: Colors.black,
       );
       polyLines.insert(0, polyline);
       setState(() {});
@@ -419,7 +430,7 @@ class PassengerMapState extends State<PassengerMap> {
         if (event.snapshot.value['driver_phone'] != null) {
           driverPhone = event.snapshot.value['driver_phone'].toString();
         }
-      
+
         if (event.snapshot.value['driver_loc'] != null) {
           double driverLat = double.parse(
               event.snapshot.value['driver_loc']['latitude'].toString());
@@ -498,6 +509,7 @@ class PassengerMapState extends State<PassengerMap> {
               size: 40,
             )),
           );
+ 
           markers.insert(0, marks['current']);
           driversDetailes = 0;
           statusRide = '';
@@ -516,6 +528,21 @@ class PassengerMapState extends State<PassengerMap> {
       var pos = latLng.LatLng(currLatLng.latitude, currLatLng.longitude);
       String time = await calcTime(pos, driverCurrLoc);
       setState(() {
+        if (arrivalStatus == ' الباص على الطريق ') {
+          markers.clear();
+          marks['current'] = Marker(
+            width: 80.0,
+            height: 80.0,
+            point: pos,
+            builder: (ctx) => Container(
+                child: Icon(
+              Icons.location_on,
+              color: mypink,
+              size: 40,
+            )),
+          );
+          markers.insert(0, marks['current']);
+        }
         arrivalStatus = ' الرجاء التوجه إلى مسار الباص, الباص يبعد ' +
             time /* + " دقائق " */;
       });
@@ -627,6 +654,7 @@ class PassengerMapState extends State<PassengerMap> {
         size: 40,
       )),
     );
+
     markers.insert(0, marks['current']);
 
     getData(currentPosition.latitude, currentPosition.longitude);
@@ -824,23 +852,6 @@ class PassengerMapState extends State<PassengerMap> {
                   onPressed: () {
                     if (isExtended == 1) {
                       createRequest();
-                      setState(() {
-                        markers.clear();
-                        points.clear();
-                        polyLines.clear();
-                        marks['current'] = Marker(
-                          width: 80.0,
-                          height: 80.0,
-                          point: currLatLng,
-                          builder: (ctx) => Container(
-                              child: Icon(
-                            Icons.location_on,
-                            color: mypink,
-                            size: 40,
-                          )),
-                        );
-                        markers.add(marks['current']);
-                      });
                       startGeoListen();
                     } else if (isExtended == 2) {
                       cancelReq();
