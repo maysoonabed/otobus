@@ -10,6 +10,7 @@ import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/dataProvider/appData.dart';
 import 'package:OtoBus/dataProvider/fUNCS.dart';
 import 'package:OtoBus/dataProvider/tripInfo.dart';
+import 'package:OtoBus/screens/TheCalendar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -1311,7 +1312,17 @@ class DriverMapState extends State<DriverMap> {
               BottomNavigationBarItem(
                   icon: Icon(Icons.home), title: Text('الخريطة')),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.date_range), title: Text('التقويم')),
+                icon: IconButton(
+                  icon: Icon(Icons.date_range),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => TheCalendar()),
+                    );
+                  },
+                ),
+                title: Text('التقويم'),
+              ),
               BottomNavigationBarItem(
                   icon: new Stack(
                     children: <Widget>[

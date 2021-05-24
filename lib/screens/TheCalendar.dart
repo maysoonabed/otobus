@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:OtoBus/main.dart';
 import 'package:OtoBus/screens/calender.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-  Map<DateTime, List<dynamic>> events=new Map();
+Map<DateTime, List<dynamic>> events = new Map();
+List<dynamic> selectedEvents;
+SharedPreferences prefs;
 
 class TheCalendar extends StatefulWidget {
   @override
@@ -18,6 +23,17 @@ class _TheCalendarState extends State<TheCalendar> {
     super.initState();
     calCont = CalendarController();
     events = {};
+    selectedEvents = [];
+    initPrefs();
+  }
+
+  initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+       events = Map<DateTime, List<dynamic>>.from(
+        decodeMap(json.decode(prefs.getString('events') ?? "{}")));
+    });
+   
   }
 
   @override
@@ -38,41 +54,48 @@ class _TheCalendarState extends State<TheCalendar> {
         backgroundColor: apcolor,
       ),
       body: SingleChildScrollView(
-        child: TableCalendar(
-          events: events,
-          calendarController: calCont,
-          calendarStyle: CalendarStyle(
-            todayColor: Color(0xFF93f1df),
-            selectedColor: apcolor,
-          ),
-          startingDayOfWeek: StartingDayOfWeek.saturday,
-          onDaySelected: (date, events, e) {
-            print(date.toString());
-          },
+        child: Column(
+          children: [
+            TableCalendar(
+              events: events,
+              calendarController: calCont,
+              calendarStyle: CalendarStyle(
+                todayColor: Color(0xFF93f1df),
+                selectedColor: apcolor,
+              ),
+              startingDayOfWeek: StartingDayOfWeek.saturday,
+              onDaySelected: (date, events, e) {
+                setState(() {
+                  selectedEvents = events;
+                });
+                print(date.toString());
+              },
+            ),
+            ...selectedEvents.map((event) => ListTile(
+                  title: Text(event),
+                )),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
           backgroundColor: apcolor,
           foregroundColor: Colors.black,
-          child: Icon(Icons.add),
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
           onPressed: () {
             showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) => Calendar());
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) => Calendar())
+                .then((value) => setState(() {}));
           }),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Map<String, dynamic> encodeMap(Map<DateTime, dynamic> map) {
-    Map<String, dynamic> newMap = {};
-    map.forEach((key, value) {
-      newMap[key.toString()] = map[key];
-    });
-    return newMap;
-  }
-
+ 
   Map<DateTime, dynamic> decodeMap(Map<String, dynamic> map) {
     Map<DateTime, dynamic> newMap = {};
     map.forEach((key, value) {
@@ -80,8 +103,4 @@ class _TheCalendarState extends State<TheCalendar> {
     });
     return newMap;
   }
-
-
-
-  
 }

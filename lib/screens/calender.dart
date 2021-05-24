@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/address.dart';
 import 'package:OtoBus/main.dart';
@@ -24,6 +26,17 @@ class _CalendarState extends State<Calendar> {
   TextEditingController _dest = TextEditingController();
   TextEditingController _date = TextEditingController();
   TextEditingController _pick = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _key = GlobalKey<ScaffoldState>();
+  bool processing = false;
+
+  Map<String, dynamic> encodeMap(Map<DateTime, dynamic> map) {
+    Map<String, dynamic> newMap = {};
+    map.forEach((key, value) {
+      newMap[key.toString()] = map[key];
+    });
+    return newMap;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,194 +46,213 @@ class _CalendarState extends State<Calendar> {
         ),
         elevation: 0.0,
         backgroundColor: Colors.white,
-        child: Container(
-          margin: EdgeInsets.all(4),
-          width: double.infinity,
-          decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(4)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                'حجز توصيلة',
-                style: TextStyle(fontFamily: 'Lemonada', fontSize: 18),
-              ),
-              SizedBox(height: 15),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: <Widget>[
-                    Theme(
-                      data: Theme.of(context).copyWith(primaryColor: apcolor),
-                      child: TextField(
-                        minLines: 1,
-                        maxLines: null,
-                        readOnly: true,
-                        textAlign: TextAlign.end,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.date_range),
-                          hintText: 'الموعد',
-                        ),
-                        controller: _date,
-                        onTap: () {
-                          showCupertinoModalPopup(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return _buildBottomPicker(
-                                CupertinoDatePicker(
-                                  mode: CupertinoDatePickerMode.dateAndTime,
-                                  minimumDate: DateTime.now(),
-                                  maximumDate: DateTime(2021, 6, 7),
-                                  onDateTimeChanged: (DateTime newDateTime) {
-                                    if (mounted) {
-                                      {
-                                        setState(() {
-                                          _date.text = newDateTime.toString();
-                                          this.startTime = newDateTime;
-                                        });
-                                      }
-                                    }
-                                  },
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        enabled: true,
-                      ),
-                    ),
-                    Theme(
-                      data: Theme.of(context).copyWith(primaryColor: apcolor),
-                      child: TextField(
-                        minLines: 1,
-                        maxLines: null,
-                        readOnly: true,
-                        textAlign: TextAlign.end,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.location_on),
-                          hintText: 'الموقف',
-                        ),
-                        controller: _pick,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MapBoxAutoCompleteWidget(
-                                apiKey: tokenkey,
-                                hint: "حدد مكان اللقاء",
-                                onSelect: (place) {
-                                  _pick.text = place.placeName;
-                                  setState(() {
-                                    pick.lat = place.center[1];
-                                    pick.long = place.center[0];
-                                    pick.placeName = place.placeName;
-                                  });
-                                },
-                                limit: 30,
-                                country: 'Ps',
-                              ),
-                            ),
-                          );
-                        },
-                        enabled: true,
-                      ),
-                    ),
-                    Theme(
-                      data: Theme.of(context).copyWith(primaryColor: apcolor),
-                      child: TextField(
-                        minLines: 1,
-                        maxLines: null,
-                        readOnly: true,
-                        textAlign: TextAlign.end,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.location_on_outlined),
-                          hintText: 'الوجهة',
-                        ),
-                        controller: _dest,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MapBoxAutoCompleteWidget(
-                                apiKey: tokenkey,
-                                hint: "حدد وجهتك",
-                                onSelect: (place) {
-                                  _dest.text = place.placeName;
-                                  setState(() {
-                                    dest.lat = place.center[1];
-                                    dest.long = place.center[0];
-                                    dest.placeName = place.placeName;
-                                  });
-                                  print(dest.lat.toString() +
-                                      dest.long.toString());
-                                },
-                                limit: 30,
-                                country: 'Ps',
-                              ),
-                            ),
-                          );
-                        },
-                        enabled: true,
-                      ),
-                    ),
-                    Theme(
-                      data: Theme.of(context).copyWith(primaryColor: apcolor),
-                      child: TextField(
-                        textAlign: TextAlign.end,
-                        onChanged: (v) {
-                          numCont = int.parse(v);
-                        },
-                        keyboardType: TextInputType.number,
-                        autofocus: false,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.person),
-                          hintText: 'عدد الركاب',
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          FlatButton(
-                              child: const Text(
-                                'إلغاء',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Lemonada'),
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              }),
-                          FlatButton(
-                              child: Text(
-                                'حفظ',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Lemonada'),
-                              ),
-                              onPressed: () {
-                                calendarClient.insert('going to ' + _dest.text,
-                                    startTime, startTime);
-                                setState(() {
-                                  if (events[startTime] != null) {
-                                    events[startTime]
-                                        .add('going to ' + _dest.text);
-                                  } else {
-                                    events[startTime] = [
-                                      'going to ' + _dest.text
-                                    ];
-                                  }
-                                });
-
-                                Navigator.pop(context);
-                              }),
-                        ]),
-                  ],
+        child: Form(
+          key: _formKey,
+          child: Container(
+            margin: EdgeInsets.all(4),
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(4)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  'حجز توصيلة',
+                  style: TextStyle(fontFamily: 'Lemonada', fontSize: 18),
                 ),
-              ),
-            ],
+                SizedBox(height: 15),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: <Widget>[
+                      Theme(
+                        data: Theme.of(context).copyWith(primaryColor: apcolor),
+                        child: TextFormField(
+                          minLines: 1,
+                          maxLines: null,
+                          readOnly: true,
+                          textAlign: TextAlign.end,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.date_range),
+                            hintText: 'الموعد',
+                          ),
+                          controller: _date,
+                          onTap: () {
+                            showCupertinoModalPopup(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return _buildBottomPicker(
+                                  CupertinoDatePicker(
+                                    mode: CupertinoDatePickerMode.dateAndTime,
+                                    minimumDate: DateTime.now(),
+                                    maximumDate: DateTime(2021, 6, 7),
+                                    onDateTimeChanged: (DateTime newDateTime) {
+                                      if (mounted) {
+                                        {
+                                          setState(() {
+                                            _date.text = newDateTime.toString();
+                                            this.startTime = newDateTime;
+                                          });
+                                        }
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          enabled: true,
+                        ),
+                      ),
+                      Theme(
+                        data: Theme.of(context).copyWith(primaryColor: apcolor),
+                        child: TextFormField(
+                          minLines: 1,
+                          maxLines: null,
+                          readOnly: true,
+                          textAlign: TextAlign.end,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.location_on),
+                            hintText: 'الموقف',
+                          ),
+                          controller: _pick,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MapBoxAutoCompleteWidget(
+                                  apiKey: tokenkey,
+                                  hint: "حدد مكان اللقاء",
+                                  onSelect: (place) {
+                                    _pick.text = place.placeName;
+                                    setState(() {
+                                      pick.lat = place.center[1];
+                                      pick.long = place.center[0];
+                                      pick.placeName = place.placeName;
+                                    });
+                                  },
+                                  limit: 30,
+                                  country: 'Ps',
+                                ),
+                              ),
+                            );
+                          },
+                          enabled: true,
+                        ),
+                      ),
+                      Theme(
+                        data: Theme.of(context).copyWith(primaryColor: apcolor),
+                        child: TextFormField(
+                          minLines: 1,
+                          maxLines: null,
+                          readOnly: true,
+                          textAlign: TextAlign.end,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.location_on_outlined),
+                            hintText: 'الوجهة',
+                          ),
+                          controller: _dest,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MapBoxAutoCompleteWidget(
+                                  apiKey: tokenkey,
+                                  hint: "حدد وجهتك",
+                                  onSelect: (place) {
+                                    _dest.text = place.placeName;
+                                    setState(() {
+                                      dest.lat = place.center[1];
+                                      dest.long = place.center[0];
+                                      dest.placeName = place.placeName;
+                                    });
+                                    print(dest.lat.toString() +
+                                        dest.long.toString());
+                                  },
+                                  limit: 30,
+                                  country: 'Ps',
+                                ),
+                              ),
+                            );
+                          },
+                          enabled: true,
+                        ),
+                      ),
+                      Theme(
+                        data: Theme.of(context).copyWith(primaryColor: apcolor),
+                        child: TextFormField(
+                          textAlign: TextAlign.end,
+                          onChanged: (v) {
+                            numCont = int.parse(v);
+                          },
+                          keyboardType: TextInputType.number,
+                          autofocus: false,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.person),
+                            hintText: 'عدد الركاب',
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      processing
+                          ? Center(child: CircularProgressIndicator())
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                  FlatButton(
+                                      child: const Text(
+                                        'إلغاء',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontFamily: 'Lemonada'),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      }),
+                                  FlatButton(
+                                      child: Text(
+                                        'حفظ',
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontFamily: 'Lemonada'),
+                                      ),
+                                      onPressed: () {
+                                        calendarClient.insert(
+                                            'going to ' + _dest.text,
+                                            startTime,
+                                            startTime);
+                                        setState(() {
+                                          if (events[startTime] != null) {
+                                            events[startTime].add('going to ' +
+                                                _dest.text +
+                                                'at' +
+                                                startTime.hour.toString() +
+                                                ':' +
+                                                startTime.minute.toString());
+                                          } else {
+                                            events[startTime] = [
+                                              'going to ' +
+                                                  _dest.text +
+                                                  'at' +
+                                                  startTime.hour.toString() +
+                                                  ':' +
+                                                  startTime.minute.toString()
+                                            ];
+                                          }
+
+                                          prefs.setString("events",
+                                              json.encode(encodeMap(events)));
+                                        });
+
+                                        Navigator.pop(context);
+                                      }),
+                                ]),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ));
   }
