@@ -107,7 +107,7 @@ class DriverMapState extends State<DriverMap> {
   String passengername = "";
   reppass(pPhone) async {
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/report.php"; //10.0.0.8////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/report.php"; //10.0.0.8////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'passphone': pPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -118,7 +118,7 @@ class DriverMapState extends State<DriverMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getname(pasPhone) async {
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/getnameofpass.php"; //10.0.0.8////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/getnameofpass.php"; //10.0.0.8////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'passphone': pasPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -132,7 +132,7 @@ class DriverMapState extends State<DriverMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future<void> suredialog(pssphone) async {
     getname(pssphone);
-    return await showDialog<void>(
+    return showDialog<void>(
         builder: (context) => new AlertDialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(32.0))),
@@ -166,55 +166,32 @@ class DriverMapState extends State<DriverMap> {
                         maxLines: 5,
                       ),
                     ),
-                    Row(children: [
-                      InkWell(
-                        child: Container(
-                          padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
-                          decoration: BoxDecoration(
-                            color: mypink,
-                            borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(32.0),
-                                bottomRight: Radius.circular(32.0)),
-                          ),
-                          child: Text(
-                            "تأكيد",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontFamily: 'Lemonada', //'ArefRuqaaR',
-                                fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
+                    InkWell(
+                      child: Container(
+                        padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                        decoration: BoxDecoration(
+                          color: mypink,
+                          borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(32.0),
+                              bottomRight: Radius.circular(32.0),
+                              topLeft: Radius.circular(32.0),
+                              topRight: Radius.circular(32.0)),
                         ),
-                        onTap: () {
-                          reppass(pssphone);
-                          Navigator.pop(context);
-                        },
-                      ),
-                      InkWell(
-                        child: Container(
-                          padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(32.0),
-                                bottomRight: Radius.circular(32.0)),
-                          ),
-                          child: Text(
-                            "تراجع",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontFamily: 'Lemonada', //'ArefRuqaaR',
-                                fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          ),
+                        child: Text(
+                          "تأكيد",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontFamily: 'Lemonada', //'ArefRuqaaR',
+                              fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
                         ),
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
                       ),
-                    ]),
+                      onTap: () {
+                        reppass(pssphone);
+                        Navigator.pop(context);
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -225,7 +202,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.108/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -496,7 +473,7 @@ class DriverMapState extends State<DriverMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.8/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -512,7 +489,7 @@ class DriverMapState extends State<DriverMap> {
     insur = Io.File(img.path).readAsBytesSync();
     base64insu = base64Encode(insur);
     String url =
-        "http://192.168.1.8/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'insimg': base64insu,
       'insname': imgname,
@@ -534,7 +511,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future updateinsdate(String formatted) async {
     String url =
-        "http://192.168.1.8/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
     var response =
         await http.post(url, body: {'endate': formatted, 'email': email});
     if (response.statusCode == 200) {
@@ -547,7 +524,7 @@ class DriverMapState extends State<DriverMap> {
   var onoff;
   Future insphp() async {
     String url =
-        "http://192.168.1.8/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {'email': email});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -1186,6 +1163,7 @@ class DriverMapState extends State<DriverMap> {
                                                 onPressed: () {
                                                   passPhone = item[index]
                                                       ['passengerPhone'];
+                                                  print(passPhone);
                                                   getInfoForChat(passPhone);
                                                   roomId = globalFunctions()
                                                       .creatChatRoomInfo(
