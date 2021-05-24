@@ -179,10 +179,10 @@ class PassengerPageState extends State<PassengerPage> {
         contentPadding: EdgeInsets.all(20.0),
         content: Container(
             width: 300.0,
-            height: 300.0,
+            height: 250,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 SizedBox(height: 10),
                 Expanded(
@@ -336,7 +336,7 @@ class PassengerPageState extends State<PassengerPage> {
                                 )),
                               ),
                             );
-                            
+
                             getJsonData();
                             Navigator.pop(context);
                           })

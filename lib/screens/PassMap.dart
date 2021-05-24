@@ -376,9 +376,11 @@ class _PassMapState extends State<PassMap> {
         contentPadding: EdgeInsets.all(20.0),
         content: Container(
             width: 300.0,
-            height: 200.0,
+            height: 250,
             child: Column(
-              children: <Widget>[
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+               children: <Widget>[
                 Expanded(
                   child: Theme(
                     data: Theme.of(context).copyWith(primaryColor: apcolor),
@@ -500,27 +502,37 @@ class _PassMapState extends State<PassMap> {
                     ),
                   ),
                 ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      FlatButton(
+                          child: const Text(
+                            'إلغاء',
+                            style: TextStyle(
+                                color: Colors.black, fontFamily: 'Lemonada'),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          }),
+                      FlatButton(
+                          child: const Text(
+                            'اختيار',
+                            style: TextStyle(
+                                color: Colors.black, fontFamily: 'Lemonada'),
+                          ),
+                          onPressed: () {
+                            isExtended = 0;
+                            btn = true;
+                            setState(() {
+                              _getPolyline();
+                              butMarker();
+                              _bounds();
+                            });
+                            Navigator.pop(context);
+                          })
+                    ])
               ],
             )),
-        actions: <Widget>[
-          new FlatButton(
-              child: const Text('إنهاء'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          new FlatButton(
-              child: const Text('اختيار'),
-              onPressed: () {
-                isExtended = 0;
-                btn = true;
-                setState(() {
-                  _getPolyline();
-                  butMarker();
-                  _bounds();
-                });
-                Navigator.pop(context);
-              })
-        ],
       ),
       context: context,
     );
@@ -742,7 +754,7 @@ class _PassMapState extends State<PassMap> {
     Polyline polyline = Polyline(
       polylineId: id,
       points: polylineCoordinates,
-      width: 3,
+      width: 4,
       color: myblue,
     );
     polylines[id] = polyline;
@@ -916,27 +928,22 @@ class _PassMapState extends State<PassMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void cancelReq() {
     rideReq.remove();
-    setState(() {
-      isExtended = 0;
-      btn = false;
-      stat = 'normal';
-      markers.clear();
-      circles.clear();
-      polylines.clear();
-    });
+ 
+    isExtended = 0;
+    btn = false;
+    stat = 'normal';
+    markers.clear();
+    circles.clear();
+    polylines.clear();
+
     LatLng pos = LatLng(_originLatitude, _originLongitude);
     CameraPosition cp = new CameraPosition(target: pos, zoom: 14);
     newGoogleMapController.animateCamera(CameraUpdate.newCameraPosition(cp));
+    setState(() {});
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void driversMarkers() {
-    setState(() {
-      //markers.length > 1 ? markers.removeRange(1, markers.length) : null;//removeAll()
-      circles.clear();
-      polylines.clear();
-      markers.clear();
-    });
     for (NearDrivers driver in FireDrivers.nDrivers) {
       setState(() {
         driverltlg = LatLng(driver.lat, driver.long);
@@ -1825,11 +1832,6 @@ class _PassMapState extends State<PassMap> {
       );
       cancelReq();
     } else {
-      setState(() {
-        //markers.length > 1 ? markers.removeRange(1, markers.length) : null;
-        markers.clear();
-        polylines.clear();
-      });
       var driver = availableDrivers[0]; //length-1
       print(driver.key);
       availableDrivers.removeAt(0);
@@ -1936,10 +1938,11 @@ class _PassMapState extends State<PassMap> {
     Polyline polyline = Polyline(
       polylineId: id,
       points: polylineCoordinates,
-      width: 3,
-      color: myblue,
+      width: 2,
+      color: Colors.black,
     );
-    polylines[id] = polyline;
+    
+    polylines[id]  = polyline;
   }
 
   void shared() {}

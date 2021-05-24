@@ -69,7 +69,7 @@ class _SignupPageState extends State<SignupPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/regpass.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/regpass.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'name': name, //get the username text
       'email': email,

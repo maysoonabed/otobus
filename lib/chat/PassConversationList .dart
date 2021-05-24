@@ -30,7 +30,7 @@ class _PassConversationListState extends State<PassConversationList> {
   AssetImage img;
   getUserfromphp(String usEmail) async {
     String apiurl =
-        "http://192.168.1.108:8089/otobus/lib/chat/chatphp/getImage.php"; //10.0.0.8////192.168.1.108:8089
+        "http://192.168.1.8/otobus/lib/chat/chatphp/getImage.php"; //10.0.0.8////192.168.1.8
     var response = await http.post(apiurl, body: {'email': usEmail});
     //print(response.body);
     if (response.statusCode == 200) {
