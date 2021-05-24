@@ -4,7 +4,7 @@
  $Phone = $_POST['passphone'];
 
  $query = "SELECT * from `passenger` WHERE phonenum ='$Phone'";
- $res = $con->query($query);
+ $res = $connect->query($query);
  $ro = mysqli_fetch_assoc($res);
  $reportcount = $ro['repcnt'] + 1;
  
