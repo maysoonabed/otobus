@@ -166,30 +166,55 @@ class DriverMapState extends State<DriverMap> {
                         maxLines: 5,
                       ),
                     ),
-                    InkWell(
-                      child: Container(
-                        padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
-                        decoration: BoxDecoration(
-                          color: mypink,
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(32.0),
-                              bottomRight: Radius.circular(32.0)),
+                    Row(children: [
+                      InkWell(
+                        child: Container(
+                          padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                          decoration: BoxDecoration(
+                            color: mypink,
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(32.0),
+                                bottomRight: Radius.circular(32.0)),
+                          ),
+                          child: Text(
+                            "تأكيد",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontFamily: 'Lemonada', //'ArefRuqaaR',
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                        child: Text(
-                          "تأكيد",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontFamily: 'Lemonada', //'ArefRuqaaR',
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
+                        onTap: () {
+                          reppass(pssphone);
+                          Navigator.pop(context);
+                        },
                       ),
-                      onTap: () {
-                        reppass(pssphone);
-                        Navigator.pop(context);
-                      },
-                    ),
+                      InkWell(
+                        child: Container(
+                          padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(32.0),
+                                bottomRight: Radius.circular(32.0)),
+                          ),
+                          child: Text(
+                            "تراجع",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontFamily: 'Lemonada', //'ArefRuqaaR',
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ]),
                   ],
                 ),
               ),
