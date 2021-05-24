@@ -217,7 +217,7 @@ class DriverMapState extends State<DriverMap> {
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   final _widgetOptions = [
     Text('Index 0: Home'),
     Text('Index 1: Notification'),
