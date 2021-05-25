@@ -118,7 +118,7 @@ class _EventsListViewState extends State<EventsListView> {
                   context: context,
                   barrierDismissible: false,
                   builder: (BuildContext context) =>
-                      ConfJoin(pass: evt.passengers, id: evt.id));
+                      ConfJoin(pass: evt));
             })
         : Container(
             height: 0,

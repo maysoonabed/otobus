@@ -239,7 +239,7 @@ class _CalendarState extends State<Calendar> {
                                             .toString()
                                             .substring(i + 1, j);
                                         addEvent();
-                                           calendarClient.insert(
+                                        calendarClient.insert(
                                             'going to ' + _dest.text,
                                             startTime,
                                             startTime);
@@ -248,7 +248,7 @@ class _CalendarState extends State<Calendar> {
                                             events[startTime].add('going to ' +
                                                 _dest.text +
                                                 ' at ' +
-                                              t);
+                                                t);
                                           } else {
                                             events[startTime] = [
                                               'going to ' +
@@ -258,7 +258,7 @@ class _CalendarState extends State<Calendar> {
                                             ];
                                           }
 
-                                          prefs.setString("events",
+                                          prefs.setString(thisUser.phone,
                                               json.encode(encodeMap(events)));
                                         });
                                       }),

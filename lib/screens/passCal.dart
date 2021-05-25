@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/screens/eventsListView.dart';
 
 import 'package:OtoBus/dataProvider/eventsList.dart';
@@ -6,10 +9,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:table_calendar/table_calendar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Map<DateTime, List<dynamic>> events = new Map();
-CalendarController calCont;
+List<dynamic> selectedEvents;
+SharedPreferences prefsP;
 String edt;
+CalendarController calCont;
 
 class PassCalendar extends StatefulWidget {
   @override
@@ -19,11 +25,29 @@ class PassCalendar extends StatefulWidget {
 class _PassCalendarState extends State<PassCalendar> {
   @override
   void initState() {
-    edt = DateTime.now().toString();
-
     super.initState();
     calCont = CalendarController();
+    edt = DateTime.now().toString();
+
     events = {};
+    selectedEvents = [];
+    initPrefs();
+  }
+
+  initPrefs() async {
+    prefsP = await SharedPreferences.getInstance();
+    setState(() {
+      events = Map<DateTime, List<dynamic>>.from(
+          decodeMap(json.decode(prefsP.getString(thisUser.phone) ?? "{}")));
+    });
+  }
+
+  Map<DateTime, dynamic> decodeMap(Map<String, dynamic> map) {
+    Map<DateTime, dynamic> newMap = {};
+    map.forEach((key, value) {
+      newMap[DateTime.parse(key)] = map[key];
+    });
+    return newMap;
   }
 
   @override
@@ -48,11 +72,9 @@ class _PassCalendarState extends State<PassCalendar> {
         child: Column(
           children: [
             TableCalendar(
-
               events: events,
               calendarController: calCont,
               calendarStyle: CalendarStyle(
-              
                 todayColor: Color(0xFF93f1df),
                 selectedColor: apcolor,
               ),
@@ -60,6 +82,7 @@ class _PassCalendarState extends State<PassCalendar> {
               onDaySelected: (date, events, e) {
                 print(date.toString());
                 edt = date.toString();
+                selectedEvents = events;
                 setState(() {});
               },
             ),

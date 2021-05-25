@@ -1,16 +1,17 @@
 import 'dart:convert';
-
+import 'package:OtoBus/screens/passCal.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:OtoBus/screens/CalendarClient.dart';
+import 'package:OtoBus/dataProvider/eventsList.dart';
 
 class ConfJoin extends StatefulWidget {
-  final String pass;
-  final String id;
-  ConfJoin({this.pass, this.id});
+  final EventsList pass;
+  ConfJoin({this.pass});
 
   @override
   _ConfJoinState createState() => _ConfJoinState();
@@ -20,6 +21,7 @@ class _ConfJoinState extends State<ConfJoin> {
   int cont;
   bool processing = false;
   String errormsg = '';
+  CalendarClient calendarClient = CalendarClient();
 
   @override
   Widget build(BuildContext context) {
@@ -102,13 +104,13 @@ class _ConfJoinState extends State<ConfJoin> {
   }
 
   join() async {
-    int x = int.parse(widget.pass) - cont;
+    int x = int.parse(widget.pass.passengers) - cont;
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
         "http://192.168.1.8/otobus/phpfiles/joinEvent.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'passphone': thisUser.phone,
-      'id': widget.id,
+      'id': widget.pass.id,
       'newP': x.toString(),
       'passengers': cont.toString(),
       'name': thisUser.name
@@ -123,7 +125,25 @@ class _ConfJoinState extends State<ConfJoin> {
         });
       } else {
         if (jsondata["success"] == 1) {
+          DateTime dateTime =
+              DateTime.parse(widget.pass.eDate + ' ' + widget.pass.eTime);
           setState(() {
+            calendarClient.insert(
+                ' الذهاب إلى ' + widget.pass.dest, dateTime, dateTime);
+
+            if (events[dateTime] != null) {
+              events[dateTime].add(' الذهاب إلى ' +
+                  widget.pass.dest +
+                  ' at ' +
+                  widget.pass.eTime);
+            } else {
+              events[dateTime] = [
+                ' الذهاب إلى ' + widget.pass.dest + ' at ' + widget.pass.eTime
+              ];
+            }
+
+            prefsP.setString(thisUser.phone, json.encode(encodeMap(events)));
+
             processing = false;
             errormsg = jsondata["message"];
           });
@@ -145,5 +165,13 @@ class _ConfJoinState extends State<ConfJoin> {
       msg: errormsg,
     );
     Navigator.pop(context);
+  }
+
+  Map<String, dynamic> encodeMap(Map<DateTime, dynamic> map) {
+    Map<String, dynamic> newMap = {};
+    map.forEach((key, value) {
+      newMap[key.toString()] = map[key];
+    });
+    return newMap;
   }
 }

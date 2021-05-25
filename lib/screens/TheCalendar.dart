@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/eventsList.dart';
 import 'package:OtoBus/main.dart';
 import 'package:OtoBus/screens/calender.dart';
@@ -36,7 +37,7 @@ class _TheCalendarState extends State<TheCalendar> {
     prefs = await SharedPreferences.getInstance();
     setState(() {
       events = Map<DateTime, List<dynamic>>.from(
-          decodeMap(json.decode(prefs.getString('events') ?? "{}")));
+          decodeMap(json.decode(prefs.getString(thisUser.phone) ?? "{}")));
     });
   }
 
