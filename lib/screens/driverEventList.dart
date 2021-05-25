@@ -16,8 +16,8 @@ import 'dart:convert';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/joined.dart';
 
-String errmsg;
 CurrDriverInfo dv = new CurrDriverInfo();
+String errormsg;
 
 class DEventsListView extends StatefulWidget {
   final List<EventsList> events;
@@ -30,7 +30,7 @@ class DEventsListView extends StatefulWidget {
 }
 
 class _DEventsListViewState extends State<DEventsListView> {
-  var _lights = false;
+  Map<String, bool> lights = {};
 
   Widget build(context) {
     return Expanded(
@@ -96,10 +96,15 @@ class _DEventsListViewState extends State<DEventsListView> {
                   scale: 0.8,
                   child: CupertinoSwitch(
                       activeColor: apBcolor,
-                      value: _lights,
+                      value: /*  lights[evt.id] != null ? lights[evt.id] : */ evt
+                                  .st ==
+                              '1'
+                          ? true
+                          : false,
                       onChanged: (bool value) {
                         setState(() {
-                          _lights = value;
+                          evt.st = value ? '1' : '0';
+                          changeSt(evt.id, evt.st);
                         });
                       }),
                 ),
@@ -132,6 +137,16 @@ class _DEventsListViewState extends State<DEventsListView> {
             height: 0,
           );
   }
+
+  changeSt(String id, String st) async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://192.168.1.8/otobus/phpfiles/changeSt.php"; //10.0.0.8//
+    var response = await http.post(apiurl, body: {
+      'id': id,
+      'status':st,
+    });
+  }
 }
 
 //Future is n object representing a delayed computation.
@@ -150,4 +165,5 @@ Future<List<EventsList>> downloadJSON() async {
   } else
     throw Exception('We were not able to successfully download the json data.');
 }
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
