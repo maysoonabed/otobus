@@ -3,7 +3,7 @@ import 'package:OtoBus/dataProvider/Spacecraft.dart';
 import 'package:OtoBus/dataProvider/currDriverInfo.dart';
 import 'package:OtoBus/dataProvider/eventsList.dart';
 import 'package:OtoBus/main.dart';
-import 'package:OtoBus/screens/driverInfoBottomSheet.dart';
+import 'package:OtoBus/screens/confirmJoin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -42,75 +42,87 @@ class _EventsListViewState extends State<EventsListView> {
   }
 
   Widget createViewItem(EventsList evt, BuildContext context) {
-    print(evt.eDate + ' hi ' + widget.edt);
-    return widget.edt.contains(evt.eDate)? ListTile(
-        trailing: Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              IconButton(
-                  icon: Icon(
-                    Icons.person,
-                    color: apBcolor,
-                  ),
-                  iconSize: 20,
-                  padding: EdgeInsets.all(0),
-                  onPressed: () async {
-                    await getDriverInfo(evt.driverPhoneNumber);
-                    await getRatings(evt.driverPhoneNumber);
-                    showBottomSheet(
-                        context: context,
-                        backgroundColor: Colors.transparent,
-                        builder: (BuildContext context) {
-                          return BottomClone(
-                              dv: dv); // returns your BottomSheet widget
-                        });
-                  }),
-              IconButton(
-                  icon: Icon(
-                    Icons.message,
-                    color: apBcolor,
-                  ),
-                  iconSize: 20,
-                  padding: EdgeInsets.all(0),
-                  onPressed: () {
-                    print(evt.driverPhoneNumber);
-                  }),
-            ]),
-        title: new Container(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            children: <Widget>[
-              Column(
-                children: [
-                  Row(children: <Widget>[
-                    Padding(
-                        child: Text(
-                          evt.eTime,
-                          style: new TextStyle(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.right,
-                        ),
-                        padding: EdgeInsets.all(1.0)),
-                  ]),
-                  Padding(
-                      child: Text(
-                        evt.pick +
-                            ' إلى ' +
-                            evt.dest +
-                            ',' +
-                            evt.passengers +
-                            ' ركاب ',
-                        style: new TextStyle(fontStyle: FontStyle.italic),
-                        textAlign: TextAlign.right,
+    return widget.edt.contains(evt.eDate) &&
+            evt.passengers != '0' &&
+            evt.st != '0'
+        ? ListTile(
+            trailing: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                  IconButton(
+                      icon: Icon(
+                        Icons.person,
+                        color: apBcolor,
                       ),
-                      padding: EdgeInsets.all(1.0)),
+                      iconSize: 20,
+                      padding: EdgeInsets.all(0),
+                      onPressed: () async {
+                        await getDriverInfo(evt.driverPhoneNumber);
+                        await getRatings(evt.driverPhoneNumber);
+                        showBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            builder: (BuildContext context) {
+                              return BottomClone(
+                                  dv: dv); // returns your BottomSheet widget
+                            });
+                      }),
+                  IconButton(
+                      icon: Icon(
+                        Icons.message,
+                        color: apBcolor,
+                      ),
+                      iconSize: 20,
+                      padding: EdgeInsets.all(0),
+                      onPressed: () {
+                        print(evt.driverPhoneNumber);
+                      }),
+                ]),
+            title: new Container(
+              padding: EdgeInsets.all(10.0),
+              child: Column(
+                children: <Widget>[
+                  Column(
+                    children: [
+                      Row(children: <Widget>[
+                        Padding(
+                            child: Text(
+                              evt.eTime,
+                              style: new TextStyle(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.right,
+                            ),
+                            padding: EdgeInsets.all(1.0)),
+                      ]),
+                      Padding(
+                          child: Text(
+                            evt.pick +
+                                ' إلى ' +
+                                evt.dest +
+                                ',' +
+                                evt.passengers +
+                                ' ركاب ',
+                            style: new TextStyle(fontStyle: FontStyle.italic),
+                            textAlign: TextAlign.right,
+                          ),
+                          padding: EdgeInsets.all(1.0)),
+                    ],
+                  ),
+                  Divider(),
                 ],
               ),
-              Divider(),
-            ],
-          ),
-        ),
-        onTap: () {}):Container(height: 0,);
+            ),
+            onTap: () {
+              print(evt.id);
+              showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) =>
+                      ConfJoin(pass: evt.passengers, id: evt.id));
+            })
+        : Container(
+            height: 0,
+          );
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

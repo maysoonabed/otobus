@@ -48,7 +48,7 @@ class Spacecrafts
                 $spacecrafts=array();
                 while($row=$result->fetch_array())
                 {
-                    array_push($spacecrafts, array("eDate"=>$row['eDate'],"eTime"=>$row['eTime'],
+                    array_push($spacecrafts, array("id"=>$row['id'],"eDate"=>$row['eDate'],"eTime"=>$row['eTime'],
                     "passengers"=>$row['passengers'],"status"=>$row['status'],
                     "pick"=>$row['pick'],   "dest"=>$row['dest'],  "driverphone"=>$row['driverphone'],));
                 }

@@ -1,4 +1,5 @@
 class EventsList {
+  String id;
   String dest;
   String driverPhoneNumber;
   String pick;
@@ -8,7 +9,8 @@ class EventsList {
   String eTime;
 
   EventsList(
-      {this.dest,
+      {this.id,
+      this.dest,
       this.driverPhoneNumber,
       this.pick,
       this.st,
@@ -25,6 +27,7 @@ class EventsList {
       passengers: json['passengers'],
       eDate: json['eDate'],
       eTime: json['eTime'],
+      id: json['id'],
     );
   }
 }
