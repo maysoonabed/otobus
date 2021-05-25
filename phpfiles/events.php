@@ -9,7 +9,7 @@ class Constants
     static $PASSWORD="";
 
     //STATEMENTS
-    static $SQL_SELECT_ALL="SELECT * FROM events";
+    static $SQL_SELECT_ALL="SELECT * FROM events ";
 
 }
 

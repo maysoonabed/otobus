@@ -34,6 +34,7 @@ import 'package:OtoBus/chat/NotificChat.dart';
 import 'package:page_transition/page_transition.dart';
 import 'driverInfoBottomSheet.dart';
 import 'noDriversDialog.dart';
+import 'package:OtoBus/screens/passCal.dart';
 
 class PassMap extends StatefulWidget {
   @override
@@ -380,7 +381,7 @@ class _PassMapState extends State<PassMap> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-               children: <Widget>[
+              children: <Widget>[
                 Expanded(
                   child: Theme(
                     data: Theme.of(context).copyWith(primaryColor: apcolor),
@@ -928,7 +929,7 @@ class _PassMapState extends State<PassMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void cancelReq() {
     rideReq.remove();
- 
+
     isExtended = 0;
     btn = false;
     stat = 'normal';
@@ -1790,6 +1791,12 @@ class _PassMapState extends State<PassMap> {
                                         notispress = true;
                                         proispress = false;
                                       });
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                PassCalendar()),
+                                      );
                                     }),
                               ),
                               Material(
@@ -1941,8 +1948,8 @@ class _PassMapState extends State<PassMap> {
       width: 2,
       color: Colors.black,
     );
-    
-    polylines[id]  = polyline;
+
+    polylines[id] = polyline;
   }
 
   void shared() {}

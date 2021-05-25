@@ -42,71 +42,75 @@ class _EventsListViewState extends State<EventsListView> {
   }
 
   Widget createViewItem(EventsList evt, BuildContext context) {
-    if (widget.edt == evt.eDate) {
-      return new ListTile(
-          trailing: Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: <Widget>[
-                IconButton(
-                    icon: Icon(
-                      Icons.person,
-                      color: apBcolor,
-                    ),
-                    iconSize: 20,
-                    padding: EdgeInsets.all(0),
-                    onPressed: () async {
-                      await getDriverInfo(evt.driverPhoneNumber);
-                      await getRatings(evt.driverPhoneNumber);
-                      showBottomSheet(
-                          context: context,
-                          backgroundColor: Colors.transparent,
-                          builder: (BuildContext context) {
-                            return BottomClone(
-                                dv: dv); // returns your BottomSheet widget
-                          });
-                    }),
-                IconButton(
-                    icon: Icon(
-                      Icons.message,
-                      color: apBcolor,
-                    ),
-                    iconSize: 20,
-                    padding: EdgeInsets.all(0),
-                    onPressed: () {
-                      print(evt.driverPhoneNumber);
-                    }),
-              ]),
-          title: new Container(
-            padding: EdgeInsets.all(20.0),
-            child: Column(
-              children: <Widget>[
-                Column(
-                  children: [
-                    Row(children: <Widget>[
-                      Padding(
-                          child: Text(
-                            evt.eTime,
-                            style: new TextStyle(fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.right,
-                          ),
-                          padding: EdgeInsets.all(1.0)),
-                    ]),
+    print(evt.eDate + ' hi ' + widget.edt);
+    return widget.edt.contains(evt.eDate)? ListTile(
+        trailing: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              IconButton(
+                  icon: Icon(
+                    Icons.person,
+                    color: apBcolor,
+                  ),
+                  iconSize: 20,
+                  padding: EdgeInsets.all(0),
+                  onPressed: () async {
+                    await getDriverInfo(evt.driverPhoneNumber);
+                    await getRatings(evt.driverPhoneNumber);
+                    showBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return BottomClone(
+                              dv: dv); // returns your BottomSheet widget
+                        });
+                  }),
+              IconButton(
+                  icon: Icon(
+                    Icons.message,
+                    color: apBcolor,
+                  ),
+                  iconSize: 20,
+                  padding: EdgeInsets.all(0),
+                  onPressed: () {
+                    print(evt.driverPhoneNumber);
+                  }),
+            ]),
+        title: new Container(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            children: <Widget>[
+              Column(
+                children: [
+                  Row(children: <Widget>[
                     Padding(
                         child: Text(
-                          evt.pick + ' إلى ' + evt.dest,
-                          style: new TextStyle(fontStyle: FontStyle.italic),
+                          evt.eTime,
+                          style: new TextStyle(fontWeight: FontWeight.bold),
                           textAlign: TextAlign.right,
                         ),
                         padding: EdgeInsets.all(1.0)),
-                  ],
-                ),
-                Divider(),
-              ],
-            ),
+                  ]),
+                  Padding(
+                      child: Text(
+                        evt.pick +
+                            ' إلى ' +
+                            evt.dest +
+                            ',' +
+                            evt.passengers +
+                            ' ركاب ',
+                        style: new TextStyle(fontStyle: FontStyle.italic),
+                        textAlign: TextAlign.right,
+                      ),
+                      padding: EdgeInsets.all(1.0)),
+                ],
+              ),
+              Divider(),
+            ],
           ),
-          onTap: () {});
-    }
+        ),
+        onTap: () {}):Container(height: 0,);
   }
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -160,7 +164,6 @@ class _EventsListViewState extends State<EventsListView> {
     });
 
     if (response.statusCode == 200) {
-      
       var jsondata = json.decode(response.body);
       if (jsondata["error"] == 1) {
         errmsg = jsondata["message"];

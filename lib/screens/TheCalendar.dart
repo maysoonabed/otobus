@@ -30,10 +30,9 @@ class _TheCalendarState extends State<TheCalendar> {
   initPrefs() async {
     prefs = await SharedPreferences.getInstance();
     setState(() {
-       events = Map<DateTime, List<dynamic>>.from(
-        decodeMap(json.decode(prefs.getString('events') ?? "{}")));
+      events = Map<DateTime, List<dynamic>>.from(
+          decodeMap(json.decode(prefs.getString('events') ?? "{}")));
     });
-   
   }
 
   @override
@@ -68,7 +67,7 @@ class _TheCalendarState extends State<TheCalendar> {
                 setState(() {
                   selectedEvents = events;
                 });
-                print(date.toString());
+  
               },
             ),
             ...selectedEvents.map((event) => ListTile(
@@ -95,7 +94,6 @@ class _TheCalendarState extends State<TheCalendar> {
     );
   }
 
- 
   Map<DateTime, dynamic> decodeMap(Map<String, dynamic> map) {
     Map<DateTime, dynamic> newMap = {};
     map.forEach((key, value) {

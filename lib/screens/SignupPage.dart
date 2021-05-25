@@ -10,9 +10,7 @@ import 'package:page_transition/page_transition.dart';
 import '../main.dart';
 import 'LoginPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'MapTy.dart';
-import 'PassMap.dart';
-import 'PassengerPage.dart';
+import 'MapTy.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:connectivity/connectivity.dart';
 

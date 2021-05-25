@@ -19,6 +19,8 @@ class PassCalendar extends StatefulWidget {
 class _PassCalendarState extends State<PassCalendar> {
   @override
   void initState() {
+    edt = DateTime.now().toString();
+
     super.initState();
     calCont = CalendarController();
     events = {};
@@ -55,9 +57,8 @@ class _PassCalendarState extends State<PassCalendar> {
               startingDayOfWeek: StartingDayOfWeek.saturday,
               onDaySelected: (date, events, e) {
                 print(date.toString());
-                setState(() {
-                 edt= getFstWord(date.toString());
-                });
+                edt = date.toString();
+                setState(() {});
               },
             ),
             Container(
@@ -67,7 +68,7 @@ class _PassCalendarState extends State<PassCalendar> {
                   if (snapshot.hasData) {
                     List<EventsList> evts = snapshot.data;
 
-                    return EventsListView(evts,edt);
+                    return EventsListView(evts, edt);
                   } else if (snapshot.hasError) {
                     return Text('${snapshot.error}');
                   }

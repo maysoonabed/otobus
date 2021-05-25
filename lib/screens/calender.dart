@@ -7,12 +7,18 @@ import 'package:OtoBus/screens/CalendarClient.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:OtoBus/screens/TheCalendar.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 
 Adress dest = new Adress();
 Adress pick = new Adress();
+String errormsg;
+int cont;
+String d, t;
 
 class Calendar extends StatefulWidget {
   @override
@@ -125,15 +131,18 @@ class _CalendarState extends State<Calendar> {
                                   apiKey: tokenkey,
                                   hint: "حدد مكان اللقاء",
                                   onSelect: (place) {
-                                    _pick.text = place.placeName;
                                     setState(() {
                                       pick.lat = place.center[1];
                                       pick.long = place.center[0];
                                       pick.placeName = place.placeName;
+                                      var str = place.placeName.toString();
+                                      var ss = str.split(',');
+                                      _pick.text = ss[0];
                                     });
                                   },
                                   limit: 30,
                                   country: 'Ps',
+                                  language: 'ar',
                                 ),
                               ),
                             );
@@ -161,17 +170,18 @@ class _CalendarState extends State<Calendar> {
                                   apiKey: tokenkey,
                                   hint: "حدد وجهتك",
                                   onSelect: (place) {
-                                    _dest.text = place.placeName;
                                     setState(() {
                                       dest.lat = place.center[1];
                                       dest.long = place.center[0];
                                       dest.placeName = place.placeName;
+                                      var str = place.placeName.toString();
+                                      var ss = str.split(',');
+                                      _dest.text = ss[0];
                                     });
-                                    print(dest.lat.toString() +
-                                        dest.long.toString());
                                   },
                                   limit: 30,
                                   country: 'Ps',
+                                  language: 'ar',
                                 ),
                               ),
                             );
@@ -184,7 +194,7 @@ class _CalendarState extends State<Calendar> {
                         child: TextFormField(
                           textAlign: TextAlign.end,
                           onChanged: (v) {
-                            numCont = int.parse(v);
+                            cont = int.parse(v);
                           },
                           keyboardType: TextInputType.number,
                           autofocus: false,
@@ -218,34 +228,39 @@ class _CalendarState extends State<Calendar> {
                                             fontFamily: 'Lemonada'),
                                       ),
                                       onPressed: () {
-                                        calendarClient.insert(
+                                        int i =
+                                            startTime.toString().indexOf(' ');
+                                        d = startTime
+                                            .toString()
+                                            .substring(0, i);
+                                        int j =
+                                            startTime.toString().indexOf('.');
+                                        t = startTime
+                                            .toString()
+                                            .substring(i + 1, j);
+                                        addEvent();
+                                        /*    calendarClient.insert(
                                             'going to ' + _dest.text,
                                             startTime,
-                                            startTime);
+                                            startTime); */
                                         setState(() {
                                           if (events[startTime] != null) {
                                             events[startTime].add('going to ' +
                                                 _dest.text +
-                                                'at' +
-                                                startTime.hour.toString() +
-                                                ':' +
-                                                startTime.minute.toString());
+                                                ' at ' +
+                                              t);
                                           } else {
                                             events[startTime] = [
                                               'going to ' +
                                                   _dest.text +
-                                                  'at' +
-                                                  startTime.hour.toString() +
-                                                  ':' +
-                                                  startTime.minute.toString()
+                                                  ' at ' +
+                                                  t
                                             ];
                                           }
 
                                           prefs.setString("events",
                                               json.encode(encodeMap(events)));
                                         });
-
-                                        Navigator.pop(context);
                                       }),
                                 ]),
                     ],
@@ -280,28 +295,45 @@ class _CalendarState extends State<Calendar> {
     );
   }
 
-  void book() {
-    bookRef = FirebaseDatabase.instance.reference().child('Bookings').push();
-    Map pickUpMap = {
-      'longitude': pick.long.toString(),
-      'latitude': pick.lat.toString(),
-    };
-    Map destinationMap = {
-      'longitude': dest.long.toString(),
-      'latitude': dest.lat.toString(),
-    };
-    Map rideMap = {
-      'createdAt': startTime.toString(),
-      'passengerName': thisUser.name,
-      'passengerPhone': thisUser.phone,
-      'pickUpAddress': pick.placeName,
-      'destinationAddress': dest.placeName,
-      'location': pickUpMap,
-      'destination': destinationMap,
-      'driver_id': 'waiting',
-      'status': 'waiting',
-      'passengers': numCont != null ? numCont : 1,
-    };
-    bookRef.set(rideMap);
+  addEvent() async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://192.168.1.8/otobus/phpfiles/addEvent.php"; //10.0.0.8//
+    var response = await http.post(apiurl, body: {
+      'driverphone': thisUser.phone, //get the username text
+      'pick': _dest.text,
+      'dest': _pick.text,
+      'passengers': cont.toString(),
+      'eDate': d,
+      'eTime': t,
+    });
+
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        setState(() {
+          errormsg = jsondata["message"];
+        });
+      } else {
+        if (jsondata["success"] == 1) {
+          setState(() {
+            errormsg = jsondata["message"];
+          });
+          Navigator.pop(context);
+        } else {
+          setState(() {
+            errormsg = "حدث خطأ";
+          });
+        }
+      }
+    } else {
+      setState(() {
+        errormsg = "حدث خطأ أثناء الاتصال بالشبكة";
+      });
+    }
+    Fluttertoast.showToast(
+      context,
+      msg: errormsg,
+    );
   }
 }
