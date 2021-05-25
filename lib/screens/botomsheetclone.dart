@@ -15,7 +15,7 @@ class BottomClone extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
        decoration: new BoxDecoration(
-          color:Colors.white,
+          color:bacolor,
           borderRadius: new BorderRadius.only(
               topLeft: const Radius.circular(25.0),
               topRight: const Radius.circular(25.0))),
@@ -117,7 +117,7 @@ class BottomClone extends StatelessWidget {
                           width: 200.0,
                           lineHeight: 6.0,
                           percent: s5 / rateCount,
-                          backgroundColor: bacolor,
+                          backgroundColor: Colors.white,
                           progressColor: apcolor,
                         ),
                         Text(
@@ -134,7 +134,7 @@ class BottomClone extends StatelessWidget {
                           width: 200.0,
                           lineHeight: 6.0,
                           percent: s4 / rateCount,
-                          backgroundColor: bacolor,
+                          backgroundColor: Colors.white,
                           progressColor: apcolor,
                         ),
                         Text(
@@ -151,7 +151,7 @@ class BottomClone extends StatelessWidget {
                           width: 200.0,
                           lineHeight: 6.0,
                           percent: s3 / rateCount,
-                          backgroundColor: bacolor,
+                          backgroundColor: Colors.white,
                           progressColor: apcolor,
                         ),
                         Text(
@@ -168,7 +168,7 @@ class BottomClone extends StatelessWidget {
                           width: 200.0,
                           lineHeight: 6.0,
                           percent: s2 / rateCount,
-                          backgroundColor: bacolor,
+                          backgroundColor: Colors.white,
                           progressColor: apcolor,
                         ),
                         Text(
@@ -185,7 +185,7 @@ class BottomClone extends StatelessWidget {
                           width: 200.0,
                           lineHeight: 6.0,
                           percent: s1 / rateCount,
-                          backgroundColor: bacolor,
+                          backgroundColor: Colors.white,
                           progressColor: apcolor,
                         ),
                         Text(
