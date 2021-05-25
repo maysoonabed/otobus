@@ -239,10 +239,10 @@ class _CalendarState extends State<Calendar> {
                                             .toString()
                                             .substring(i + 1, j);
                                         addEvent();
-                                        /*    calendarClient.insert(
+                                           calendarClient.insert(
                                             'going to ' + _dest.text,
                                             startTime,
-                                            startTime); */
+                                            startTime);
                                         setState(() {
                                           if (events[startTime] != null) {
                                             events[startTime].add('going to ' +

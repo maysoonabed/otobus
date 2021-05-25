@@ -43,6 +43,7 @@ class _TheCalendarState extends State<TheCalendar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+   //   backgroundColor: myG,
       appBar: AppBar(
         actions: <Widget>[
           new Container(),
@@ -65,6 +66,7 @@ class _TheCalendarState extends State<TheCalendar> {
               events: events,
               calendarController: calCont,
               calendarStyle: CalendarStyle(
+                // contentDecoration: BoxDecoration(color:ba1color),
                 todayColor: Color(0xFF93f1df),
                 selectedColor: apcolor,
               ),
@@ -94,7 +96,9 @@ class _TheCalendarState extends State<TheCalendar> {
                 },
               ),
             ),
-            SizedBox(height: 20,),
+            SizedBox(
+              height: 20,
+            ),
           ],
         ),
       ),
@@ -112,7 +116,8 @@ class _TheCalendarState extends State<TheCalendar> {
                     builder: (BuildContext context) => Calendar())
                 .then((value) => setState(() {}));
           }),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 
