@@ -62,10 +62,11 @@ class _ConfJoinState extends State<ConfJoin> {
                     ),
                     SizedBox(height: 16),
                     processing
-                        ? Center(child: CircularProgressIndicator( backgroundColor: apcolor,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              apBcolor),
-                  ))
+                        ? Center(
+                            child: CircularProgressIndicator(
+                            backgroundColor: apcolor,
+                            valueColor: AlwaysStoppedAnimation<Color>(apBcolor),
+                          ))
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
@@ -101,7 +102,7 @@ class _ConfJoinState extends State<ConfJoin> {
   }
 
   join() async {
-    int x = cont - int.parse(widget.pass);
+    int x = int.parse(widget.pass) - cont;
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
         "http://192.168.1.8/otobus/phpfiles/joinEvent.php"; //10.0.0.8//
@@ -110,6 +111,7 @@ class _ConfJoinState extends State<ConfJoin> {
       'id': widget.id,
       'newP': x.toString(),
       'passengers': cont.toString(),
+      'name': thisUser.name
     });
 
     if (response.statusCode == 200) {

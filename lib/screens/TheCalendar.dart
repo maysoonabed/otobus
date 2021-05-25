@@ -1,14 +1,17 @@
 import 'dart:convert';
 
+import 'package:OtoBus/dataProvider/eventsList.dart';
 import 'package:OtoBus/main.dart';
 import 'package:OtoBus/screens/calender.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:OtoBus/screens/driverEventList.dart';
 
 Map<DateTime, List<dynamic>> events = new Map();
 List<dynamic> selectedEvents;
 SharedPreferences prefs;
+String edt;
 
 class TheCalendar extends StatefulWidget {
   @override
@@ -22,6 +25,8 @@ class _TheCalendarState extends State<TheCalendar> {
   void initState() {
     super.initState();
     calCont = CalendarController();
+    edt = DateTime.now().toString();
+
     events = {};
     selectedEvents = [];
     initPrefs();
@@ -52,7 +57,8 @@ class _TheCalendarState extends State<TheCalendar> {
         ),
         backgroundColor: apcolor,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
         child: Column(
           children: [
             TableCalendar(
@@ -64,15 +70,31 @@ class _TheCalendarState extends State<TheCalendar> {
               ),
               startingDayOfWeek: StartingDayOfWeek.saturday,
               onDaySelected: (date, events, e) {
-                setState(() {
-                  selectedEvents = events;
-                });
-  
+                edt = date.toString();
+                selectedEvents = events;
+                setState(() {});
               },
             ),
-            ...selectedEvents.map((event) => ListTile(
-                  title: Text(event),
-                )),
+            Container(
+              child: FutureBuilder<List<EventsList>>(
+                future: downloadJSON(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<EventsList> evts = snapshot.data;
+
+                    return DEventsListView(evts, edt);
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+
+                  return CircularProgressIndicator(
+                    backgroundColor: apcolor,
+                    valueColor: AlwaysStoppedAnimation<Color>(apBcolor),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 20,),
           ],
         ),
       ),
@@ -90,7 +112,7 @@ class _TheCalendarState extends State<TheCalendar> {
                     builder: (BuildContext context) => Calendar())
                 .then((value) => setState(() {}));
           }),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 
