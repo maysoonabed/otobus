@@ -6,16 +6,16 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:OtoBus/dataProvider/Spacecraft.dart';
-import 'package:OtoBus/screens/Customlistview.dart';
+import 'package:OtoBus/screens/CustomListClone.dart';
+class BottomClone extends StatelessWidget {
+  final CurrDriverInfo dv;
+  BottomClone({this.dv});
 
-class DriverInfoBottom extends StatelessWidget {
- 
- 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: new BoxDecoration(
-          color: Colors.white,
+       decoration: new BoxDecoration(
+          color:Colors.white,
           borderRadius: new BorderRadius.only(
               topLeft: const Radius.circular(25.0),
               topRight: const Radius.circular(25.0))),
@@ -50,7 +50,7 @@ class DriverInfoBottom extends StatelessWidget {
                   child: IconButton(
                       icon: Icon(Icons.phone),
                       onPressed: () async {
-                        launch(('tel://${theDriver.phone}'));
+                        launch(('tel://${dv.phone}'));
                       }),
                 ),
                 Column(
@@ -58,14 +58,14 @@ class DriverInfoBottom extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      theDriver.name,
+                      dv.name,
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 11, fontFamily: 'Lemonada'),
                     ),
                     Text(
-                      getFstWord(theDriver.begN) +
+                      getFstWord(dv.begN) +
                           ' - ' +
-                          getFstWord(theDriver.endN),
+                          getFstWord(dv.endN),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 11,
@@ -95,8 +95,8 @@ class DriverInfoBottom extends StatelessWidget {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.white,
-                  backgroundImage: theDriver.pic != null
-                      ? AssetImage('lib/Images/${theDriver.pic}')
+                  backgroundImage: dv.pic != null
+                      ? AssetImage('lib/Images/${dv.pic}')
                       : AssetImage('lib/Images/Defultprof.jpg'),
                 )
               ],
@@ -202,7 +202,7 @@ class DriverInfoBottom extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      theDriver.rate.toStringAsFixed(1),
+                      dv.rate.toStringAsFixed(1),
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 40, fontFamily: 'Lemonada'),
                     ),
@@ -210,7 +210,7 @@ class DriverInfoBottom extends StatelessWidget {
                       isReadOnly: true,
                       color: apcolor,
                       borderColor: apcolor,
-                      rating: theDriver.rate,
+                      rating: dv.rate,
                       size: 15,
                       allowHalfRating: false,
                       starCount: 5,
@@ -228,20 +228,16 @@ class DriverInfoBottom extends StatelessWidget {
             ),
             Divider(),
             Container(
-              //FutureBuilder is a widget that builds itself based on the latest snapshot
-              // of interaction with a Future.
               child: FutureBuilder<List<Spacecraft>>(
                 future: downloadJSON(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<Spacecraft> spacecrafts = snapshot.data;
-
-                    return CustomListView(spacecrafts);
+                    return CustomListClone(spacecrafts,dv);
                   } else if (snapshot.hasError) {
-                    return Text('${snapshot.error}');
-                  }
 
-                  //return  a circular progress indicator.
+                    return Text('${snapshot.error}');
+                  } 
                   return CircularProgressIndicator();
                 },
               ),

@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'package:OtoBus/screens/eventsListView.dart';
 
 import 'package:OtoBus/dataProvider/eventsList.dart';
 import 'package:OtoBus/main.dart';
@@ -9,6 +9,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 Map<DateTime, List<dynamic>> events = new Map();
 CalendarController calCont;
+String edt;
 
 class PassCalendar extends StatefulWidget {
   @override
@@ -40,7 +41,8 @@ class _PassCalendarState extends State<PassCalendar> {
         ),
         backgroundColor: apcolor,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
         child: Column(
           children: [
             TableCalendar(
@@ -53,16 +55,42 @@ class _PassCalendarState extends State<PassCalendar> {
               startingDayOfWeek: StartingDayOfWeek.saturday,
               onDaySelected: (date, events, e) {
                 print(date.toString());
+                setState(() {
+                 edt= getFstWord(date.toString());
+                });
               },
             ),
-        
-        
+            Container(
+              child: FutureBuilder<List<EventsList>>(
+                future: downloadJSON(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<EventsList> evts = snapshot.data;
+
+                    return EventsListView(evts,edt);
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+
+                  return CircularProgressIndicator(
+                    backgroundColor: apcolor,
+                    valueColor: AlwaysStoppedAnimation<Color>(apBcolor),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  
+  String getFstWord(String input) {
+    if (input.contains(' ')) {
+      int i = input.indexOf(' ');
+      String word = input.substring(0, i);
+      return word;
+    } else
+      return input;
+  }
 }
- 
