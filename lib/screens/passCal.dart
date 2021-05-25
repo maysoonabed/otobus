@@ -48,9 +48,11 @@ class _PassCalendarState extends State<PassCalendar> {
         child: Column(
           children: [
             TableCalendar(
+
               events: events,
               calendarController: calCont,
               calendarStyle: CalendarStyle(
+              
                 todayColor: Color(0xFF93f1df),
                 selectedColor: apcolor,
               ),

@@ -96,10 +96,10 @@ class _EventsListViewState extends State<EventsListView> {
                       ]),
                       Padding(
                           child: Text(
-                            evt.pick +
+                            evt.dest +
                                 ' إلى ' +
-                                evt.dest +
-                                ',' +
+                                evt.pick +
+                                ', ' +
                                 evt.passengers +
                                 ' ركاب ',
                             style: new TextStyle(fontStyle: FontStyle.italic),

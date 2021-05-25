@@ -45,8 +45,8 @@ class _CustomListCloneState extends State<CustomListClone> {
               /*    decoration:
                   BoxDecoration(border: Border.all(color: Colors.orange)),
          */
-              padding: EdgeInsets.all(20.0),
-              margin: EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(15.0),
+              margin: EdgeInsets.all(15.0),
               child: Column(
                 children: <Widget>[
                   Column(
