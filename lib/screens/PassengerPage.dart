@@ -11,7 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:flutter_session/flutter_session.dart';
-import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'dart:convert';
 import '../main.dart';
@@ -23,7 +22,7 @@ import 'LineString.dart';
 import 'CurrUserInfo.dart';
 import 'package:OtoBus/configMaps.dart';
 import 'package:OtoBus/dataProvider/nearDriver.dart';
-import 'package:OtoBus/screens/calender.dart';
+import 'package:OtoBus/screens/passCal.dart';
 
 import 'TheCalendar.dart';
 
@@ -792,7 +791,7 @@ class PassengerPageState extends State<PassengerPage> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  TheCalendar()),
+                                                  PassCalendar()),
                                         );
                                       }),
                                 ),
