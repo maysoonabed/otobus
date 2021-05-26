@@ -1503,12 +1503,15 @@ class DriverMapState extends State<DriverMap> {
     whereTo.remove();
     whereTo = null;
 
-    if (item==null|| (item!=null&&item.isEmpty )) {
+    if (item == null || (item != null && item.isEmpty)) {
       gMarkers.removeWhere(
           (marker) => marker.markerId.value == 'Final_Destination');
       gMarkers.removeWhere((marker) => marker.markerId.value == 'Current');
       gMarkers.removeWhere((marker) => marker.markerId.value == 'moving');
       polylines.clear();
+      setState(() {
+        driversDetailes = 0;
+      });
     }
   }
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
