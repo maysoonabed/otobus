@@ -115,6 +115,8 @@ class _ConfJoinState extends State<ConfJoin> {
       'passengers': cont.toString(),
       'name': thisUser.name
     });
+    DateTime dateTime =
+        DateTime.parse(widget.pass.eDate + ' ' + widget.pass.eTime);
 
     if (response.statusCode == 200) {
       var jsondata = json.decode(response.body);
@@ -125,12 +127,7 @@ class _ConfJoinState extends State<ConfJoin> {
         });
       } else {
         if (jsondata["success"] == 1) {
-          DateTime dateTime =
-              DateTime.parse(widget.pass.eDate + ' ' + widget.pass.eTime);
           setState(() {
-            calendarClient.insert(
-                ' الذهاب إلى ' + widget.pass.dest, dateTime, dateTime);
-
             if (events[dateTime] != null) {
               events[dateTime].add(' الذهاب إلى ' +
                   widget.pass.dest +
@@ -165,6 +162,76 @@ class _ConfJoinState extends State<ConfJoin> {
       msg: errormsg,
     );
     Navigator.pop(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          contentPadding: EdgeInsets.only(top: 10.0),
+          content: Container(
+            margin: EdgeInsets.all(10),
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(4)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  'هل تريد حفظ الموعد على ',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(fontFamily: 'Lemonada', fontSize: 15),
+                ),
+                Text(
+                  'Google Calendar ?',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(fontFamily: 'Lemonada', fontSize: 15),
+                ),
+                SizedBox(height: 15),
+                Divider(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 16),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            FlatButton(
+                                child: const Text(
+                                  'لا',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Lemonada'),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                }),
+                            FlatButton(
+                                child: Text(
+                                  'نعم',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Lemonada'),
+                                ),
+                                onPressed: () {
+                                  calendarClient.insert(
+                                      ' الذهاب إلى ' + widget.pass.dest,
+                                      dateTime,
+                                      dateTime);
+                                  Navigator.pop(context);
+                                }),
+                          ]),
+                      SizedBox(height: 5),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )),
+    );
   }
 
   Map<String, dynamic> encodeMap(Map<DateTime, dynamic> map) {

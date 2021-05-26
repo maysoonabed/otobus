@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:OtoBus/dataProvider/currDriverInfo.dart';
 
 import 'package:OtoBus/main.dart';
-import 'package:OtoBus/screens/confirmJoin.dart';
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' show get;
 import 'package:http/http.dart' as http;

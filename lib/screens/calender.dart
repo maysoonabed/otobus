@@ -13,6 +13,7 @@ import 'package:flutter_mapbox_autocomplete/flutter_mapbox_autocomplete.dart';
 import 'package:OtoBus/screens/TheCalendar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 Adress dest = new Adress();
 Adress pick = new Adress();
@@ -239,10 +240,7 @@ class _CalendarState extends State<Calendar> {
                                             .toString()
                                             .substring(i + 1, j);
                                         addEvent();
-                                        calendarClient.insert(
-                                            'going to ' + _dest.text,
-                                            startTime,
-                                            startTime);
+
                                         setState(() {
                                           if (events[startTime] != null) {
                                             events[startTime].add('going to ' +
@@ -319,7 +317,6 @@ class _CalendarState extends State<Calendar> {
           setState(() {
             errormsg = jsondata["message"];
           });
-          Navigator.pop(context);
         } else {
           setState(() {
             errormsg = "حدث خطأ";
@@ -334,6 +331,77 @@ class _CalendarState extends State<Calendar> {
     Fluttertoast.showToast(
       context,
       msg: errormsg,
+    );
+
+    Navigator.pop(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          contentPadding: EdgeInsets.only(top: 10.0),
+          content: Container(
+            margin: EdgeInsets.all(10),
+            width: double.infinity,
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(4)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  'هل تريد حفظ الموعد على ',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(fontFamily: 'Lemonada', fontSize: 15),
+                ),
+                Text(
+                  'Google Calendar ?',
+                  textAlign: TextAlign.end,
+                  style: TextStyle(fontFamily: 'Lemonada', fontSize: 15),
+                ),
+                SizedBox(height: 15),
+                Divider(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: <Widget>[
+                       Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            FlatButton(
+                                child: const Text(
+                                  'لا',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Lemonada'),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                }),
+                            FlatButton(
+                                child: Text(
+                                  'نعم',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'Lemonada'),
+                                ),
+                                onPressed: () {
+                                  calendarClient.insert(
+                                      'going to ' + _dest.text,
+                                      startTime,
+                                      startTime);
+                                  Navigator.pop(context);
+                                }),
+                          ]),
+                      SizedBox(height: 5),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          )),
     );
   }
 }
