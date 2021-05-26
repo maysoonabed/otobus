@@ -8,11 +8,25 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:OtoBus/dataProvider/Spacecraft.dart';
 import 'package:OtoBus/screens/Customlistview.dart';
 
-class DriverInfoBottom extends StatelessWidget {
- 
- 
+class DriverInfoBottom extends StatefulWidget {
+  @override
+  _DriverInfoBottomState createState() => _DriverInfoBottomState();
+}
+
+AssetImage img;
+
+class _DriverInfoBottomState extends State<DriverInfoBottom> {
+  rty() {
+    setState(() {
+      img = theDriver.pic != null
+          ? AssetImage('lib/Images/${theDriver.pic}')
+          : AssetImage('lib/Images/Defultprof.jpg');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    rty();
     return Container(
       decoration: new BoxDecoration(
           color: Colors.white,
@@ -95,9 +109,7 @@ class DriverInfoBottom extends StatelessWidget {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.white,
-                  backgroundImage: theDriver.pic != null
-                      ? AssetImage('lib/Images/${theDriver.pic}')
-                      : AssetImage('lib/Images/Defultprof.jpg'),
+                  backgroundImage: img,
                 )
               ],
             ),

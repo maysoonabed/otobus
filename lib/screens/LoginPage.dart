@@ -49,11 +49,11 @@ class _LoginPageState extends State<LoginPage> {
             .collection('users')
             .doc(currUser.uid)
             .update({'token': token});
-         DatabaseReference    xx = FirebaseDatabase.instance
-        .reference()
-        .child('Drivers/${currUser.uid}/phone');
+        DatabaseReference xx = FirebaseDatabase.instance
+            .reference()
+            .child('Drivers/${currUser.uid}/phone');
 
-    xx.set(thisUser.phone);
+        xx.set(thisUser.phone);
       });
       print('logFFFire');
     } else
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
   startLogin() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/login.php"; //10.0.0.9////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/login.php"; //10.0.0.9////192.168.1.108:8089
 
     var response = await http.post(apiurl, body: {
       'email': email,

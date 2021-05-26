@@ -108,7 +108,7 @@ class DriverMapState extends State<DriverMap> {
   String passengername = "";
   reppass(pPhone) async {
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/report.php"; //10.0.0.8////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/report.php"; //10.0.0.8////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'passphone': pPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -119,7 +119,7 @@ class DriverMapState extends State<DriverMap> {
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getname(pasPhone) async {
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/getnameofpass.php"; //10.0.0.8////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/getnameofpass.php"; //10.0.0.8////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'passphone': pasPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -203,7 +203,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.8
+        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -474,7 +474,7 @@ class DriverMapState extends State<DriverMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.8/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/updatedriverimage.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -490,7 +490,7 @@ class DriverMapState extends State<DriverMap> {
     insur = Io.File(img.path).readAsBytesSync();
     base64insu = base64Encode(insur);
     String url =
-        "http://192.168.1.8/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/upinspic.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'insimg': base64insu,
       'insname': imgname,
@@ -512,7 +512,7 @@ class DriverMapState extends State<DriverMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Future updateinsdate(String formatted) async {
     String url =
-        "http://192.168.1.8/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/updateINSdate.php"; //10.0.0.8//192.168.1.106:8089
     var response =
         await http.post(url, body: {'endate': formatted, 'email': email});
     if (response.statusCode == 200) {
@@ -525,7 +525,7 @@ class DriverMapState extends State<DriverMap> {
   var onoff;
   Future insphp() async {
     String url =
-        "http://192.168.1.8/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.108:8089/otobus/phpfiles/insdate.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {'email': email});
     //print(response.body);
     if (response.statusCode == 200) {

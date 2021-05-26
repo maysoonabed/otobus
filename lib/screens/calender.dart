@@ -296,7 +296,7 @@ class _CalendarState extends State<Calendar> {
   addEvent() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.8/otobus/phpfiles/addEvent.php"; //10.0.0.8//
+        "http://192.168.1.108:8089/otobus/phpfiles/addEvent.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'driverphone': thisUser.phone, //get the username text
       'pick': _dest.text,
@@ -367,7 +367,7 @@ class _CalendarState extends State<Calendar> {
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: <Widget>[
-                       Row(
+                      Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             FlatButton(
