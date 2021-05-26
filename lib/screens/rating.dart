@@ -147,8 +147,7 @@ class _RatingState extends State<Rating> {
 
   rate() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
-    String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/rate.php"; //10.0.0.8//
+    String apiurl = "http://192.168.1.8/otobus/phpfiles/rate.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'passid': thisUser.name, //get the username text
       'passphone': thisUser.phone,

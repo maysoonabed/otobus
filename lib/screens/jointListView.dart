@@ -78,7 +78,7 @@ class _JointListViewState extends State<JointListView> {
 //Future is n object representing a delayed computation.
 Future<List<Joint>> downJSON() async {
   final jsonEndpoint =
-      "http://192.168.1.108:8089/otobus/phpfiles/joint.php"; //10.0.0.9
+      "http://192.168.1.8/otobus/phpfiles/joint.php"; //10.0.0.9
 
   final response = await get(jsonEndpoint);
 

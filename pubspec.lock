@@ -366,9 +366,11 @@ packages:
   flutter_mapbox_autocomplete:
     dependency: "direct main"
     description:
-      name: flutter_mapbox_autocomplete
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "777467d17f7667e1d15b842d739a76162ddd74e8"
+      url: "https://github.com/maysoonabed/flutter_mapbox_autocomplete.git"
+    source: git
     version: "1.0.4"
   flutter_plugin_android_lifecycle:
     dependency: transitive

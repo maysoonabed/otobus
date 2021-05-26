@@ -151,7 +151,7 @@ class _PassMapState extends State<PassMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.9//192.168.1.106:8089
+        "http://192.168.1.8/otobus/phpfiles/updatepass.php"; //10.0.0.9//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -163,7 +163,7 @@ class _PassMapState extends State<PassMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.9////192.168.1.108:8089
+        "http://192.168.1.8/otobus/phpfiles/getdataforchat.php"; //10.0.0.9////192.168.1.8
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -593,7 +593,7 @@ class _PassMapState extends State<PassMap> {
   getRatings() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.9//
+        "http://192.168.1.8/otobus/phpfiles/avgRatings.php"; //10.0.0.9//
     var response = await http.post(apiurl, body: {
       'phone': theDriver.phone, //get the username text
     });
@@ -638,7 +638,7 @@ class _PassMapState extends State<PassMap> {
   Future<void> displayDriverDetails() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.9//
+        "http://192.168.1.8/otobus/phpfiles/getDriverInfo.php"; //10.0.0.9//
     var response = await http.post(apiurl, body: {
       'phone': driverPhone,
     });
@@ -970,7 +970,7 @@ class _PassMapState extends State<PassMap> {
   Future<void> getName(NearDrivers dv) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getDName.php"; //10.0.0.9//
+        "http://192.168.1.8/otobus/phpfiles/getDName.php"; //10.0.0.9//
     var response = await http.post(apiurl, body: {
       'phone': dv.ph,
     });

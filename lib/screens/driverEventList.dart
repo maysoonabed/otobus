@@ -76,9 +76,9 @@ class _DEventsListViewState extends State<DEventsListView> {
                           ]),
                           Padding(
                               child: Text(
-                                evt.pick +
+                                evt.dest +
                                     ' إلى ' +
-                                    evt.dest +
+                                    evt.pick +
                                     ', باقي ' +
                                     evt.passengers +
                                     ' ركاب ',
@@ -141,7 +141,7 @@ class _DEventsListViewState extends State<DEventsListView> {
   changeSt(String id, String st) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/changeSt.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/changeSt.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'id': id,
       'status': st,
@@ -152,7 +152,7 @@ class _DEventsListViewState extends State<DEventsListView> {
 //Future is n object representing a delayed computation.
 Future<List<EventsList>> downloadJSON() async {
   final jsonEndpoint =
-      "http://192.168.1.108:8089/otobus/phpfiles/events.php"; //10.0.0.9
+      "http://192.168.1.8/otobus/phpfiles/events.php"; //10.0.0.9
 
   final response = await get(jsonEndpoint);
 

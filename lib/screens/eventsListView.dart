@@ -128,7 +128,7 @@ class _EventsListViewState extends State<EventsListView> {
   Future<void> getDriverInfo(String phone) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': phone,
     });
@@ -169,7 +169,7 @@ class _EventsListViewState extends State<EventsListView> {
   getRatings(String phone) async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': phone, //get the username text
     });
@@ -216,7 +216,7 @@ class _EventsListViewState extends State<EventsListView> {
 //Future is n object representing a delayed computation.
 Future<List<EventsList>> downloadJSON() async {
   final jsonEndpoint =
-      "http://192.168.1.108:8089/otobus/phpfiles/events.php"; //10.0.0.9
+      "http://192.168.1.8/otobus/phpfiles/events.php"; //10.0.0.9
 
   final response = await get(jsonEndpoint);
 

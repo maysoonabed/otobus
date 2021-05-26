@@ -107,7 +107,7 @@ class _ConfJoinState extends State<ConfJoin> {
     int x = int.parse(widget.pass.passengers) - cont;
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/joinEvent.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/joinEvent.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'passphone': thisUser.phone,
       'id': widget.pass.id,

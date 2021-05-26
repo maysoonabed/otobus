@@ -112,7 +112,7 @@ class PassengerMapState extends State<PassengerMap> {
     profile = Io.File(img.path).readAsBytesSync();
     base64prof = base64Encode(profile);
     String url =
-        "http://192.168.1.108:8089/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
+        "http://192.168.1.8/otobus/phpfiles/updatepass.php"; //10.0.0.8//192.168.1.106:8089
     var response = await http.post(url, body: {
       'profimg': base64prof,
       'profname': imgname,
@@ -124,7 +124,7 @@ class PassengerMapState extends State<PassengerMap> {
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   getInfoForChat(String dPhone) async {
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.108:8089
+        "http://192.168.1.8/otobus/phpfiles/getdataforchat.php"; //10.0.0.8////192.168.1.8
     var response = await http.post(apiurl, body: {'phone': dPhone});
     //print(response.body);
     if (response.statusCode == 200) {
@@ -145,7 +145,7 @@ class PassengerMapState extends State<PassengerMap> {
   getRatings() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/avgRatings.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': theDriver.phone, //get the username text
     });
@@ -190,7 +190,7 @@ class PassengerMapState extends State<PassengerMap> {
   Future<void> displayDriverDetails() async {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     String apiurl =
-        "http://192.168.1.108:8089/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
+        "http://192.168.1.8/otobus/phpfiles/getDriverInfo.php"; //10.0.0.8//
     var response = await http.post(apiurl, body: {
       'phone': driverPhone,
     });
