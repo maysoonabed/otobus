@@ -1478,6 +1478,7 @@ class DriverMapState extends State<DriverMap> {
       'latitude': thisDriver.endLoc.latitude,
       'longitude': thisDriver.endLoc.longitude
     };
+
     whereTo.set(toMap);
     firebaseRef = FirebaseDatabase()
         .reference()
@@ -1600,11 +1601,8 @@ class DriverMapState extends State<DriverMap> {
     ridRef.child('driver_location').set(locationMap);
     ridRef.child('driver_loc').set(locationMap);
 
-    Map toMap = {
-      'latitude': thisDriver.begLoc.latitude,
-      'longitude': thisDriver.begLoc.longitude
-    };
-    ridRef.child('driver_dest')..set(toMap);
+    Map toMap = {'latitude': driverT.latitude, 'longitude': driverT.longitude};
+    ridRef.child('driver_dest').set(toMap);
     ridRef.child('driver_id').set(currUser.uid);
     ridRef.child('driver_phone').set(phone);
     driverNum = driverNum - tripInfo.numb;
