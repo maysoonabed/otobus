@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_session/flutter_session.dart';
@@ -48,6 +49,11 @@ class _LoginPageState extends State<LoginPage> {
             .collection('users')
             .doc(currUser.uid)
             .update({'token': token});
+         DatabaseReference    xx = FirebaseDatabase.instance
+        .reference()
+        .child('Drivers/${currUser.uid}/phone');
+
+    xx.set(thisUser.phone);
       });
       print('logFFFire');
     } else

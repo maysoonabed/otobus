@@ -950,14 +950,54 @@ class _PassMapState extends State<PassMap> {
         driverltlg = LatLng(driver.lat, driver.long);
 
         Marker driversmark = Marker(
-          markerId: MarkerId("drivmk"),
-          position: driverltlg,
-          icon: myIcon,
-        );
+            markerId: MarkerId(driver.key),
+            position: driverltlg,
+            infoWindow: InfoWindow(
+                title: driver.name, snippet: 'Rating: ' + driver.rate),
+            icon: myIcon,
+            onTap: () {
+              notifyDriver(driver);
+              print('hi');
+            });
         markers.add(driversmark);
       });
     }
   }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Future<void> getName(NearDrivers dv) async {
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String apiurl =
+        "http://192.168.1.8/otobus/phpfiles/getDName.php"; //10.0.0.9//
+    var response = await http.post(apiurl, body: {
+      'phone': dv.ph,
+    });
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"] == 1) {
+        errmsg = jsondata["message"];
+        Fluttertoast.showToast(
+          context,
+          msg: errmsg != null ? errmsg : 'hi',
+        );
+      } else {
+        dv.name = jsondata["name"];
+        dv.rate = jsondata['taqyeem'];
+        print(dv.name + ' ' + dv.rate);
+
+        errmsg = jsondata["message"];
+      }
+    } else {
+      errmsg = "حدث خطأ أثناء الاتصال بالشبكة";
+      Fluttertoast.showToast(
+        context,
+        msg: errmsg != null ? errmsg : 'hi',
+      );
+    }
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   void startGeoListen() {
@@ -978,17 +1018,14 @@ class _PassMapState extends State<PassMap> {
             nDriver.key = map['key'];
             nDriver.lat = map['latitude'];
             nDriver.long = map['longitude'];
-
-            /* FireDrivers.nDrivers.add(nDriver);
-            if (nearLoaded) {
-              driversMarkers();
-            } */
             DatabaseReference nDrivers = FirebaseDatabase.instance
                 .reference()
                 .child('Drivers/${nDriver.key}');
             nDrivers.once().then((DataSnapshot snapshot) {
               if (snapshot.value != null) {
                 dNum = snapshot.value['passengers'];
+                String ph = snapshot.value['phone'];
+                nDriver.ph = ph;
                 double wLat = double.parse(
                     snapshot.value['whereTo']['latitude'].toString());
                 double wLng = double.parse(
@@ -996,6 +1033,7 @@ class _PassMapState extends State<PassMap> {
                 Funcs.checkPoint(wLat, wLng, nDriver.lat, nDriver.long,
                     _destLatitude, _destLongitude);
                 if (dNum >= numCont && chP == true) {
+                  getName(nDriver);
                   FireDrivers.nDrivers.add(nDriver);
                   if (nearLoaded) {
                     setState(() {
@@ -1071,7 +1109,7 @@ class _PassMapState extends State<PassMap> {
                 padding: const EdgeInsets.only(right: 8.0),
                 child: Icon(Icons.cancel),
               ),
-              Text("إلغاء الأمر"),
+              Text("إلغاء الطلب"),
             ],
           );
         }
@@ -1449,6 +1487,48 @@ class _PassMapState extends State<PassMap> {
                       height: 0.1,
                       width: 0.1,
                     ),
+
+              isExtended == 1 && btn != false
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 150, right: 10),
+                      child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: FloatingActionButton.extended(
+                            backgroundColor: apcolor,
+                            isExtended: true,
+                            onPressed: () {
+                              setState(() {
+                                createRequest();
+                                startGeoListen();
+                                availableDrivers = FireDrivers.nDrivers;
+
+                                if (availableDrivers.length == 0) {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) =>
+                                        NoDriverDialog(),
+                                  );
+                                  cancelReq();
+                                } else {
+                                  isExtended++;
+                                }
+                              });
+                            },
+                            label: Row(children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Icon(
+                                  Icons.touch_app,
+                                ),
+                              ),
+                              Text(" اختيار باص"),
+                            ]),
+                          )))
+                  : Container(
+                      height: 0,
+                    ),
+
               //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
               //Display driver's info
               //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
